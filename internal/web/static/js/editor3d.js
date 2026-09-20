@@ -179,7 +179,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
   stage3D?.addEventListener("contextmenu", (e) => e.preventDefault());
   editor3DCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
-  const isInteractiveEl = (t) => t?.closest?.("button, .mannequin-widget, .zoom-vertical-controls, .floating-mode-pill, .color-bottom-sheet");
+  const isInteractiveEl = (t) => t?.closest?.("button, .mannequin-widget, .zoom-vertical-controls, .floating-mode-pill, .color-bottom-sheet, .viewport-2d-box");
 
   const getDistance = (touches) => {
     const dx = touches[0].clientX - touches[1].clientX;
@@ -188,6 +188,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
   };
 
   const onWheel = (e) => {
+    if (isInteractiveEl(e.target)) return;
     e.preventDefault();
     if (viewport3D) setZoom(viewport3D.zoom + (e.deltaY > 0 ? ZOOM_3D_STEP * 0.6 : -ZOOM_3D_STEP * 0.6));
   };

@@ -62,9 +62,10 @@ export function loadTemplate(type, modelType = "classic") {
     fillBox(28, 20, 4, 12, shirt); fillBox(20, 16, 8, 4, shirt); fillBox(28, 16, 8, 4, shirt);
 
     const armW = modelType === "slim" ? 3 : 4;
-    fillBox(44, 16, armW, 4, shirt); // Right shoulder top
-    fillBox(44 + armW, 16, armW, 4, skinTone); fillBox(44, 20, armW, 4, shirt); fillBox(44, 24, armW, 8, skinTone);
-    fillBox(40, 20, 4, 12, skinTone); fillBox(44 + armW, 20, 4, 12, skinTone);
+    // Right arm: top/bottom, 4 sleeve faces (y=20..24), 4 skin faces (y=24..32)
+    fillBox(44, 16, armW, 4, shirt); fillBox(44 + armW, 16, armW, 4, skinTone);
+    fillBox(40, 20, 4, 4, shirt); fillBox(44, 20, armW, 4, shirt); fillBox(44 + armW, 20, 4, 4, shirt); fillBox(48 + armW, 20, armW, 4, shirt);
+    fillBox(40, 24, 4, 8, skinTone); fillBox(44, 24, armW, 8, skinTone); fillBox(44 + armW, 24, 4, 8, skinTone); fillBox(48 + armW, 24, armW, 8, skinTone);
 
     fillBox(4, 16, 4, 4, pants); // Right leg top
     fillBox(8, 16, 4, 4, shoes); // Right leg bottom / sole
@@ -73,8 +74,10 @@ export function loadTemplate(type, modelType = "classic") {
     fillBox(8, 30, 4, 2, shoes); fillBox(12, 30, 4, 2, shoes); // Right leg shoe side
 
     if (texH >= 64) {
-      fillBox(36, 48, armW, 4, shirt); fillBox(36 + armW, 48, armW, 4, skinTone); fillBox(36, 52, armW, 4, shirt);
-      fillBox(36, 56, armW, 8, skinTone); fillBox(32, 52, 4, 12, skinTone); fillBox(40 + armW, 52, 4, 12, skinTone);
+      // Left arm: top/bottom, 4 sleeve faces (y=52..56), 4 skin faces (y=56..64)
+      fillBox(36, 48, armW, 4, shirt); fillBox(36 + armW, 48, armW, 4, skinTone);
+      fillBox(32, 52, 4, 4, shirt); fillBox(36, 52, armW, 4, shirt); fillBox(36 + armW, 52, 4, 4, shirt); fillBox(40 + armW, 52, armW, 4, shirt);
+      fillBox(32, 56, 4, 8, skinTone); fillBox(36, 56, armW, 8, skinTone); fillBox(36 + armW, 56, 4, 8, skinTone); fillBox(40 + armW, 56, armW, 8, skinTone);
       fillBox(20, 48, 4, 4, pants); fillBox(24, 48, 4, 4, shoes); fillBox(20, 52, 4, 10, pants); fillBox(28, 52, 4, 10, pants);
       fillBox(16, 52, 4, 10, pants); fillBox(24, 52, 4, 10, pants);
       fillBox(16, 62, 4, 2, shoes); fillBox(20, 62, 4, 2, shoes); fillBox(24, 62, 4, 2, shoes); fillBox(28, 62, 4, 2, shoes);

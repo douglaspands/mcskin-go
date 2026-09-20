@@ -13,6 +13,8 @@ const HINTS = {
   toolEraser: { icon: "🧹", text: "Borracha: Apague pixels deixando transparentes.", badge: "Apagar" },
   toolColorPicker: { icon: "🎨", text: "Cores: Escolha entre a paleta Minecraft ou selecione qualquer cor personalizada.", badge: "Cores" },
   toolLayerToggle: { icon: "👕", text: "Camada: Alterne entre a Camada Base e a Camada Externa (3D).", badge: "Camada" },
+  btnMode3D: { icon: "🧊", text: "Modo 3D: Visualize e pinte seu personagem em três dimensões.", badge: "Visão 3D" },
+  btnMode2D: { icon: "📜", text: "Modo 2D: Desenhe na folha de textura aberta com máxima precisão de pixels.", badge: "Folha 2D" },
   btnUndo: { icon: "↩️", text: "Desfazer: Reverte a última alteração realizada.", badge: "Desfazer" },
   btnRedo: { icon: "↪️", text: "Refazer: Reaplica a última alteração desfeita.", badge: "Refazer" },
   btnToggleGrid: { icon: "▦", text: "Grade: Mostra ou esconde as linhas de grade dos pixels no boneco.", badge: "Grade" },

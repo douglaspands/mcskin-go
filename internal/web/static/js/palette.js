@@ -149,6 +149,39 @@ export function initPalette({ onLoadTemplate, onSetModel, onRender2D, onRender3D
     playSound("click");
   });
 
+  // View Mode (3D vs 2D)
+  const btn3D = document.getElementById("btnMode3D");
+  const btn2D = document.getElementById("btnMode2D");
+  const wrap3D = document.getElementById("characterWorld");
+  const wrap2D = document.getElementById("wrapper2D");
+  const mannequin = document.getElementById("mannequinWidget");
+  const zoom3D = document.getElementById("zoom3DVerticalControls");
+  const floatingPill = document.querySelector(".floating-mode-pill");
+
+  btn3D?.addEventListener("click", () => {
+    btn3D.classList.add("active");
+    btn2D?.classList.remove("active");
+    if (wrap3D) wrap3D.style.display = "flex";
+    if (wrap2D) wrap2D.style.display = "none";
+    if (mannequin) mannequin.style.display = "flex";
+    if (zoom3D) zoom3D.style.display = "flex";
+    if (floatingPill) floatingPill.style.display = "flex";
+    onRender3D();
+    playSound("click");
+  });
+
+  btn2D?.addEventListener("click", () => {
+    btn2D.classList.add("active");
+    btn3D?.classList.remove("active");
+    if (wrap3D) wrap3D.style.display = "none";
+    if (wrap2D) wrap2D.style.display = "flex";
+    if (mannequin) mannequin.style.display = "none";
+    if (zoom3D) zoom3D.style.display = "none";
+    if (floatingPill) floatingPill.style.display = "none";
+    onRender2D();
+    playSound("click");
+  });
+
   // Template Buttons (Steve, Alex, Blank)
   const setTpl = (btn, type, model) => {
     document.querySelectorAll(".model-pill-item").forEach((b) => b.classList.remove("active"));

@@ -188,6 +188,12 @@
                 <button type="button" class="model-pill-item" id="tplAlex" title="Modelo Alex (Braços 3px)">👱 Alex</button>
               </div>
 
+              <!-- Alternador de Visão: 3D vs Folha 2D -->
+              <div class="model-toggle-pill" id="viewModeToggleGroup">
+                <button type="button" class="view-mode-pill-item active" id="btnMode3D" title="Modo Boneco 3D">🧊 3D</button>
+                <button type="button" class="view-mode-pill-item" id="btnMode2D" title="Modo Folha 2D">📜 2D</button>
+              </div>
+
               <button type="button" class="btn-toggle-grid" id="btnToggleGrid" title="Alternar grade de pixels">▦ Grade</button>
 
               <!-- Elementos auxiliares ocultos para integração de estado e testes -->
@@ -243,6 +249,13 @@
               <!-- O PERSONAGEM 3D INTERATIVO (BONECO DO 3D REAL COM THREE.JS MANTIDO!) -->
               <div class="character-viewport-world" id="characterWorld">
                 <canvas id="editor3DCanvas" width="480" height="640"></canvas>
+              </div>
+
+              <!-- VISÃO 2D DA FOLHA DE TEXTURA (DESDOBRADA) -->
+              <div class="viewport-2d-box" id="wrapper2D" style="display: none;">
+                <div class="canvas-2d-container">
+                  <canvas id="editor2DCanvas" width="512" height="512"></canvas>
+                </div>
               </div>
 
               <!-- GAVETA DE CORES -->
