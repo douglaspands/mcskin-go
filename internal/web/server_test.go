@@ -511,3 +511,44 @@ func TestFavicon_NonEmptyBody(t *testing.T) {
 	}
 }
 
+// TestStaticMIMETypesEnforcement verifies that JavaScript and CSS assets served from /static/
+// are delivered with explicit MIME types, avoiding Windows registry conflicts.
+func TestStaticMIMETypesEnforcement(t *testing.T) {
+	staticFS := fstest.MapFS{
+		"js/app.js": {Data: []byte("console.log('mcskin');")},
+		"style.css": {Data: []byte("body { margin: 0; }")},
+	}
+
+	handler := web.NewHandler(web.Config{
+		Port:     8080,
+		StaticFS: staticFS,
+	})
+
+	// Test .js file
+	reqJS := httptest.NewRequest(http.MethodGet, "/static/js/app.js", nil)
+	recJS := httptest.NewRecorder()
+	handler.ServeHTTP(recJS, reqJS)
+
+	if recJS.Code != http.StatusOK {
+		t.Fatalf("GET /static/js/app.js: expected 200 OK, got %d", recJS.Code)
+	}
+	contentTypeJS := recJS.Header().Get("Content-Type")
+	if !strings.Contains(contentTypeJS, "javascript") {
+		t.Errorf("GET /static/js/app.js: expected Content-Type containing 'javascript', got %q", contentTypeJS)
+	}
+
+	// Test .css file
+	reqCSS := httptest.NewRequest(http.MethodGet, "/static/style.css", nil)
+	recCSS := httptest.NewRecorder()
+	handler.ServeHTTP(recCSS, reqCSS)
+
+	if recCSS.Code != http.StatusOK {
+		t.Fatalf("GET /static/style.css: expected 200 OK, got %d", recCSS.Code)
+	}
+	contentTypeCSS := recCSS.Header().Get("Content-Type")
+	if !strings.Contains(contentTypeCSS, "text/css") {
+		t.Errorf("GET /static/style.css: expected Content-Type containing 'text/css', got %q", contentTypeCSS)
+	}
+}
+
+

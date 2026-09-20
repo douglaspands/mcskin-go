@@ -70,8 +70,8 @@ export function update3DTexture(canvas, uvWidth, uvHeight) {
  */
 export function set3DModel(model) {
   if (viewport3D) {
-    viewport3D.modelType = model;
-    viewport3D.render();
+    if (typeof viewport3D.setModel === "function") viewport3D.setModel(model);
+    else { viewport3D.modelType = model; viewport3D._rebuildMeshes?.(); viewport3D.render(); }
   }
 }
 
