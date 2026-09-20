@@ -1,3 +1,5 @@
+unexport GOROOT
+
 BINARY_NAME=mcskin
 BIN_DIR=bin
 DIST_DIR=dist

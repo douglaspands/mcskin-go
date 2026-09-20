@@ -6,7 +6,11 @@ Enables conversion of PNG Minecraft skin textures into fully compliant Minecraft
 ## Requirements
 
 ### Requirement: PNG Image Validation
-The system SHALL validate that the input file is a valid PNG image matching standard Minecraft skin dimensions (64x64 or 128x128 pixels) and 8-bit RGBA color format.
+The system SHALL validate that the input file is a valid PNG image matching supported Minecraft skin dimensions (64x64, 64x32 classic legacy, or 128x128 pixels) and 8-bit RGBA color format.
+
+#### Scenario: Valid 64x32 classic skin PNG
+- **WHEN** an input file is a valid 64x32 RGBA PNG image
+- **THEN** the system successfully reads and validates the texture data without errors
 
 #### Scenario: Valid 64x64 skin PNG
 - **WHEN** an input file is a valid 64x64 RGBA PNG image
