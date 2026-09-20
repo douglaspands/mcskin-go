@@ -232,6 +232,37 @@ func TestRun_WindowsNoArgs_LaunchesWeb(t *testing.T) {
 	}
 }
 
+func TestRun_DarwinNoArgs_LaunchesWeb(t *testing.T) {
+	origOS := currentOS
+	origRunner := webServerRunner
+	defer func() {
+		currentOS = origOS
+		webServerRunner = origRunner
+	}()
+
+	currentOS = "darwin"
+	var launched bool
+	webServerRunner = func(port int, openBrowser bool, stdout, stderr io.Writer) int {
+		launched = true
+		if port != 8080 {
+			t.Errorf("expected default port 8080, got %d", port)
+		}
+		if !openBrowser {
+			t.Errorf("expected openBrowser true on Darwin double-click, got false")
+		}
+		return 0
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("expected code 0 on Darwin no-args, got %d", code)
+	}
+	if !launched {
+		t.Error("expected web server to launch on Darwin with zero args")
+	}
+}
+
 func TestRun_NonWindowsNoArgs_ShowsUsage(t *testing.T) {
 	origOS := currentOS
 	defer func() { currentOS = origOS }()
@@ -246,4 +277,5 @@ func TestRun_NonWindowsNoArgs_ShowsUsage(t *testing.T) {
 		t.Errorf("expected usage output, got: %s", stderr.String())
 	}
 }
+
 

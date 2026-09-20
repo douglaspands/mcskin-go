@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"runtime"
+	"time"
 
 	"mcskin/internal/bedrock"
 	"mcskin/internal/converter"
@@ -33,12 +35,20 @@ func defaultWebServerRunner(port int, openBrowser bool, stdout, stderr io.Writer
 		return 1
 	}
 
+	addr := fmt.Sprintf(":%d", port)
+	srv := &http.Server{Addr: addr}
+
 	cfg := web.Config{
 		Port:     port,
 		StaticFS: staticFS,
+		ShutdownTrigger: func() error {
+			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+			defer cancel()
+			return srv.Shutdown(ctx)
+		},
 	}
 
-	handler := web.NewHandler(cfg)
+	srv.Handler = web.NewHandler(cfg)
 	info := web.ResolveServerInfo(port, nil)
 
 	fmt.Fprintln(stdout, "===========================================================")
@@ -57,8 +67,7 @@ func defaultWebServerRunner(port int, openBrowser bool, stdout, stderr io.Writer
 		_ = web.OpenBrowser(info.LocalURL, currentOS, nil)
 	}
 
-	addr := fmt.Sprintf(":%d", port)
-	if err := http.ListenAndServe(addr, handler); err != nil && err != http.ErrServerClosed {
+	if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 		fmt.Fprintf(stderr, "Erro no servidor web: %v\n", err)
 		return 1
 	}
@@ -68,7 +77,7 @@ func defaultWebServerRunner(port int, openBrowser bool, stdout, stderr io.Writer
 
 func run(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
-		if currentOS == "windows" {
+		if currentOS == "windows" || currentOS == "darwin" {
 			return webServerRunner(8080, true, stdout, stderr)
 		}
 		printUsage(stderr)

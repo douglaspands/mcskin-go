@@ -1,0 +1,61 @@
+---
+name: token-guardian
+description: Enforces codebase token economy, file size boundaries (< 300 lines / 15 KB), compact test execution, vendor library isolation, and subagent offloading guidelines across Google Antigravity and Anthropic Claude harnesses.
+---
+
+# Token Guardian (`token-guardian`)
+
+Use this skill when designing new features, writing code, refactoring modules, or executing verification loops in `mcskin` to ensure the project maintains maximal context window efficiency and eliminates cognitive overload.
+
+---
+
+## 1. Core Principles: "Nascem Otimizadas" (Born Modularized)
+
+Every new feature and refactored component in `mcskin` must be born modularized:
+- **Never create monolithic source files**: No application source file in `cmd/`, `internal/`, or `static/js/` may exceed **300 lines of code** or **15 KB** in size.
+- **Single Responsibility Principle (SRP)**: Each file must address one discrete architectural concern (e.g., converter, palette, 3D viewport, shutdown modal).
+- **Zero Third-Party Bundler Requirement**: JavaScript modules must use standard browser ES6 `import` / `export` syntax without Node.js, Webpack, or Vite build steps.
+- **Human-Readable Architecture**: Clean semantic identifiers, Go docstrings, and comprehensive JSDoc comments so developers and AI agents can rapidly grok any file in isolation.
+
+---
+
+## 2. Token Budget & File Size Thresholds
+
+| File Category | Target Size | Hard Limit | Inspection Command |
+|---|---|---|---|
+| Orchestrator (`js/app.js`) | < 100 lines | 120 lines | `wc -l internal/web/static/js/app.js` |
+| Feature Module (`js/*.js`) | 100–250 lines | 300 lines / 15 KB | `wc -l internal/web/static/js/*.js` |
+| Go Components (`internal/*/*.go`) | 100–250 lines | 300 lines | `wc -l internal/**/*.go` |
+| Vendor Libraries | N/A (isolated) | In `vendor/` only | Excluded from context reads |
+
+### Vendor Isolation Rule
+- All third-party minified libraries (e.g., `three.min.js`, `qrcode.js`) MUST reside in `internal/web/static/vendor/`.
+- Agents MUST NOT read vendor libraries into conversational context or include them in general file searches.
+
+---
+
+## 3. Compact Test Execution & Token Savings
+
+When verifying code or running test suites during iterative development:
+- **Silent-on-Success**: Use `./scripts/test-compact.sh` instead of verbose `go test -v ./...`.
+  - On PASS: Outputs a single concise line (`PASS: all packages OK`), saving 500–2,000 output tokens.
+  - On FAIL: Surfaces only the failing package, test identifier, and assertion diff.
+- **Targeted Test Runs**: When working on a single package, run only that package (e.g. `go test ./internal/web/...`).
+
+---
+
+## 4. Subagent Delegation & Context Offloading
+
+- **Research & Exploration**: Delegate codebase exploration, multi-file inspection, and symbol discovery to subagents (`subagent: research` or `role: "Codebase Researcher"`).
+- **Verbose Diagnostic Loops**: When troubleshooting unexpected behavior, run investigation loops inside an isolated subagent so that only the final root-cause conclusion is returned to the parent conversation context.
+- **Progressive Disclosure**: Keep parent conversations lean and actionable.
+
+---
+
+## 5. Token Guardian Verification Checklist
+
+Before marking any task complete or archiving a change (`/opsx-archive`):
+1. [ ] Check file line counts: `wc -l internal/web/static/js/*.js` (all < 300 lines).
+2. [ ] Check vendor isolation: no minified vendor files outside `static/vendor/`.
+3. [ ] Run compact tests: `./scripts/test-compact.sh` (outputs `PASS: all packages OK`).
+4. [ ] Ensure no monolithic files exist in the changes.

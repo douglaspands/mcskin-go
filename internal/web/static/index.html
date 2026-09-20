@@ -6,7 +6,7 @@
   <title>CRIE SKINS LEGAIS - Minecraft Bedrock Skin Pack</title>
   <meta name="description" content="Converta sua imagem PNG em pacote de skin .mcpack para Minecraft Bedrock de forma super fácil e divertida!">
   <link rel="stylesheet" href="/static/style.css">
-  <script src="/static/three.min.js"></script>
+  <script src="/static/vendor/three.min.js"></script>
 </head>
 <body>
 
@@ -377,9 +377,39 @@
   <footer>
     <p>⛏️ <strong>CRIE SKINS LEGAIS</strong> • Conversor para Minecraft Bedrock Edition</p>
     <p>100% Grátis, Seguro e Rápido • Funciona em Celulares, Tablets, PCs e Consoles</p>
+    <div class="footer-shutdown-wrap">
+      <button type="button" class="btn-shutdown-server" id="btnShutdownServer" title="Desligar servidor local">🛑 Desligar Servidor</button>
+    </div>
   </footer>
 
-  <script src="/static/qrcode.js"></script>
-  <script src="/static/app.js"></script>
+  <!-- Modal para Desligar Servidor -->
+  <div class="shutdown-modal-backdrop" id="shutdownModal" style="display: none;">
+    <div class="shutdown-modal-content">
+      <h3 class="modal-title">🛑 Desligar Servidor Local</h3>
+      <p class="modal-hint">Deseja realmente desligar o servidor do mcskin?</p>
+      <p class="modal-hint-sub">Ao confirmar, o servidor será encerrado e você poderá fechar esta aba com segurança.</p>
+      <div class="shutdown-modal-actions">
+        <button type="button" class="btn-minecraft btn-modal-danger" id="btnConfirmShutdown">
+          <span>✔️ Sim, Desligar</span>
+        </button>
+        <button type="button" class="btn-modal-cancel" id="btnCancelShutdown">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay de Despedida -->
+  <div class="goodbye-overlay" id="goodbyeOverlay" style="display: none;">
+    <div class="goodbye-card">
+      <div class="goodbye-icon">⛏️</div>
+      <h2>Servidor Desligado com Sucesso!</h2>
+      <p>Obrigado por usar o <strong>mcskin</strong>. Até a próxima aventura!</p>
+      <p class="goodbye-hint">Você já pode fechar esta aba com segurança.</p>
+    </div>
+  </div>
+
+  <script src="/static/vendor/qrcode.js"></script>
+  <script type="module" src="/static/js/app.js"></script>
 </body>
 </html>
