@@ -7,7 +7,7 @@ import (
 	"image/png"
 	"testing"
 
-	"png-to-mcpack/internal/skin"
+	"mcskin/internal/skin"
 )
 
 func createTestPNG(width, height int) []byte {

@@ -1,6 +1,6 @@
 # AI Agent Governance: Graph & Loop Engineering Specification
 
-This document formalizes the AI agent execution policies for the `png-to-mcpack` repository. It provides deterministic constraints for supported terminal harnesses: Antigravity and Claude Code.
+This document formalizes the AI agent execution policies for the `mcskin` repository. It provides deterministic constraints for supported terminal harnesses: Antigravity and Claude Code.
 
 ---
 
@@ -15,7 +15,9 @@ stateDiagram-v2
     RedTesting --> GreenImplementation: Tests Fail As Expected (RED)
     GreenImplementation --> Verification: Tests Pass (GREEN)
     Verification --> SpecPlanning: New Scope Discovered
-    Verification --> Completed: Build & Lint Pass
+    Verification --> POQAReview: Build & Tests Pass
+    POQAReview --> GreenImplementation: Issues Found / Refactor Required
+    POQAReview --> Completed: PO/QA Approved
     Completed --> [*]
 ```
 
@@ -26,8 +28,9 @@ stateDiagram-v2
 | **SpecPlanning** | Trigger `/opsx-propose`, branch `feat/<nome_spec>` created | Planning artifacts validated by `openspec validate` | **First Command Invariant**: The very first action upon `/opsx-propose` MUST be `git checkout -b feat/<nome_spec>` for rollback isolation. No direct edits on `main`. |
 | **RedTesting** | Plan complete, task selected | Test suite authored and verified failing | Tests must fail due to missing implementation, not syntax errors. All unit tests must be 100% mocked with zero integration |
 | **GreenImplementation** | Verified failing test | Test suite passes | Implement only the minimal code necessary to satisfy tests |
-| **Verification** | All package tests pass | Full suite `go test ./...` and `go build ./...` succeed | Zero regressions across existing capabilities |
-| **Completed** | Clean git status, spec archived via `/opsx-archive` | User confirmation requested for squash merge | Prompt user to execute `git checkout main && git merge --squash feat/<nome_spec>`. All tasks marked `[x]` |
+| **Verification** | All tasks in `/openspec-apply-change` complete | Full suite `go test ./...` and `go build ./...` succeed | **Automatic Trigger**: Automatically transitions to `POQAReview` immediately upon completing implementation tasks |
+| **POQAReview** | Build and unit tests succeed | Skill `feature-qa-reviewer` produces formal `APROVADO` report | Simulates PO (user requirements, usability 6+, theme, UX) and QA (binary checks, edge cases, Bedrock compliance). If issues found, transitions to bounded remediation loop |
+| **Completed** | PO/QA Approved, clean git status, spec archived via `/opsx-archive` | User confirmation requested for squash merge | Prompt user to execute `git checkout main && git merge --squash feat/<nome_spec>`. All tasks marked `[x]` |
 
 ---
 
@@ -36,12 +39,13 @@ stateDiagram-v2
 Unbounded loops waste tokens and risk code degradation. Agents must enforce these mechanical bounds:
 
 ### 2.1 Iteration Cap
-- **Rule**: A maximum of **3 attempts** (`max_attempts = 3`) is permitted for any single test-repair or debugging loop.
-- **Action on Breach**: If a test or build does not succeed after 3 iterations, the agent **must halt immediately**, preserve current diagnostic logs, and report the blocker to the user.
+- **Rule**: A maximum of **3 attempts** (`max_attempts = 3`) is permitted for any single test-repair, QA-remediation, or debugging loop.
+- **Action on Breach**: If a test, build, or QA review does not succeed after 3 iterations, the agent **must halt immediately**, preserve current diagnostic logs, and report the blocker to the user.
 
-### 2.2 Halting Heuristics
-- **Identical Failure Rule**: If an identical error output (same panic, assertion failure, or compiler error) occurs across 2 consecutive iterations without modification effect, halt immediately. Do not attempt a 3rd identical attempt.
-- **Scope Creep Rule**: If fixing a test requires altering unrelated packages or expanding the API boundary beyond the active spec, halt and request a spec update.
+### 2.2 Halting Heuristics & Infinite Loop Prevention
+- **Identical Failure Rule (2-Strike Halting)**: If an identical error output (same panic, assertion failure, compiler error, or QA rejection reason) occurs across 2 consecutive iterations without modification effect, halt immediately. Do not attempt a 3rd identical attempt.
+- **Scope Boundary Rule**: If fixing an issue requires altering unrelated packages or expanding requirements beyond the active specification, halt immediately and request a specification revision (`/openspec-update-change`).
+- **Regression Verification Rule**: Always re-execute unit tests (`go test ./...`) prior to re-evaluating with QA to verify fixes didn't introduce collateral regressions.
 
 ### 2.3 Idempotency
 - All commands, scripts, and build targets must be idempotent.
@@ -83,7 +87,7 @@ Commands are categorized into 3 permission tiers, enforced both via prompt rules
 | :--- | :--- | :--- | :--- |
 | **Go Toolchain** | `go test ...`, `go build ...`, `go vet ...`, `go run ...`, `go fmt ...`, `go mod tidy`, `go mod verify`, `go version`, `go doc` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **Build & Test** | `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make lint`, `make clean` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
-| **Local Binary** | `./bin/png-to-mcpack ...` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
+| **Local Binary** | `./bin/mcskin ...`, `./bin/png-to-mcpack ...` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **OpenSpec** | `openspec ...` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **Safe Git** | `git status`, `git diff`, `git log`, `git show`, `git branch`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **Inspection** | `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |

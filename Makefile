@@ -1,4 +1,4 @@
-BINARY_NAME=png-to-mcpack
+BINARY_NAME=mcskin
 BIN_DIR=bin
 DIST_DIR=dist
 

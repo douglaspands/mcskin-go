@@ -5,6 +5,7 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"io"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,7 +34,7 @@ func TestRun_NoArgs(t *testing.T) {
 	if code == 0 {
 		t.Errorf("expected non-zero exit code when no arguments provided, got %d", code)
 	}
-	if !strings.Contains(stderr.String(), "Usage") && !strings.Contains(stderr.String(), "png-to-mcpack") {
+	if !strings.Contains(stderr.String(), "Usage") && !strings.Contains(stderr.String(), "mcskin") {
 		t.Errorf("expected usage instructions in stderr, got: %s", stderr.String())
 	}
 }
@@ -55,7 +56,7 @@ func TestRun_VersionFlag(t *testing.T) {
 	if code != 0 {
 		t.Errorf("expected exit code 0 for --version, got %d", code)
 	}
-	if !strings.Contains(stdout.String(), "png-to-mcpack version") {
+	if !strings.Contains(stdout.String(), "mcskin version") {
 		t.Errorf("expected version info in stdout, got: %s", stdout.String())
 	}
 
@@ -64,7 +65,7 @@ func TestRun_VersionFlag(t *testing.T) {
 	if codeShort != 0 {
 		t.Errorf("expected exit code 0 for -v, got %d", codeShort)
 	}
-	if !strings.Contains(stdout.String(), "png-to-mcpack version") {
+	if !strings.Contains(stdout.String(), "mcskin version") {
 		t.Errorf("expected version info in stdout for -v, got: %s", stdout.String())
 	}
 }
@@ -174,3 +175,75 @@ func TestRun_NonexistentFile(t *testing.T) {
 		t.Error("expected error message in stderr, got none")
 	}
 }
+
+func TestRun_WebFlag(t *testing.T) {
+	origRunner := webServerRunner
+	defer func() { webServerRunner = origRunner }()
+
+	var capturedPort int
+	var capturedOpenBrowser bool
+	webServerRunner = func(port int, openBrowser bool, stdout, stderr io.Writer) int {
+		capturedPort = port
+		capturedOpenBrowser = openBrowser
+		return 0
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"--web", "--port", "9090", "--no-browser"}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("expected code 0, got %d", code)
+	}
+	if capturedPort != 9090 {
+		t.Errorf("expected port 9090, got %d", capturedPort)
+	}
+	if capturedOpenBrowser {
+		t.Errorf("expected openBrowser false with --no-browser, got true")
+	}
+}
+
+func TestRun_WindowsNoArgs_LaunchesWeb(t *testing.T) {
+	origOS := currentOS
+	origRunner := webServerRunner
+	defer func() {
+		currentOS = origOS
+		webServerRunner = origRunner
+	}()
+
+	currentOS = "windows"
+	var launched bool
+	webServerRunner = func(port int, openBrowser bool, stdout, stderr io.Writer) int {
+		launched = true
+		if port != 8080 {
+			t.Errorf("expected default port 8080, got %d", port)
+		}
+		if !openBrowser {
+			t.Errorf("expected openBrowser true on Windows double-click, got false")
+		}
+		return 0
+	}
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("expected code 0 on Windows no-args, got %d", code)
+	}
+	if !launched {
+		t.Error("expected web server to launch on Windows with zero args")
+	}
+}
+
+func TestRun_NonWindowsNoArgs_ShowsUsage(t *testing.T) {
+	origOS := currentOS
+	defer func() { currentOS = origOS }()
+	currentOS = "linux"
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{}, &stdout, &stderr)
+	if code == 0 {
+		t.Errorf("expected non-zero exit code on Linux with no args, got 0")
+	}
+	if !strings.Contains(stderr.String(), "Usage") {
+		t.Errorf("expected usage output, got: %s", stderr.String())
+	}
+}
+

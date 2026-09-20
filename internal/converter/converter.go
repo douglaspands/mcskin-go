@@ -9,9 +9,9 @@ import (
 	"path/filepath"
 	"strings"
 
-	"png-to-mcpack/internal/bedrock"
-	"png-to-mcpack/internal/pack"
-	"png-to-mcpack/internal/skin"
+	"mcskin/internal/bedrock"
+	"mcskin/internal/pack"
+	"mcskin/internal/skin"
 )
 
 // Options holds parameters for a conversion execution.
@@ -80,6 +80,45 @@ func Convert(opts Options) (*Result, error) {
 		}
 	}
 
+	mcpackBytes, err := ConvertBytes(skinName, textureData, modelMode)
+	if err != nil {
+		return nil, err
+	}
+
+	parentDir := filepath.Dir(outputPath)
+	if err := os.MkdirAll(parentDir, 0755); err != nil {
+		return nil, fmt.Errorf("failed to create directory %s: %w", parentDir, err)
+	}
+
+	if err := os.WriteFile(outputPath, mcpackBytes, 0644); err != nil {
+		return nil, fmt.Errorf("failed to write mcpack archive to %s: %w", outputPath, err)
+	}
+
+	return &Result{
+		OutputPath: outputPath,
+		OutputSize: int64(len(mcpackBytes)),
+		SkinName:   skinName,
+		Model:      modelMode,
+		Slim:       modelMode == bedrock.ModelModeSlim,
+	}, nil
+}
+
+// ConvertBytes processes raw PNG skin bytes in-memory and returns a valid .mcpack zip archive.
+func ConvertBytes(skinName string, textureData []byte, model bedrock.ModelMode) ([]byte, error) {
+	if strings.TrimSpace(skinName) == "" {
+		skinName = "custom_skin"
+	}
+
+	// Validate PNG format and dimensions
+	if _, err := skin.Validate(bytes.NewReader(textureData)); err != nil {
+		return nil, fmt.Errorf("skin validation failed: %w", err)
+	}
+
+	modelMode := model
+	if modelMode == "" {
+		modelMode = bedrock.ModelModeBoth
+	}
+
 	// Generate unique identifiers
 	headerUUID, err := bedrock.NewUUID()
 	if err != nil {
@@ -91,7 +130,7 @@ func Convert(opts Options) (*Result, error) {
 	}
 
 	// Build metadata
-	manifest, err := bedrock.GenerateManifest(skinName, "Converted by png-to-mcpack", headerUUID, moduleUUID)
+	manifest, err := bedrock.GenerateManifest(skinName, "Converted by mcskin", headerUUID, moduleUUID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build manifest: %w", err)
 	}
@@ -100,7 +139,8 @@ func Convert(opts Options) (*Result, error) {
 		return nil, fmt.Errorf("failed to marshal manifest: %w", err)
 	}
 
-	skinsCfg, err := bedrock.GenerateSkinsJSON(skinName, filename, modelMode)
+	textureFilename := skinName + ".png"
+	skinsCfg, err := bedrock.GenerateSkinsJSON(skinName, textureFilename, modelMode)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build skins.json: %w", err)
 	}
@@ -111,21 +151,11 @@ func Convert(opts Options) (*Result, error) {
 
 	langBytes := []byte(bedrock.GenerateLang(skinName, modelMode))
 
-	// Package into .mcpack zip archive
-	if err := pack.CreateMCPack(outputPath, manifestBytes, skinsBytes, langBytes, textureData, filename); err != nil {
+	var buf bytes.Buffer
+	if err := pack.WriteMCPack(&buf, manifestBytes, skinsBytes, langBytes, textureData, textureFilename); err != nil {
 		return nil, fmt.Errorf("failed to create mcpack archive: %w", err)
 	}
 
-	stat, err := os.Stat(outputPath)
-	if err != nil {
-		return nil, fmt.Errorf("failed to stat generated mcpack: %w", err)
-	}
-
-	return &Result{
-		OutputPath: outputPath,
-		OutputSize: stat.Size(),
-		SkinName:   skinName,
-		Model:      modelMode,
-		Slim:       modelMode == bedrock.ModelModeSlim,
-	}, nil
+	return buf.Bytes(), nil
 }
+

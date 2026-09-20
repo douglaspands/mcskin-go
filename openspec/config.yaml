@@ -1,7 +1,7 @@
 schema: spec-driven
 
 context: |
-  Project: png-to-mcpack (Minecraft Bedrock Skin Pack Converter)
+  Project: mcskin (Minecraft Bedrock Skin Pack Converter)
   Language & Toolchain: Go 1.25+, standard library only (image/png, archive/zip, crypto/rand, encoding/json, path/filepath). Zero third-party runtime dependencies.
   Platform Compatibility: Cross-platform (Linux and Windows amd64). Use filepath.ToSlash() for zip entries.
   Methodology: Test-Driven Development (TDD). Pure unit tests MUST be 100% mocked with zero external integration (use io.Reader, bytes.Buffer, in-memory structs; no network, persistent disk, or OS process calls). Integration tests must be explicitly segregated. Tests MUST be verified RED before implementation code is written (GREEN phase).
@@ -46,8 +46,11 @@ operations:
       - "Never exceed 3 iteration loops on a failing test without user escalation"
       - "Run targeted tests to optimize execution time and token usage"
       - "Mark tasks complete immediately in tasks.md upon verification"
+      - "AUTOMATIC DIRECTIVE: Automatically execute feature-qa-reviewer immediately upon completing all tasks"
+      - "LOOP ENGINEERING: In case of defects, use bounded loop remediation (max 3 attempts, halt on 2 identical errors, no infinite loops)"
   archive:
     guidance:
+      - "Verify PO/QA review verdict is APROVADO before archiving"
       - "Verify all tests pass (go test ./...) and binaries build before archiving"
       - "Summarize changes and spec synchronization outcome"
       - "Request user approval to squash merge the feature branch into main (git checkout main && git merge --squash feat/<change-name>)"

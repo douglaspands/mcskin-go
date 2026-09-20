@@ -34,17 +34,17 @@ jobs:
           mkdir -p dist build-linux build-windows
 
           # Build Linux amd64
-          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o build-linux/png-to-mcpack ./cmd/png-to-mcpack
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o build-linux/mcskin ./cmd/mcskin
           cp README.md build-linux/
-          tar -czf "dist/png-to-mcpack_${TAG}_linux_amd64.tar.gz" -C build-linux png-to-mcpack README.md
+          tar -czf "dist/mcskin_${TAG}_linux_amd64.tar.gz" -C build-linux mcskin README.md
 
           # Build Windows amd64
-          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o build-windows/png-to-mcpack.exe ./cmd/png-to-mcpack
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o build-windows/mcskin.exe ./cmd/mcskin
           cp README.md build-windows/
-          (cd build-windows && zip "../dist/png-to-mcpack_${TAG}_windows_amd64.zip" png-to-mcpack.exe README.md)
+          (cd build-windows && zip "../dist/mcskin_${TAG}_windows_amd64.zip" mcskin.exe README.md)
 
           # Generate SHA256 Checksums
-          (cd dist && sha256sum png-to-mcpack_${TAG}_linux_amd64.tar.gz png-to-mcpack_${TAG}_windows_amd64.zip > checksums.txt)
+          (cd dist && sha256sum mcskin_${TAG}_linux_amd64.tar.gz mcskin_${TAG}_windows_amd64.zip > checksums.txt)
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2

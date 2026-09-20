@@ -4,24 +4,73 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
+	"runtime"
 
-	"png-to-mcpack/internal/bedrock"
-	"png-to-mcpack/internal/converter"
+	"mcskin/internal/bedrock"
+	"mcskin/internal/converter"
+	"mcskin/internal/web"
 )
 
 var (
 	version = "dev"
 	commit  = "none"
 	date    = "unknown"
+
+	currentOS       = runtime.GOOS
+	webServerRunner = defaultWebServerRunner
 )
 
 func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
 }
 
+func defaultWebServerRunner(port int, openBrowser bool, stdout, stderr io.Writer) int {
+	staticFS, err := web.GetStaticFS()
+	if err != nil {
+		fmt.Fprintf(stderr, "Erro ao carregar arquivos estáticos do servidor web: %v\n", err)
+		return 1
+	}
+
+	cfg := web.Config{
+		Port:     port,
+		StaticFS: staticFS,
+	}
+
+	handler := web.NewHandler(cfg)
+	info := web.ResolveServerInfo(port, nil)
+
+	fmt.Fprintln(stdout, "===========================================================")
+	fmt.Fprintln(stdout, " ⛏️  CRIE SKINS LEGAIS - Servidor Web Iniciado!")
+	fmt.Fprintf(stdout, "  Acesse no computador: %s\n", info.LocalURL)
+	if len(info.NetworkURLs) > 0 {
+		fmt.Fprintln(stdout, "  Acesse em celulares e tablets na mesma rede Wi-Fi:")
+		for _, u := range info.NetworkURLs {
+			fmt.Fprintf(stdout, "    👉 %s\n", u)
+		}
+	}
+	fmt.Fprintln(stdout, "  Pressione Ctrl+C para encerrar o servidor.")
+	fmt.Fprintln(stdout, "===========================================================")
+
+	if openBrowser {
+		_ = web.OpenBrowser(info.LocalURL, currentOS, nil)
+	}
+
+	addr := fmt.Sprintf(":%d", port)
+	if err := http.ListenAndServe(addr, handler); err != nil && err != http.ErrServerClosed {
+		fmt.Fprintf(stderr, "Erro no servidor web: %v\n", err)
+		return 1
+	}
+
+	return 0
+}
+
 func run(args []string, stdout, stderr io.Writer) int {
 	if len(args) == 0 {
+		if currentOS == "windows" {
+			return webServerRunner(8080, true, stdout, stderr)
+		}
 		printUsage(stderr)
 		return 1
 	}
@@ -32,12 +81,12 @@ func run(args []string, stdout, stderr io.Writer) int {
 			return 0
 		}
 		if arg == "-v" || arg == "--version" {
-			fmt.Fprintf(stdout, "png-to-mcpack version %s (commit: %s, built at: %s)\n", version, commit, date)
+			fmt.Fprintf(stdout, "mcskin version %s (commit: %s, built at: %s)\n", version, commit, date)
 			return 0
 		}
 	}
 
-	fs := flag.NewFlagSet("png-to-mcpack", flag.ContinueOnError)
+	fs := flag.NewFlagSet("mcskin", flag.ContinueOnError)
 	fs.SetOutput(stderr)
 
 	var classic bool
@@ -46,6 +95,9 @@ func run(args []string, stdout, stderr io.Writer) int {
 	var showVersion bool
 	var overwrite bool
 	var inputFlag string
+	var webMode bool
+	var port int
+	var noBrowser bool
 
 	fs.BoolVar(&classic, "classic", false, "Generate only classic humanoid model (4px arms / Steve)")
 	fs.BoolVar(&slim, "slim", false, "Generate only slim humanoid model (3px arms / Alex)")
@@ -56,13 +108,23 @@ func run(args []string, stdout, stderr io.Writer) int {
 	fs.StringVar(&inputFlag, "input", "", "Path to input PNG skin file")
 	fs.StringVar(&inputFlag, "i", "", "Path to input PNG skin file (shorthand)")
 
+	fs.BoolVar(&webMode, "web", false, "Start interactive web server mode ('CRIE SKINS LEGAIS')")
+	fs.BoolVar(&webMode, "w", false, "Start interactive web server mode (shorthand)")
+	fs.IntVar(&port, "port", 8080, "Port for web server")
+	fs.IntVar(&port, "p", 8080, "Port for web server (shorthand)")
+	fs.BoolVar(&noBrowser, "no-browser", false, "Do not open default browser automatically in web mode")
+
 	if err := fs.Parse(args); err != nil {
 		return 1
 	}
 
 	if showVersion {
-		fmt.Fprintf(stdout, "png-to-mcpack version %s (commit: %s, built at: %s)\n", version, commit, date)
+		fmt.Fprintf(stdout, "mcskin version %s (commit: %s, built at: %s)\n", version, commit, date)
 		return 0
+	}
+
+	if webMode {
+		return webServerRunner(port, !noBrowser, stdout, stderr)
 	}
 
 	if classic && slim {
@@ -112,16 +174,24 @@ func run(args []string, stdout, stderr io.Writer) int {
 }
 
 func printUsage(w io.Writer) {
-	fmt.Fprintln(w, "Usage: png-to-mcpack [options] <path/to/skin.png>")
+	fmt.Fprintln(w, "Usage: mcskin [options] <path/to/skin.png>")
+	fmt.Fprintln(w, "   or: mcskin --web [options]")
 	fmt.Fprintln(w, "")
 	fmt.Fprintln(w, "Convert Minecraft PNG skin textures into Bedrock .mcpack archives.")
 	fmt.Fprintln(w, "")
-	fmt.Fprintln(w, "Options:")
+	fmt.Fprintln(w, "CLI Conversion Options:")
 	fmt.Fprintln(w, "  --both          Generate both classic and slim models in the pack (default)")
 	fmt.Fprintln(w, "  --classic       Generate only classic humanoid geometry (4px arms / Steve)")
 	fmt.Fprintln(w, "  --slim          Generate only slim humanoid geometry (3px arms / Alex)")
 	fmt.Fprintln(w, "  --force         Overwrite existing .mcpack output file (default true)")
 	fmt.Fprintln(w, "  -i, --input     Path to input PNG skin file")
+	fmt.Fprintln(w, "")
+	fmt.Fprintln(w, "Web Server Options ('CRIE SKINS LEGAIS'):")
+	fmt.Fprintln(w, "  -w, --web       Start local web server with friendly Minecraft UI")
+	fmt.Fprintln(w, "  -p, --port      Port for web server (default: 8080)")
+	fmt.Fprintln(w, "  --no-browser    Do not automatically open default browser on launch")
+	fmt.Fprintln(w, "")
+	fmt.Fprintln(w, "General Options:")
 	fmt.Fprintln(w, "  -v, --version   Display version information")
 	fmt.Fprintln(w, "  -h, --help      Display this help message")
 }

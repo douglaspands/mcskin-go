@@ -1,0 +1,824 @@
+/* ==========================================================================
+   CRIE SKINS LEGAIS - Minecraft Bedrock UI
+   Otimizado para crianças (6+), tablets, smartphones e computadores
+   ========================================================================== */
+
+:root {
+  --mc-dark-bg: #141414;
+  --mc-panel-bg: #2d2d2d;
+  --mc-panel-border: #121212;
+  --mc-panel-bevel-light: #525252;
+  --mc-panel-bevel-dark: #1b1b1b;
+  
+  --mc-green-top: #5da632;
+  --mc-green-light: #7cd332;
+  --mc-green-dark: #325e17;
+  
+  --mc-gold: #fecb00;
+  --mc-gold-shadow: #8a6c00;
+  --mc-diamond: #4deeea;
+  --mc-diamond-shadow: #1b7a78;
+  --mc-emerald: #2ecc71;
+  --mc-redstone: #ff4757;
+  
+  --mc-text-white: #f5f5f5;
+  --mc-text-gray: #b0b0b0;
+  --mc-black: #0a0a0a;
+
+  --pixel-shadow: 4px 4px 0px rgba(0, 0, 0, 0.8);
+  --font-family: 'Segoe UI', system-ui, -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  --font-pixel: 'Courier New', Courier, monospace;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-family);
+  background-color: var(--mc-dark-bg);
+  background-image: 
+    radial-gradient(circle at 50% 20%, rgba(93, 166, 50, 0.15) 0%, transparent 60%),
+    repeating-linear-gradient(0deg, transparent, transparent 32px, rgba(0, 0, 0, 0.3) 32px, rgba(0, 0, 0, 0.3) 64px),
+    repeating-linear-gradient(90deg, #1b1b1b, #1b1b1b 32px, #161616 32px, #161616 64px);
+  color: var(--mc-text-white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 16px;
+  overflow-x: hidden;
+  position: relative;
+}
+
+/* Canvas para partículas de celebração */
+#confettiCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* ==========================================================================
+   Header Banner
+   ========================================================================== */
+header {
+  width: 100%;
+  max-width: 960px;
+  margin-bottom: 24px;
+}
+
+.header-banner {
+  background: linear-gradient(180deg, #6ab038 0%, #4e8a24 100%);
+  border: 4px solid var(--mc-black);
+  box-shadow: 
+    inset 4px 4px 0px var(--mc-green-light),
+    inset -4px -4px 0px var(--mc-green-dark),
+    var(--pixel-shadow);
+  padding: 20px 16px;
+  border-radius: 6px;
+  text-align: center;
+  position: relative;
+}
+
+.header-badge {
+  display: inline-block;
+  background: var(--mc-black);
+  color: var(--mc-diamond);
+  font-weight: 900;
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 4px 14px;
+  border-radius: 4px;
+  border: 2px solid var(--mc-diamond);
+  box-shadow: 2px 2px 0px rgba(0,0,0,0.6);
+  margin-bottom: 10px;
+}
+
+.site-title {
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  font-weight: 900;
+  color: var(--mc-gold);
+  text-shadow: 
+    3px 3px 0px var(--mc-gold-shadow),
+    -2px -2px 0px var(--mc-black),
+    2px -2px 0px var(--mc-black),
+    -2px 2px 0px var(--mc-black),
+    3px 5px 0px var(--mc-black);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  line-height: 1.1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.site-title .icon {
+  filter: drop-shadow(2px 2px 0px #000);
+}
+
+.site-subtitle {
+  font-size: clamp(0.95rem, 2.5vw, 1.2rem);
+  color: var(--mc-text-white);
+  text-shadow: 2px 2px 0px var(--mc-black);
+  margin-top: 8px;
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   Main Grid Layout
+   ========================================================================== */
+.main-container {
+  width: 100%;
+  max-width: 960px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .main-container {
+    grid-template-columns: 1.45fr 1fr;
+  }
+}
+
+/* Minecraft GUI Stone Card */
+.mc-card {
+  background: var(--mc-panel-bg);
+  border: 4px solid var(--mc-panel-border);
+  box-shadow: 
+    inset 4px 4px 0px var(--mc-panel-bevel-light),
+    inset -4px -4px 0px var(--mc-panel-bevel-dark),
+    var(--pixel-shadow);
+  padding: 24px 20px;
+  border-radius: 6px;
+  position: relative;
+}
+
+.card-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--mc-diamond);
+  text-shadow: 2px 2px 0px var(--mc-black);
+  margin-bottom: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ==========================================================================
+   Dropzone Area
+   ========================================================================== */
+.dropzone {
+  border: 4px dashed #777;
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 32px 16px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  box-shadow: inset 3px 3px 6px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dropzone:hover, .dropzone.dragover {
+  border-color: var(--mc-green-light);
+  background: #25331c;
+  transform: translateY(-2px);
+  box-shadow: inset 3px 3px 10px rgba(0,0,0,0.6), 0 0 16px rgba(124, 211, 50, 0.4);
+}
+
+.dropzone-icon {
+  font-size: 4rem;
+  margin-bottom: 12px;
+  filter: drop-shadow(3px 3px 0px var(--mc-black));
+  transition: transform 0.2s ease;
+}
+
+.dropzone:hover .dropzone-icon {
+  transform: scale(1.1) rotate(5deg);
+}
+
+.dropzone-text {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--mc-text-white);
+  text-shadow: 2px 2px 0px var(--mc-black);
+  margin-bottom: 6px;
+}
+
+.dropzone-hint {
+  font-size: 0.9rem;
+  color: #aaa;
+  font-weight: 600;
+}
+
+.dropzone-highlight {
+  display: inline-block;
+  margin-top: 10px;
+  background: #333;
+  color: var(--mc-gold);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border: 1px solid #555;
+}
+
+/* ==========================================================================
+   Interactive Character Preview Box
+   ========================================================================== */
+.preview-box {
+  display: none;
+  background: #1a1a1a;
+  border: 3px solid var(--mc-black);
+  box-shadow: inset 2px 2px 0px #333, inset -2px -2px 0px #0e0e0e;
+  padding: 16px;
+  border-radius: 6px;
+  margin-top: 20px;
+  gap: 18px;
+  align-items: center;
+}
+
+.preview-box.active {
+  display: flex;
+}
+
+.character-preview-frame {
+  background: #2a2a2a;
+  border: 3px solid #111;
+  box-shadow: inset 2px 2px 0px #444, inset -2px -2px 0px #181818;
+  padding: 8px;
+  border-radius: 6px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 100px;
+}
+
+#skinCanvas {
+  width: 96px;
+  height: 128px;
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+  background: transparent;
+  display: block;
+}
+
+.preview-details {
+  flex: 1;
+}
+
+.skin-file-name {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--mc-gold);
+  text-shadow: 2px 2px 0px var(--mc-black);
+  word-break: break-all;
+}
+
+.skin-dims {
+  font-size: 0.85rem;
+  color: var(--mc-text-gray);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.btn-change-skin {
+  margin-top: 10px;
+  background: #444;
+  color: #fff;
+  border: 2px solid #111;
+  box-shadow: inset 2px 2px 0px #666, inset -2px -2px 0px #222;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-change-skin:hover {
+  background: #555;
+}
+
+/* ==========================================================================
+   Model Selection Cards
+   ========================================================================== */
+.model-section {
+  margin-top: 24px;
+}
+
+.section-label {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--mc-text-white);
+  margin-bottom: 12px;
+  text-shadow: 2px 2px 0px var(--mc-black);
+}
+
+.model-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.model-card {
+  background: #252525;
+  border: 3px solid #111;
+  box-shadow: inset 2px 2px 0px #4d4d4d, inset -2px -2px 0px #181818;
+  padding: 14px 10px;
+  text-align: center;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease;
+  position: relative;
+  user-select: none;
+}
+
+.model-card:hover {
+  background: #323232;
+  transform: translateY(-2px);
+}
+
+.model-card.selected {
+  background: #233e16;
+  border-color: var(--mc-green-light);
+  box-shadow: 
+    inset 3px 3px 0px var(--mc-green-top),
+    inset -3px -3px 0px #122409,
+    0 0 12px rgba(124, 211, 50, 0.6);
+}
+
+.model-card input {
+  display: none;
+}
+
+.model-name {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--mc-text-white);
+  margin-bottom: 4px;
+  text-shadow: 1px 1px 0px var(--mc-black);
+}
+
+.model-desc {
+  font-size: 0.78rem;
+  color: #ccc;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.model-badge {
+  position: absolute;
+  top: -10px;
+  right: -6px;
+  background: var(--mc-gold);
+  color: var(--mc-black);
+  font-size: 0.7rem;
+  font-weight: 900;
+  padding: 2px 8px;
+  border-radius: 4px;
+  border: 2px solid var(--mc-black);
+  box-shadow: 1px 1px 0px var(--mc-black);
+}
+
+/* ==========================================================================
+   Big Minecraft Download Button
+   ========================================================================== */
+.btn-minecraft {
+  width: 100%;
+  margin-top: 26px;
+  padding: 18px 20px;
+  font-size: clamp(1.15rem, 3vw, 1.4rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--mc-text-white);
+  background: linear-gradient(180deg, #5da632 0%, #468222 100%);
+  border: 4px solid var(--mc-black);
+  box-shadow: 
+    inset 4px 4px 0px var(--mc-green-light),
+    inset -4px -4px 0px var(--mc-green-dark),
+    var(--pixel-shadow);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.1s ease;
+  user-select: none;
+  text-shadow: 2px 2px 0px var(--mc-black);
+}
+
+.btn-minecraft:hover:not(:disabled) {
+  background: linear-gradient(180deg, #6cb83d 0%, #509428 100%);
+  transform: translateY(-2px);
+  box-shadow: 
+    inset 4px 4px 0px #8de93d,
+    inset -4px -4px 0px var(--mc-green-dark),
+    4px 6px 0px rgba(0,0,0,0.8);
+}
+
+.btn-minecraft:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: 
+    inset -4px -4px 0px var(--mc-green-light),
+    inset 4px 4px 0px var(--mc-green-dark),
+    1px 1px 0px rgba(0,0,0,0.8);
+}
+
+.btn-minecraft:disabled {
+  background: #444;
+  color: #888;
+  cursor: not-allowed;
+  border-color: #222;
+  box-shadow: inset 2px 2px 0px #666, inset -2px -2px 0px #222;
+  transform: none;
+  text-shadow: none;
+}
+
+/* ==========================================================================
+   Feedback Banners
+   ========================================================================== */
+.status-card {
+  display: none;
+  border-radius: 6px;
+  padding: 18px 16px;
+  margin-top: 20px;
+  text-align: center;
+  border: 4px solid var(--mc-black);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.status-card.active {
+  display: block;
+}
+
+.status-card.success {
+  background: #1d3c16;
+  border-color: var(--mc-green-light);
+  box-shadow: inset 3px 3px 0px #356627, var(--pixel-shadow);
+}
+
+.status-card.error {
+  background: #3c1616;
+  border-color: var(--mc-redstone);
+  box-shadow: inset 3px 3px 0px #662727, var(--pixel-shadow);
+}
+
+.status-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  margin-bottom: 6px;
+  text-shadow: 2px 2px 0px var(--mc-black);
+}
+
+.status-card.success .status-title { color: var(--mc-gold); }
+.status-card.error .status-title { color: #ff8888; }
+
+.status-msg {
+  font-size: 0.95rem;
+  color: #fff;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+/* ==========================================================================
+   Side Card: QR Code & Mobile Access
+   ========================================================================== */
+.qr-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.qr-step-box {
+  background: #212121;
+  border: 2px solid #3c3c3c;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  text-align: left;
+  width: 100%;
+}
+
+.qr-step {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #ddd;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.qr-step:last-child {
+  margin-bottom: 0;
+}
+
+.step-num {
+  background: var(--mc-gold);
+  color: var(--mc-black);
+  font-weight: 900;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+
+.qr-box {
+  background: #ffffff;
+  padding: 16px;
+  border: 4px solid var(--mc-black);
+  box-shadow: var(--pixel-shadow);
+  border-radius: 8px;
+  margin-bottom: 12px;
+  display: inline-block;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.qr-box:hover {
+  transform: scale(1.02);
+}
+
+#qrcodeCanvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 200px;
+  min-height: 200px;
+}
+
+#qrcodeCanvas img {
+  display: block;
+  width: 220px;
+  height: 220px;
+  max-width: 100%;
+  height: auto;
+}
+
+.btn-expand-qr {
+  background: #2e6482;
+  color: #fff;
+  border: 2px solid var(--mc-black);
+  box-shadow: inset 2px 2px 0px #4a8fa8, inset -2px -2px 0px #183e52, 2px 2px 0px rgba(0,0,0,0.6);
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-bottom: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.btn-expand-qr:hover {
+  background: #39799c;
+  transform: translateY(-1px);
+}
+
+/* Modal de QR Code Gigante em Tela Cheia */
+.qr-modal-backdrop {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.88);
+  z-index: 10000;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+
+.qr-modal-backdrop.active {
+  display: flex;
+}
+
+.qr-modal-content {
+  background: #252525;
+  border: 4px solid var(--mc-black);
+  box-shadow: inset 4px 4px 0px #555, inset -4px -4px 0px #111, 0 10px 30px rgba(0,0,0,0.9);
+  padding: 24px;
+  border-radius: 8px;
+  max-width: 480px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  animation: popIn 0.25s ease;
+}
+
+.qr-box-giant {
+  background: #ffffff;
+  padding: 20px;
+  border: 4px solid var(--mc-black);
+  border-radius: 8px;
+  margin: 16px auto;
+  display: inline-block;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.6);
+}
+
+#qrcodeCanvasGiant {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 280px;
+  min-height: 280px;
+}
+
+#qrcodeCanvasGiant img {
+  display: block;
+  width: 340px;
+  height: 340px;
+  max-width: 100%;
+  height: auto;
+}
+
+.modal-title {
+  font-size: 1.3rem;
+  font-weight: 900;
+  color: var(--mc-gold);
+  text-shadow: 2px 2px 0px var(--mc-black);
+}
+
+.modal-hint {
+  font-size: 0.9rem;
+  color: #ccc;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
+.btn-close-modal {
+  background: var(--mc-redstone);
+  color: #fff;
+  border: 2px solid var(--mc-black);
+  box-shadow: inset 2px 2px 0px #ff7675, inset -2px -2px 0px #d63031, 2px 2px 0px rgba(0,0,0,0.7);
+  padding: 10px 20px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  cursor: pointer;
+  margin-top: 14px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-close-modal:hover {
+  background: #ff5252;
+}
+
+/* Dica de digitação manual direta para câmeras muito simples */
+.manual-url-box {
+  background: #1b2616;
+  border: 2px solid #3d6a22;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin-top: 16px;
+  text-align: left;
+  font-size: 0.85rem;
+  color: #ddd;
+  line-height: 1.4;
+}
+
+.manual-label {
+  display: block;
+  font-weight: 900;
+  color: var(--mc-gold);
+  margin-bottom: 4px;
+}
+
+.manual-ip {
+  font-family: var(--font-pixel);
+  font-weight: 900;
+  color: var(--mc-diamond);
+  font-size: 1.1rem;
+  background: #111;
+  padding: 4px 8px;
+  border-radius: 4px;
+  border: 1px solid #444;
+  display: inline-block;
+  margin-top: 4px;
+  user-select: all;
+}
+
+.network-url-pill {
+  background: #171717;
+  border: 2px solid #444;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-family: var(--font-pixel);
+  font-size: 0.95rem;
+  color: var(--mc-diamond);
+  word-break: break-all;
+  user-select: all;
+  margin-bottom: 12px;
+  font-weight: bold;
+  box-shadow: inset 2px 2px 4px rgba(0,0,0,0.5);
+  width: 100%;
+}
+
+.btn-copy {
+  background: #444;
+  color: #fff;
+  border: 2px solid var(--mc-black);
+  box-shadow: inset 2px 2px 0px #666, inset -2px -2px 0px #222, 2px 2px 0px rgba(0,0,0,0.6);
+  padding: 10px 18px;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.15s;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-copy:hover {
+  background: #555;
+  transform: translateY(-1px);
+}
+
+.btn-copy:active {
+  transform: translateY(2px);
+  box-shadow: inset -2px -2px 0px #666, inset 2px 2px 0px #222;
+}
+
+/* ==========================================================================
+   Footer
+   ========================================================================== */
+footer {
+  margin-top: 36px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #888;
+  font-weight: 600;
+}
+
+footer p {
+  margin-bottom: 4px;
+}
+
+/* ==========================================================================
+   Animations & Media Queries
+   ========================================================================== */
+@keyframes popIn {
+  from { transform: scale(0.92); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 600px) {
+  body {
+    padding: 10px;
+  }
+  .model-options {
+    grid-template-columns: 1fr;
+  }
+  .model-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    text-align: left;
+  }
+  .model-desc {
+    margin-top: 2px;
+  }
+  .dropzone {
+    padding: 24px 12px;
+  }
+  .preview-box {
+    flex-direction: column;
+    text-align: center;
+  }
+  .btn-minecraft {
+    padding: 16px;
+  }
+}

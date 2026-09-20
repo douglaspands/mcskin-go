@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"png-to-mcpack/internal/pack"
+	"mcskin/internal/pack"
 )
 
 func TestWriteMCPack_InMemory(t *testing.T) {

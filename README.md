@@ -1,6 +1,6 @@
-# png-to-mcpack
+# mcskin
 
-> Ferramenta CLI em Go de alta performance, leve e sem dependências externas para converter texturas de skins de Minecraft (`.png`) em pacotes prontos para importação no Minecraft Bedrock (`.mcpack`).
+> Ferramenta em Go de alta performance, leve e sem dependências externas para **criação, atualização e instalação** de skins no Minecraft Bedrock (`.mcpack`), com **foco primordial em smartphones e tablets** (iPads, celulares Android e tablets).
 
 [![Go Version](https://img.shields.io/badge/go-1.25%2B-blue.svg)](https://golang.org)
 [![Platform](https://img.shields.io/badge/plataformas-linux%20%7C%20windows-lightgrey.svg)]()
@@ -9,24 +9,25 @@
 
 ---
 
-## ✨ Destaques
+## 🎯 Proposta & Missão
 
-- **Pacote Dual-Model por Padrão**: Por padrão, gera **ambos os modelos (Clássico/Steve e Slim/Alex)** dentro do mesmo arquivo `.mcpack`. Ao importar no jogo, o jogador escolhe diretamente no vestiário qual modelo prefere usar!
-- **Otimização de Armazenamento**: Os dois modelos compartilham a mesma textura PNG na raiz do pacote, evitando duplicação do tamanho do arquivo.
-- **Zero Dependências**: Construído exclusivamente com a biblioteca padrão do Go.
-- **Multiplataforma**: Binários nativos para Linux e Windows (`amd64`).
-- **Automação de Release**: Binários compactados (`.tar.gz` e `.zip`) com somas de verificação SHA256 publicados automaticamente a cada tag de versão no GitHub.
+O `mcskin` nasceu para eliminar as barreiras na customização de skins no Minecraft Bedrock:
+- 📱 **Foco Mobile (Tablets e Celulares)**: Conexão sem fios instantânea via QR Code local (Wi-Fi). A criança aponta a câmera do tablet para a tela do computador, abre a interface e baixa o `.mcpack` direto no aparelho, instalando no jogo com 1 toque (*"Abrir com o Minecraft"*).
+- ⛏️ **Criação Descomplicada ("CRIE SKINS LEGAIS")**: Interface lúdica com estética autêntica de blocos, botões grandes táteis (64px+) para dedos pequenos (6+ anos) e áudio feedback de level up.
+- 🔄 **Atualização Ágil**: Reempacotamento rápido de texturas sem perder compatibilidade com o vestiário do jogo.
+- 👥 **Dual-Model por Padrão**: Gera ambos os modelos (Steve 4px e Alex 3px) compartilhando uma única textura. Zero desperdício de espaço!
+- ⚡ **Zero Dependências & Air-Gapped**: 100% Go standard library, sem Node/NPM, sem CDNs externos, funcionando totalmente offline.
 
 ---
 
 ## 🚀 Como Usar
 
-O `png-to-mcpack` foi desenvolvido para ser direto e simples: basta passar o caminho da imagem da sua skin PNG e o pacote `.mcpack` será gerado automaticamente no mesmo diretório.
+O `mcskin` foi desenvolvido para ser direto e simples: basta passar o caminho da imagem da sua skin PNG e o pacote `.mcpack` será gerado automaticamente no mesmo diretório.
 
 ### Sintaxe Básica
 
 ```bash
-png-to-mcpack [opções] <caminho/para/skin.png>
+mcskin [opções] <caminho/para/skin.png>
 ```
 
 ### Opções Disponíveis
@@ -53,7 +54,7 @@ png-to-mcpack [opções] <caminho/para/skin.png>
 Por padrão, quando nenhum modelo for especificado, o pacote gerará ambas as variantes:
 
 ```bash
-./bin/png-to-mcpack minhas_skins/guerreiro.png
+./bin/mcskin minhas_skins/guerreiro.png
 ```
 
 **Saída:**
@@ -66,26 +67,26 @@ Successfully converted "guerreiro" to Bedrock skin pack [both (classic & slim)]:
 #### 2. Restringir Apenas ao Modelo Clássico (Steve, braços de 4px)
 
 ```bash
-./bin/png-to-mcpack --classic minhas_skins/steve_custom.png
+./bin/mcskin --classic minhas_skins/steve_custom.png
 ```
 
 #### 3. Restringir Apenas ao Modelo Fino / Slim (Alex, braços de 3px)
 
 ```bash
-./bin/png-to-mcpack --slim minhas_skins/alex_custom.png
+./bin/mcskin --slim minhas_skins/alex_custom.png
 ```
 
 #### 4. Consultar Versão do Binário
 
 ```bash
-./bin/png-to-mcpack --version
-# Exemplo: png-to-mcpack version v1.0.0 (commit: 9b600f4, built at: 2026-09-20T03:21:18Z)
+./bin/mcskin --version
+# Exemplo: mcskin version v1.0.0 (commit: 9b600f4, built at: 2026-09-20T03:21:18Z)
 ```
 
 #### 5. No Windows (Prompt de Comando ou PowerShell)
 
 ```cmd
-bin\png-to-mcpack.exe C:\Users\SeuUsuario\Imagens\skin_personalizada.png
+bin\mcskin.exe C:\Users\SeuUsuario\Imagens\skin_personalizada.png
 ```
 
 ---
@@ -158,11 +159,11 @@ O arquivo `.mcpack` gerado é um arquivo ZIP válido em conformidade com o padr�
 
 As versões oficiais são geradas automaticamente através do workflow de integração contínua [`.github/workflows/release.yml`](.github/workflows/release.yml) sempre que uma tag de versão (`v*`) é criada:
 
-- **Linux (`amd64`)**: Arquivo `png-to-mcpack_<tag>_linux_amd64.tar.gz` contendo o executável estático e a documentação.
-- **Windows (`amd64`)**: Arquivo `png-to-mcpack_<tag>_windows_amd64.zip` contendo o `png-to-mcpack.exe` e a documentação.
+- **Linux (`amd64`)**: Arquivo `mcskin_<tag>_linux_amd64.tar.gz` contendo o executável estático e a documentação.
+- **Windows (`amd64`)**: Arquivo `mcskin_<tag>_windows_amd64.zip` contendo o `mcskin.exe` e a documentação.
 - **Integridade**: Cada release acompanha o arquivo `checksums.txt` com as somas de verificação SHA256 de todos os pacotes.
 
-Para baixar a versão mais recente, acesse a página de **[Releases no GitHub](https://github.com/douglas/png-to-mcpack/releases)**.
+Para baixar a versão mais recente, acesse a página de **[Releases no GitHub](https://github.com/douglas/mcskin/releases)**.
 
 ---
 
@@ -215,7 +216,7 @@ go test -v ./...
 # Executa testes direcionados por pacote
 go test -v ./internal/bedrock/...
 go test -v ./internal/converter/...
-go test -v ./cmd/png-to-mcpack/...
+go test -v ./cmd/mcskin/...
 ```
 
 > **Regra de Isolamento**: Todos os testes unitários são 100% mockados em memória (`bytes.Buffer`, `bytes.Reader`). Nenhum teste unitário faz requisições de rede ou cria arquivos persistentes fora de diretórios temporários transitórios (`t.TempDir()`).

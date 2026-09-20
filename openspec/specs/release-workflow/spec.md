@@ -17,7 +17,7 @@ The release workflow SHALL compile stripped, standalone binaries for both Linux 
 
 #### Scenario: Build Linux and Windows binaries
 - **WHEN** the release job executes
-- **THEN** `png-to-mcpack-linux-amd64` and `png-to-mcpack-windows-amd64.exe` are successfully produced
+- **THEN** `mcskin-linux-amd64` and `mcskin-windows-amd64.exe` are successfully produced
 
 ### Requirement: Release Asset Publication
 The release workflow SHALL attach the compiled binaries and SHA256 checksums directly to the GitHub Release matching the pushed tag.

@@ -13,11 +13,11 @@ import (
 	"strings"
 	"testing"
 
-	"png-to-mcpack/internal/bedrock"
-	"png-to-mcpack/internal/converter"
+	"mcskin/internal/bedrock"
+	"mcskin/internal/converter"
 )
 
-func writeTestSkinFile(t *testing.T, path string, width, height int) {
+func createTestSkinPNG(t *testing.T, width, height int) []byte {
 	img := image.NewRGBA(image.Rect(0, 0, width, height))
 	for y := 0; y < height; y++ {
 		for x := 0; x < width; x++ {
@@ -28,7 +28,12 @@ func writeTestSkinFile(t *testing.T, path string, width, height int) {
 	if err := png.Encode(&buf, img); err != nil {
 		t.Fatalf("failed to encode png: %v", err)
 	}
-	if err := os.WriteFile(path, buf.Bytes(), 0644); err != nil {
+	return buf.Bytes()
+}
+
+func writeTestSkinFile(t *testing.T, path string, width, height int) {
+	data := createTestSkinPNG(t, width, height)
+	if err := os.WriteFile(path, data, 0644); err != nil {
 		t.Fatalf("failed to write test skin file: %v", err)
 	}
 }
@@ -219,5 +224,54 @@ func TestConvert_ExistingFileOverwrite(t *testing.T) {
 	}
 	if res.OutputPath != mcpackPath {
 		t.Fatalf("expected output path %s, got %s", mcpackPath, res.OutputPath)
+	}
+}
+
+func TestConvertBytes_Success(t *testing.T) {
+	pngData := createTestSkinPNG(t, 64, 64)
+	mcpackBytes, err := converter.ConvertBytes("hero_skin", pngData, bedrock.ModelModeBoth)
+	if err != nil {
+		t.Fatalf("unexpected error from ConvertBytes: %v", err)
+	}
+	if len(mcpackBytes) == 0 {
+		t.Fatal("expected non-empty mcpack bytes")
+	}
+
+	zr, err := zip.NewReader(bytes.NewReader(mcpackBytes), int64(len(mcpackBytes)))
+	if err != nil {
+		t.Fatalf("failed to read zip from bytes: %v", err)
+	}
+
+	foundManifest := false
+	foundSkins := false
+	foundTexture := false
+	for _, f := range zr.File {
+		if f.Name == "manifest.json" {
+			foundManifest = true
+		}
+		if f.Name == "skins.json" {
+			foundSkins = true
+		}
+		if f.Name == "hero_skin.png" {
+			foundTexture = true
+		}
+	}
+	if !foundManifest || !foundSkins || !foundTexture {
+		t.Errorf("missing expected files in mcpack zip: manifest=%v, skins=%v, texture=%v", foundManifest, foundSkins, foundTexture)
+	}
+}
+
+func TestConvertBytes_InvalidPNG(t *testing.T) {
+	_, err := converter.ConvertBytes("bad_skin", []byte("not a png"), bedrock.ModelModeBoth)
+	if err == nil {
+		t.Fatal("expected error for invalid png data, got nil")
+	}
+}
+
+func TestConvertBytes_InvalidDimensions(t *testing.T) {
+	pngData := createTestSkinPNG(t, 32, 32)
+	_, err := converter.ConvertBytes("bad_dim", pngData, bedrock.ModelModeBoth)
+	if err == nil {
+		t.Fatal("expected error for 32x32 dimensions, got nil")
 	}
 }

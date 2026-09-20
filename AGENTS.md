@@ -1,4 +1,4 @@
-# AI Agent & Harness Guidelines: `png-to-mcpack`
+# AI Agent & Harness Guidelines: `mcskin`
 
 Welcome, AI Agent / Harness. This repository enforces strict architectural patterns, Test-Driven Development (TDD), OpenSpec-driven feature lifecycles, and bounded execution governance. Adhere to all guidelines below.
 
@@ -6,7 +6,7 @@ Welcome, AI Agent / Harness. This repository enforces strict architectural patte
 
 ## 1. Project Overview & Architecture
 
-`png-to-mcpack` is a fast, lightweight, cross-platform command-line tool written in Go that transforms Minecraft PNG skin textures into ready-to-import Minecraft Bedrock `.mcpack` skin pack archives.
+`mcskin` is a fast, lightweight, cross-platform command-line tool written in Go that transforms Minecraft PNG skin textures into ready-to-import Minecraft Bedrock `.mcpack` skin pack archives.
 
 ### Core Architectural Principles
 - **Zero External Dependencies**: Use Go standard library exclusively (`image/png`, `archive/zip`, `crypto/rand`, `encoding/json`, `path/filepath`). No third-party modules or runtime dependencies.
@@ -14,11 +14,12 @@ Welcome, AI Agent / Harness. This repository enforces strict architectural patte
 - **Deterministic Output Placement**: The `.mcpack` output file must always be generated in the exact same directory as the input `.png`, matching its base filename (e.g., `path/to/skin.png` -> `path/to/skin.mcpack`).
 
 ### Package Layout
-- `cmd/png-to-mcpack/main.go`: CLI entrypoint (argument parsing, flags `--slim`, exit codes).
+- `cmd/mcskin/main.go`: CLI entrypoint (argument parsing, flags `--slim`, exit codes).
 - `internal/skin/`: Skin PNG decoding, dimension validation (64x64 or 128x128 RGBA), and model detection (classic Steve vs. slim Alex).
 - `internal/bedrock/`: Manifest generation, RFC-4122 UUIDv4 generator, `skins.json`, localization (`texts/en_US.lang`).
 - `internal/pack/`: ZIP archive packaging stream writing into `.mcpack`.
 - `internal/converter/`: High-level orchestration coupling validation, manifest creation, and output file resolution.
+- `internal/web/`: Embedded HTTP server hosting "CRIE SKINS LEGAIS" web UI, local QR code, and browser opener.
 
 ---
 
@@ -35,10 +36,19 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
      This ensures complete sandbox isolation so that if anything deviates or fails, changes can be rolled back without impacting `main`.
 2. **Review Planning Artifacts**:
    - Ensure `proposal.md`, `specs/`, `design.md`, and `tasks.md` are coherent and validated (`openspec validate <change-name>`).
-3. **Implementation (`/opsx-apply`)**:
+3. **Implementation (`/opsx-apply` / `/openspec-apply-change`)**:
    - Work through tasks sequentially. Update tasks in `tasks.md` as they are completed (`- [ ]` -> `- [x]`).
-4. **Archive (`/opsx-archive`)**:
-   - Once all tasks are complete and verified (`go test ./...` and `go build ./...`), archive the change to sync specs.
+   - **AUTOMATIC QA TRIGGER**: Immediately upon completing all implementation tasks, the harness MUST automatically invoke `/feature-qa-reviewer` to validate deliverables before moving forward.
+4. **PO/QA Review & Bounded Loop Remediation (`feature-qa-reviewer`)**:
+   - The persona validates functional user requirements, child usability (6+), Minecraft aesthetic fidelity, cross-platform build artifacts, and Bedrock `.mcpack` compliance.
+   - **Loop Engineering Remediation**: If defects or rejections occur, trigger remediation using harness Loop Engineering guardrails with anti-infinite-loop best practices:
+     1. **Max Iterations Cap**: Maximum 3 fix attempts (`max_attempts = 3`).
+     2. **2-Strike Identical Failure Halting**: Halt immediately if the same error or rejection reason repeats across 2 consecutive attempts without progress.
+     3. **Scope Boundary Guard**: Halt and request spec revision if remediation requires out-of-scope architectural changes.
+     4. **Targeted Verification**: Re-run targeted unit tests before re-evaluating with QA.
+   - Proceed to archive only after receiving a formal `APROVADO` verdict.
+5. **Archive (`/opsx-archive`)**:
+   - Once all tasks are complete, verified, and approved by PO/QA, archive the change to sync specs.
    - **MANDATORY SQUASH MERGE REQUEST**: Immediately after archiving and synchronization are finished, request user confirmation to merge the feature branch into `main` using squash:
      ```bash
      git checkout main && git merge --squash feat/<nome_spec>
@@ -72,7 +82,7 @@ To guarantee safe, efficient, and bounded execution cycles:
 
 ### State Graph Phases
 ```
-[Plan: OpenSpec] ──> [TDD: Write Tests (RED)] ──> [Implement Code (GREEN)] ──> [Verify & Lint] ──> [Commit]
+[Plan: OpenSpec] ──> [TDD: Write Tests (RED)] ──> [Implement Code (GREEN)] ──> [Verify & Lint] ──> [PO/QA Review (SKILL)] ──> [Commit / Archive]
 ```
 
 ### Loop Engineering Guardrails

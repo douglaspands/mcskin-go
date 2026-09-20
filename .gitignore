@@ -8,6 +8,8 @@
 *.dylib
 /png-to-mcpack
 /png-to-mcpack.exe
+/mcskin
+/mcskin.exe
 
 # Test binaries and coverage
 *.test

@@ -1,4 +1,4 @@
-# Gemini & Antigravity Project Rules: `png-to-mcpack`
+# Gemini & Antigravity Project Rules: `mcskin`
 
 ## 1. Command Execution & Safety Protocol
 
@@ -6,7 +6,7 @@
 You are explicitly permitted and encouraged to autonomously execute harmless development commands:
 - **Go toolchain**:
   - `go test ...` (e.g. `go test -v ./...`, `go test -run TestX ./internal/...`)
-  - `go build ...` (e.g. `go build ./...`, `go build -o bin/png-to-mcpack ./cmd/...`)
+  - `go build ...` (e.g. `go build ./...`, `go build -o bin/mcskin ./cmd/...`)
   - `go vet ...`
   - `go run ...`
   - `go fmt ...`
@@ -14,6 +14,7 @@ You are explicitly permitted and encouraged to autonomously execute harmless dev
   - `go version`, `go doc`, `go list`
 - **Build automation**:
   - `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make lint`, `make clean`
+  - `./bin/mcskin ...`
   - `./bin/png-to-mcpack ...`
 - **OpenSpec**:
   - `openspec ...`
@@ -47,6 +48,15 @@ The following commands are hard-blocked by project policy. You must NEVER propos
     git checkout -b feat/<nome_spec>
     ```
     This ensures complete isolation and allows immediate rollback if anything deviates from expectations.
+  - **Automatic PO/QA Review upon Implementation Completion**:
+    Immediately upon finishing all tasks in `/openspec-apply-change` (or `/opsx-apply`), the harness MUST automatically execute the `feature-qa-reviewer` skill (or subagent with `role: "PO/QA Reviewer"`) to rigorously evaluate requirements, child usability (6+), Minecraft UX, and Bedrock `.mcpack` compliance.
+    - **Bounded Loop Remediation (Anti-Infinite Loop Protection)**:
+      In case defects or rejections are detected, enter a bounded remediation loop using Loop Engineering:
+      1. Maximum 3 iterations (`max_attempts = 3`).
+      2. 2-Strike Halting: Halt execution immediately if the identical error or rejection recurs across 2 attempts without progress.
+      3. Scope Boundary: Halt if fix requires expanding requirements beyond the spec (trigger `/openspec-update-change`).
+      4. Targeted Verification: Re-run tests before re-evaluating with QA.
+    - Proceed to archive only upon formal approval (`APROVADO`).
   - **Final Step on `/opsx-archive`**: After all tasks and spec synchronization are completed, explicitly request user confirmation to merge the feature branch into `main` using the squash method:
     ```bash
     git checkout main && git merge --squash feat/<nome_spec>

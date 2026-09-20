@@ -32,8 +32,8 @@ def evaluate_command(cmd: str):
     allowed_patterns = [
         r'^(?:(?:[A-Z0-9_]+=[^\s]+\s+)*)go\s+(?:test|build|vet|run|fmt|mod\s+(?:tidy|verify|download)|version|env|doc|list)\b',
         r'^(?:(?:[A-Z0-9_]+=[^\s]+\s+)*)make(?:\s+[a-zA-Z0-9_-]+)*$',
-        r'^\./bin/png-to-mcpack\b',
-        r'^(?:build-linux|build-windows)/png-to-mcpack(?:\.exe)?\b',
+        r'^\./bin/(?:mcskin|png-to-mcpack)\b',
+        r'^(?:build-linux|build-windows)/(?:mcskin|png-to-mcpack)(?:\.exe)?\b',
         r'^openspec\s+',
         r'^git\s+(?:status|diff|log|show|branch|add|commit|rev-parse|check-ignore|checkout|merge\s+--squash|rm)\b',
         r'^(?:ls|cat|head|tail|grep|find|which|stat|file|unzip|mkdir|touch|echo|tar|zip|sha256sum|cp)\b',

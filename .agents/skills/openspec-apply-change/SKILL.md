@@ -123,8 +123,18 @@ In both branches, never create the root as a side effect: do not run `openspec i
    Display:
    - Tasks completed this session
    - Overall progress: "N/M tasks complete"
-   - If all done: suggest archive
    - If paused: explain why and wait for guidance
+   - **Automatic PO/QA Validation Trigger (Mandatory Directive)**:
+     When all tasks are complete (`state: "all_done"` or N/N tasks complete):
+     - **Immediately and automatically invoke the `/feature-qa-reviewer` skill** (or execute the PO/QA verification protocol) to validate functional requirements, child usability (6+), Minecraft UX, cross-platform binaries, and Bedrock `.mcpack` compliance.
+     - **Bounded Loop Engineering (Defect Remediation)**:
+       - If PO/QA issues an `APROVADO` verdict: Congratulate the user and proceed to suggest archiving (`/openspec-archive-change`).
+       - If PO/QA returns `REPROVADO` or identifies defects/regressions:
+         Automatically request and apply adjustments using the harness **Loop Engineering protocol**, enforcing strict best practices to prevent infinite loops:
+         1. **Iteration Cap**: Maximum **3 repair attempts** (`max_attempts = 3`).
+         2. **2-Strike Identical Failure Halting**: If the identical error or test failure recurs across 2 consecutive iterations without progress, **halt execution immediately** and ask the user for guidance.
+         3. **Scope Boundary Guard**: If fixing an issue requires expanding requirements beyond the active spec, halt and suggest `/openspec-update-change`.
+         4. **Regression Guard**: Run targeted tests (`go test -run ...`) and verify before re-evaluating with QA.
 
 **Output During Implementation**
 
@@ -154,7 +164,12 @@ Working on task 4/7: <task description>
 - [x] Task 2
 ...
 
-All tasks complete! You can archive this change with `/openspec-archive-change`.
+### Automatic PO/QA Validation Triggered
+Executing `/feature-qa-reviewer`...
+[...PO/QA review report...]
+
+- If APROVADO: "All tasks and PO/QA review complete! You can archive this change with `/openspec-archive-change`."
+- If issues found: "Entering bounded repair loop (Attempt 1/3)..."
 ```
 
 **Output On Pause (Issue Encountered)**

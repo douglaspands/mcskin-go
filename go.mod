@@ -1,3 +1,3 @@
-module png-to-mcpack
+module mcskin
 
 go 1.25.0
