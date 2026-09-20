@@ -940,7 +940,8 @@ footer p {
   background: #464646;
 }
 
-.btn-template.active {
+.btn-template.active,
+.btn-topbar.active {
   background: #2e6482;
   box-shadow: inset 2px 2px 0px #4deeea, inset -2px -2px 0px #1b3d4f;
   color: #fff;
@@ -1162,7 +1163,7 @@ footer p {
   border-radius: 8px;
   border: 3px solid #111;
   padding: 16px;
-  min-height: 480px;
+  min-height: 620px;
 }
 
 .viewport-3d-box, .viewport-2d-box {
@@ -1172,11 +1173,14 @@ footer p {
   align-items: center;
 }
 
+/* Proporção 3:4 (retrato) em vez de quadrado: o boneco humanoide é bem mais
+   alto que largo, então essa proporção aproveita mais a tela sem cortar a
+   cabeça ou os pés e sem sobrar tanto fundo vazio nas laterais. */
 #editor3DCanvas {
   width: 100%;
-  max-width: 440px;
+  max-width: 560px;
   height: auto;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 3 / 4;
   border-radius: 6px;
   touch-action: none;
   cursor: crosshair;
@@ -1235,6 +1239,74 @@ footer p {
   image-rendering: crisp-edges;
   cursor: crosshair;
   touch-action: none;
+}
+
+/* Zoom Controls (3D Viewport & 2D Sheet) */
+.zoom-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 10px;
+  width: 100%;
+  max-width: 300px;
+}
+
+.btn-zoom {
+  background: #2d2d2d;
+  border: 2px solid #141414;
+  color: #ddd;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background 0.1s;
+  flex-shrink: 0;
+}
+
+.btn-zoom:hover {
+  background: #3d3d3d;
+  color: #fff;
+}
+
+.zoom-slider {
+  flex: 1;
+  accent-color: var(--mc-gold, #fecb00);
+}
+
+/* Fullscreen Editing Mode */
+.editor-card:fullscreen,
+.editor-card:-webkit-full-screen,
+.editor-card.is-fullscreen-fallback {
+  width: 100vw;
+  height: 100vh;
+  max-width: none;
+  max-height: none;
+  overflow-y: auto;
+  background: #14161a;
+  padding: 16px;
+}
+
+.editor-card.is-fullscreen-fallback {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+}
+
+.editor-card:fullscreen #editor3DCanvas,
+.editor-card:-webkit-full-screen #editor3DCanvas,
+.editor-card.is-fullscreen-fallback #editor3DCanvas {
+  /* Proporção 3:4 (retrato): limita pela altura disponível (85vh) convertida
+     em largura equivalente, com um teto de largura para telas bem largas. */
+  max-width: min(90vw, 63.75vh);
+}
+
+.editor-card:fullscreen .canvas-2d-container,
+.editor-card:-webkit-full-screen .canvas-2d-container,
+.editor-card.is-fullscreen-fallback .canvas-2d-container {
+  max-width: 92vw;
+  max-height: 75vh;
 }
 
 /* Editor Action Buttons */

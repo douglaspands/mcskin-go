@@ -176,6 +176,11 @@
             <button type="button" class="btn-topbar" id="btnUploadSkin">📂 Abrir Skin (PNG)</button>
             <input type="file" id="editorFileInput" accept="image/png" style="display: none;">
           </div>
+
+          <div class="topbar-group">
+            <button type="button" class="btn-topbar" id="btnToggleGrid" title="Mostrar/ocultar grade de pixels">▦ Grade de Pixels</button>
+            <button type="button" class="btn-topbar" id="btnFullscreen" title="Expandir para tela cheia">⛶ Tela Cheia</button>
+          </div>
         </div>
 
         <!-- Área de Criação (Ferramentas à Esquerda, Canvas ao Centro) -->
@@ -253,7 +258,12 @@
           <div class="editor-stage">
             <!-- Visão 3D -->
             <div class="viewport-3d-box" id="wrapper3D">
-              <canvas id="editor3DCanvas" width="440" height="440"></canvas>
+              <canvas id="editor3DCanvas" width="480" height="640"></canvas>
+              <div class="zoom-controls" id="zoom3DControls">
+                <button type="button" class="btn-zoom" id="btnZoom3DOut" title="Diminuir zoom">🔍➖</button>
+                <input type="range" id="zoom3DSlider" class="zoom-slider" min="15" max="90" step="1" value="50">
+                <button type="button" class="btn-zoom" id="btnZoom3DIn" title="Aumentar zoom">🔍➕</button>
+              </div>
               <div class="snap-views-bar">
                 <button type="button" class="btn-snap" data-dir="front">👤 Frente</button>
                 <button type="button" class="btn-snap" data-dir="back">🔄 Costas</button>
@@ -269,6 +279,11 @@
               <div class="sheet-hint">Toque nos quadradinhos das partes abertas para desenhar com precisão:</div>
               <div class="canvas-2d-container">
                 <canvas id="editor2DCanvas" width="512" height="512"></canvas>
+              </div>
+              <div class="zoom-controls" id="zoom2DControls">
+                <button type="button" class="btn-zoom" id="btnZoom2DOut" title="Diminuir zoom">🔍➖</button>
+                <input type="range" id="zoom2DSlider" class="zoom-slider" min="1" max="4" step="0.5" value="1">
+                <button type="button" class="btn-zoom" id="btnZoom2DIn" title="Aumentar zoom">🔍➕</button>
               </div>
             </div>
           </div>

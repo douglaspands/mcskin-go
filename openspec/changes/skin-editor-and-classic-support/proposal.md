@@ -19,6 +19,10 @@ By introducing a kid-friendly 3D and 2D skin creator inspired by Nova Skin—pai
   - Special effects: support for transparency/glass mode (semi-transparent pixels for astronaut visors, slime, glasses).
   - Dual export: "Save PNG" (universal 64x64, 64x32, or 128x128 image for device gallery/transport) and "Create .mcpack" (instant 1-click Bedrock pack generation).
   - Import: "Open Skin" to upload any standard PNG from the device to edit.
+  - Fullscreen mode: a toggle button expands the editor to fill the screen (Fullscreen API), hiding non-essential chrome for maximum drawing space on any device.
+  - Zoom controls: zoom in/out (buttons, mouse wheel, and pinch-to-zoom) for both the 3D viewport and the 2D unwrapped sheet, so the user can see and paint individual texture pixels precisely.
+  - Pixel-accurate rendering fix: the 3D viewport canvas resolution is scaled to the device pixel ratio so every texture pixel renders as one crisp, correctly aligned square instead of the current blurry/mismatched squares, keeping raycaster picking aligned 1:1 with the rendered pixel at every zoom level.
+  - Pixel grid toggle: a single button shows/hides thin grid lines on pixel boundaries in both the 3D viewport and the 2D sheet, without touching the underlying exported skin data.
 - **Multi-Screen Tabbed Navigation**:
   - Minecraft-styled top navbar switching between `[ 📦 Conversor ]` (the existing PNG converter and local Wi-Fi QR code card) and `[ 🎨 Criador 3D ]` (the new editor).
   - Single Page Application (SPA) state retention without page reload.
@@ -46,6 +50,6 @@ By introducing a kid-friendly 3D and 2D skin creator inspired by Nova Skin—pai
   - `internal/web/static/index.html`: Add top navigation header, editor view container, and 64x32 dimension labels.
   - `internal/web/static/style.css`: Add styles for editor canvas, 3D viewport, toolbar, palette, and navigation tabs.
   - `internal/web/static/app.js`: Implement navigation switching, editor state, tools, and direct `/api/convert` dispatch.
-  - `internal/web/static/three.min.js`: Embedded offline minified Three.js for 3D skin rendering and raycasting without external CDN dependencies.
+  - `internal/web/static/three.min.js`: Embedded offline minified Three.js for 3D skin rendering and raycasting without external CDN dependencies; scale the WebGL canvas backing store by `devicePixelRatio` and expose a clamped zoom range on the viewport camera.
 - **APIs**:
   - `/api/convert` handles 64x32 PNG multipart uploads natively without API breaking changes.

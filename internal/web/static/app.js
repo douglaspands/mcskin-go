@@ -528,6 +528,17 @@ document.addEventListener("DOMContentLoaded", function() {
   var isPointerDown = false;
   var lastX = 0, lastY = 0;
   var lastPaintedCoord = null;
+  var zoomFactor2D = 1; // Multiplicador de zoom da Folha 2D (1x a 4x)
+  var BASE_2D_CANVAS_SIZE = 512;
+  var MIN_ZOOM_2D = 1, MAX_ZOOM_2D = 4;
+  var gridEnabled = false; // Grade de pixels (3D e 2D)
+
+  // Distância entre dois toques (usado no gesto de pinça para zoom)
+  function touchDistance(touches) {
+    var dx = touches[0].clientX - touches[1].clientX;
+    var dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  }
 
   var undoStack = [];
   var redoStack = [];
@@ -578,10 +589,52 @@ document.addEventListener("DOMContentLoaded", function() {
     return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
   }
 
+  // Constrói uma cópia ampliada da textura com linhas finas de grade
+  // desenhadas em cada fronteira de pixel, usada apenas para exibição no
+  // boneco 3D. O `textureCanvas` original (fonte da exportação PNG/.mcpack)
+  // nunca é alterado. A ampliação é necessária porque, no tamanho nativo da
+  // textura (1 unidade = 1 pixel do skin), uma linha de 1px cobre a coluna/
+  // linha inteira do pixel vizinho, escurecendo quase toda a superfície.
+  var GRID_OVERLAY_SCALE = 4;
+
+  function buildGridOverlayCanvas() {
+    var scale = GRID_OVERLAY_SCALE;
+    var gridCanvas = document.createElement("canvas");
+    gridCanvas.width = texW * scale;
+    gridCanvas.height = texH * scale;
+    var gCtx = gridCanvas.getContext("2d");
+    gCtx.imageSmoothingEnabled = false;
+    gCtx.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, gridCanvas.width, gridCanvas.height);
+
+    gCtx.strokeStyle = "rgba(0, 0, 0, 0.35)";
+    gCtx.lineWidth = 1;
+    for (var gx = 0; gx <= texW; gx++) {
+      var lx = gx * scale + 0.5;
+      gCtx.beginPath();
+      gCtx.moveTo(lx, 0);
+      gCtx.lineTo(lx, gridCanvas.height);
+      gCtx.stroke();
+    }
+    for (var gy = 0; gy <= texH; gy++) {
+      var ly = gy * scale + 0.5;
+      gCtx.beginPath();
+      gCtx.moveTo(0, ly);
+      gCtx.lineTo(gridCanvas.width, ly);
+      gCtx.stroke();
+    }
+    return gridCanvas;
+  }
+
   // Sincroniza a textura com a viewport 3D e o Canvas 2D
   function syncTexture() {
     if (viewport3D) {
-      viewport3D.setTexture(textureCanvas);
+      if (gridEnabled) {
+        // O canvas de overlay é maior que a skin real (para caber linhas finas
+        // de grade); texW/texH mantêm o mapeamento UV correto nesse caso.
+        viewport3D.setTexture(buildGridOverlayCanvas(), texW, texH);
+      } else {
+        viewport3D.setTexture(textureCanvas);
+      }
     }
     render2DSheet();
   }
@@ -790,11 +843,15 @@ document.addEventListener("DOMContentLoaded", function() {
   // Renderizador da Folha Aberta 2D com Rótulos Grandes e Amigáveis
   function render2DSheet() {
     if (!ctx2D || !editor2DCanvas) return;
-    var cW = editor2DCanvas.width;
-    var cH = editor2DCanvas.height;
-    ctx2D.clearRect(0, 0, cW, cH);
 
-    var scale = cW / texW;
+    var scale = (BASE_2D_CANVAS_SIZE / texW) * zoomFactor2D;
+    var cW = Math.round(texW * scale);
+    var cH = Math.round(texH * scale);
+    if (editor2DCanvas.width !== cW || editor2DCanvas.height !== cH) {
+      editor2DCanvas.width = cW;
+      editor2DCanvas.height = cH;
+    }
+    ctx2D.clearRect(0, 0, cW, cH);
     ctx2D.imageSmoothingEnabled = false;
 
     // Fundo quadriculado
@@ -807,6 +864,26 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Desenha textura atual
     ctx2D.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, cW, texH * scale);
+
+    // Grade de Pixels (opcional, apenas visual)
+    if (gridEnabled) {
+      ctx2D.strokeStyle = "rgba(0, 0, 0, 0.45)";
+      ctx2D.lineWidth = 1;
+      for (var gx = 0; gx <= texW; gx++) {
+        var lx = Math.round(gx * scale) + 0.5;
+        ctx2D.beginPath();
+        ctx2D.moveTo(lx, 0);
+        ctx2D.lineTo(lx, texH * scale);
+        ctx2D.stroke();
+      }
+      for (var gy = 0; gy <= texH; gy++) {
+        var ly = Math.round(gy * scale) + 0.5;
+        ctx2D.beginPath();
+        ctx2D.moveTo(0, ly);
+        ctx2D.lineTo(cW, ly);
+        ctx2D.stroke();
+      }
+    }
 
     // Rótulos explicativos suaves para crianças
     ctx2D.lineWidth = 1;
@@ -932,6 +1009,141 @@ document.addEventListener("DOMContentLoaded", function() {
         wrapper2D.style.display = "flex";
         wrapper3D.style.display = "none";
         render2DSheet();
+        playSound("click");
+      });
+    }
+
+    // 5.1 Tela Cheia (Fullscreen) do Editor
+    var editorCardEl = document.querySelector(".editor-card");
+    var btnFullscreen = document.getElementById("btnFullscreen");
+
+    function getFullscreenElement() {
+      return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+    }
+
+    function isNativeFullscreenActive() {
+      return !!getFullscreenElement();
+    }
+
+    function onFullscreenChange() {
+      var active = isNativeFullscreenActive() || (editorCardEl && editorCardEl.classList.contains("is-fullscreen-fallback"));
+      if (btnFullscreen) {
+        btnFullscreen.innerHTML = active ? "🡼 Sair da Tela Cheia" : "⛶ Tela Cheia";
+      }
+      // Aguarda o layout se ajustar antes de redimensionar o viewport 3D
+      setTimeout(function() {
+        if (viewport3D) {
+          viewport3D.render();
+        }
+      }, 60);
+    }
+
+    function toggleFullscreen() {
+      if (!editorCardEl) return;
+
+      if (isNativeFullscreenActive()) {
+        if (document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+        else if (document.msExitFullscreen) document.msExitFullscreen();
+        return;
+      }
+
+      if (editorCardEl.classList.contains("is-fullscreen-fallback")) {
+        editorCardEl.classList.remove("is-fullscreen-fallback");
+        onFullscreenChange();
+        return;
+      }
+
+      var requestFs = editorCardEl.requestFullscreen || editorCardEl.webkitRequestFullscreen || editorCardEl.msRequestFullscreen;
+      if (requestFs) {
+        requestFs.call(editorCardEl);
+      } else {
+        // Navegador sem suporte à Fullscreen API (ex.: iOS Safari): usa overlay CSS de tela cheia
+        editorCardEl.classList.add("is-fullscreen-fallback");
+        onFullscreenChange();
+      }
+    }
+
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener("click", function() {
+        toggleFullscreen();
+        playSound("click");
+      });
+    }
+    document.addEventListener("fullscreenchange", onFullscreenChange);
+    document.addEventListener("webkitfullscreenchange", onFullscreenChange);
+    document.addEventListener("MSFullscreenChange", onFullscreenChange);
+    window.addEventListener("resize", function() {
+      if (viewport3D) viewport3D.render();
+    });
+
+    // 5.2 Controles de Zoom do Boneco 3D
+    var zoom3DSlider = document.getElementById("zoom3DSlider");
+    var btnZoom3DIn = document.getElementById("btnZoom3DIn");
+    var btnZoom3DOut = document.getElementById("btnZoom3DOut");
+    var ZOOM_3D_STEP = 5;
+
+    function setViewport3DZoom(z) {
+      if (!viewport3D) return;
+      var applied = viewport3D.setZoom(z);
+      if (zoom3DSlider) zoom3DSlider.value = applied;
+    }
+
+    if (zoom3DSlider) {
+      zoom3DSlider.addEventListener("input", function() {
+        setViewport3DZoom(parseFloat(zoom3DSlider.value));
+      });
+    }
+    if (btnZoom3DIn) {
+      btnZoom3DIn.addEventListener("click", function() {
+        if (viewport3D) setViewport3DZoom(viewport3D.zoom - ZOOM_3D_STEP);
+        playSound("click");
+      });
+    }
+    if (btnZoom3DOut) {
+      btnZoom3DOut.addEventListener("click", function() {
+        if (viewport3D) setViewport3DZoom(viewport3D.zoom + ZOOM_3D_STEP);
+        playSound("click");
+      });
+    }
+
+    // 5.3 Controles de Zoom da Folha 2D
+    var zoom2DSlider = document.getElementById("zoom2DSlider");
+    var btnZoom2DIn = document.getElementById("btnZoom2DIn");
+    var btnZoom2DOut = document.getElementById("btnZoom2DOut");
+    var ZOOM_2D_STEP = 0.5;
+
+    function setZoom2D(z) {
+      zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, z));
+      if (zoom2DSlider) zoom2DSlider.value = zoomFactor2D;
+      render2DSheet();
+    }
+
+    if (zoom2DSlider) {
+      zoom2DSlider.addEventListener("input", function() {
+        setZoom2D(parseFloat(zoom2DSlider.value));
+      });
+    }
+    if (btnZoom2DIn) {
+      btnZoom2DIn.addEventListener("click", function() {
+        setZoom2D(zoomFactor2D + ZOOM_2D_STEP);
+        playSound("click");
+      });
+    }
+    if (btnZoom2DOut) {
+      btnZoom2DOut.addEventListener("click", function() {
+        setZoom2D(zoomFactor2D - ZOOM_2D_STEP);
+        playSound("click");
+      });
+    }
+
+    // 5.4 Alternar Grade de Pixels (3D e 2D)
+    var btnToggleGrid = document.getElementById("btnToggleGrid");
+    if (btnToggleGrid) {
+      btnToggleGrid.addEventListener("click", function() {
+        gridEnabled = !gridEnabled;
+        btnToggleGrid.classList.toggle("active", gridEnabled);
+        syncTexture();
         playSound("click");
       });
     }
@@ -1092,6 +1304,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // 14. Eventos no Canvas 3D (Touch / Mouse com Dedo ou Caneta)
     if (editor3DCanvas) {
+      var pinch3DStartDist = null;
+      var pinch3DStartZoom = null;
+
+      editor3DCanvas.addEventListener("wheel", function(e) {
+        e.preventDefault();
+        if (viewport3D) setViewport3DZoom(viewport3D.zoom + (e.deltaY > 0 ? ZOOM_3D_STEP * 0.6 : -ZOOM_3D_STEP * 0.6));
+      }, { passive: false });
+
       function handlePointerStart(e) {
         isPointerDown = true;
         lastPaintedCoord = null;
@@ -1144,20 +1364,44 @@ document.addEventListener("DOMContentLoaded", function() {
 
       editor3DCanvas.addEventListener("touchstart", function(e) {
         if (e.cancelable) e.preventDefault();
+        if (e.touches.length === 2) {
+          isPointerDown = false;
+          pinch3DStartDist = touchDistance(e.touches);
+          pinch3DStartZoom = viewport3D ? viewport3D.zoom : null;
+          return;
+        }
         handlePointerStart(e);
       }, { passive: false });
 
       editor3DCanvas.addEventListener("touchmove", function(e) {
         if (e.cancelable) e.preventDefault();
+        if (e.touches.length === 2 && pinch3DStartDist && pinch3DStartZoom !== null) {
+          var newDist = touchDistance(e.touches);
+          setViewport3DZoom(pinch3DStartZoom * (pinch3DStartDist / newDist));
+          return;
+        }
         handlePointerMove(e);
       }, { passive: false });
 
-      editor3DCanvas.addEventListener("touchend", handlePointerEnd);
+      editor3DCanvas.addEventListener("touchend", function(e) {
+        if (e.touches.length < 2) {
+          pinch3DStartDist = null;
+          pinch3DStartZoom = null;
+        }
+        handlePointerEnd();
+      });
     }
 
     // 15. Eventos no Canvas 2D (Pintura em Folha Aberta)
     if (editor2DCanvas) {
       var isDrawing2D = false;
+      var pinch2DStartDist = null;
+      var pinch2DStartZoom = null;
+
+      editor2DCanvas.addEventListener("wheel", function(e) {
+        e.preventDefault();
+        setZoom2D(zoomFactor2D + (e.deltaY < 0 ? ZOOM_2D_STEP * 0.5 : -ZOOM_2D_STEP * 0.5));
+      }, { passive: false });
 
       function get2DCoord(e) {
         var rect = editor2DCanvas.getBoundingClientRect();
@@ -1194,15 +1438,32 @@ document.addEventListener("DOMContentLoaded", function() {
 
       editor2DCanvas.addEventListener("touchstart", function(e) {
         if (e.cancelable) e.preventDefault();
+        if (e.touches.length === 2) {
+          isDrawing2D = false;
+          pinch2DStartDist = touchDistance(e.touches);
+          pinch2DStartZoom = zoomFactor2D;
+          return;
+        }
         handle2DStart(e);
       }, { passive: false });
 
       editor2DCanvas.addEventListener("touchmove", function(e) {
         if (e.cancelable) e.preventDefault();
+        if (e.touches.length === 2 && pinch2DStartDist && pinch2DStartZoom !== null) {
+          var newDist = touchDistance(e.touches);
+          setZoom2D(pinch2DStartZoom * (newDist / pinch2DStartDist));
+          return;
+        }
         handle2DMove(e);
       }, { passive: false });
 
-      editor2DCanvas.addEventListener("touchend", handle2DEnd);
+      editor2DCanvas.addEventListener("touchend", function(e) {
+        if (e.touches.length < 2) {
+          pinch2DStartDist = null;
+          pinch2DStartZoom = null;
+        }
+        handle2DEnd();
+      });
     }
 
     // 16. Baixar Skin (.PNG)

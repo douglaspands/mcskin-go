@@ -27,3 +27,18 @@
 
 - [x] 4.1 Run the full Go test suite (`go test -v ./...`), check for formatting and lints (`go vet ./...`), and verify clean compilation for Linux and Windows (`go build ./cmd/mcskin`)
 - [x] 4.2 Execute the automated PO/QA reviewer skill (`feature-qa-reviewer`) to evaluate Bedrock `.mcpack` compliance, child usability (6+), touch responsiveness, and classic 64x32 compatibility
+
+## 5. Frontend: Fullscreen, Zoom & Pixel-Accurate Rendering Fix
+
+- [x] 5.1 Add a fullscreen toggle button to the editor topbar in `index.html`; implement `requestFullscreen`/`exitFullscreen` with vendor-prefix and CSS-overlay fallback in `app.js`, and verify entering/exiting (button, Esc, and browser-triggered exit) preserves the current texture and tool state
+- [x] 5.2 Expose `Viewport.prototype.zoom` (`three.min.js`) via zoom +/- buttons, mouse wheel, and touch pinch handlers in `app.js`, clamped to a min/max distance; verify the camera zooms smoothly without clipping through the model
+- [x] 5.3 Add a `zoomFactor` to `render2DSheet()` in `app.js` driven by zoom +/- buttons, wheel, and pinch gestures, re-rendering the 2D canvas inside the scrollable `.canvas-2d-container`; verify every texture pixel remains a single, correctly aligned square at all zoom levels
+- [x] 5.4 Resize the WebGL canvas backing store to a clamped `devicePixelRatio` (updating `gl.viewport` and projection aspect ratio) in `three.min.js`/`app.js`; verify raycaster-picked pixels visually match the rendered square at default and zoomed-in levels on both standard and HiDPI displays
+- [x] 5.5 Manual QA pass on desktop and touch devices confirming: fullscreen toggle works end-to-end, 3D and 2D zoom are smooth and bounded, and painted pixels align 1:1 with the texture grid with no blur or offset
+
+## 6. Frontend: Pixel Grid Line Toggle
+
+- [x] 6.1 Add a "Grade de Pixels" toggle button to the editor UI in `index.html`; wire it in `app.js` to a `gridEnabled` state, redrawing `render2DSheet()` and re-syncing the 3D texture on toggle
+- [x] 6.2 Draw grid lines on pixel boundaries in `render2DSheet()` (`app.js`) when `gridEnabled` is true, scaled to the current zoom, without altering `textureCanvas`
+- [x] 6.3 Build a grid-overlaid display canvas for the 3D viewport (copy of `textureCanvas` plus 1px lines per texel) and pass it to `viewport3D.setTexture()` only when `gridEnabled` is true; verify `textureCanvas` itself stays untouched so PNG export and `.mcpack` generation are unaffected
+- [x] 6.4 Manual QA: toggle grid on/off in both 3D and 2D views at multiple zoom levels, and confirm exported PNG/`.mcpack` have no grid lines baked in

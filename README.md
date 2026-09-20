@@ -9,6 +9,19 @@
 
 ---
 
+## ✨ Novidades
+
+O `mcskin` ganhou um modo web completo com um **editor de skins 3D e 2D embutido no navegador**, sem precisar instalar nada além do próprio binário:
+
+- 🎨 **Criador de Skins 3D e 2D**: edite skins diretamente no navegador, num boneco 3D interativo ou numa folha 2D desenrolada, com sincronização em tempo real entre as duas visões.
+- 🖥️ **Tela Cheia**: expanda o editor para ocupar a tela inteira e ganhar mais espaço de desenho em qualquer aparelho.
+- 🔍 **Zoom de Precisão**: controles de zoom (botões, roda do mouse e pinça no toque) tanto no boneco 3D quanto na folha 2D, para enxergar e pintar pixel por pixel.
+- 🔲 **Grade de Pixels**: um botão liga/desliga linhas finas nas fronteiras de cada pixel nas duas visões, facilitando encontrar o pixel certo antes de pintar.
+- 🧵 **Suporte a Skins Clássicas 64x32**: o conversor e o editor agora aceitam nativamente o formato legado do Minecraft pré-1.8, com espelhamento automático dos membros.
+- 📦 **Editor com Exportação Direta**: baixe a skin editada como PNG ou gere o `.mcpack` pronto para instalar com um único clique, sem sair do navegador.
+
+---
+
 ## 🎯 Proposta & Missão
 
 O `mcskin` nasceu para eliminar as barreiras na customização de skins no Minecraft Bedrock:
@@ -40,6 +53,9 @@ mcskin [opções] <caminho/para/skin.png>
 | `--slim` | Restringe a geração apenas ao modelo fino (braços de 3px / Alex). |
 | `--force` | Sobrescreve o arquivo `.mcpack` de saída se ele já existir (padrão: `true`). |
 | `-i`, `--input` | Informa o caminho do arquivo PNG de entrada via parâmetro nomeado. |
+| `-w`, `--web` | Inicia o servidor web local com o Conversor e o Criador de Skins 3D/2D (ver seção "Modo Web & Editor de Skins" abaixo). |
+| `-p`, `--port` | Define a porta do servidor web (padrão: `8080`). Usado apenas com `--web`. |
+| `--no-browser` | No modo web, não abre o navegador padrão automaticamente. |
 | `-v`, `--version` | Exibe a versão, commit e data de compilação do binário. |
 | `-h`, `--help` | Exibe a mensagem de ajuda com todos os parâmetros. |
 
@@ -88,6 +104,46 @@ Successfully converted "guerreiro" to Bedrock skin pack [both (classic & slim)]:
 ```cmd
 bin\mcskin.exe C:\Users\SeuUsuario\Imagens\skin_personalizada.png
 ```
+
+---
+
+## 🎨 Modo Web & Editor de Skins (3D e 2D)
+
+Além da conversão via linha de comando, o `mcskin` inclui um **servidor web local** ("CRIE SKINS LEGAIS") com um conversor de PNG e um editor de skins completo, pensado para crianças (6+) e para uso rápido em qualquer tablet, celular ou PC da mesma rede Wi-Fi.
+
+```bash
+# Inicia o servidor web na porta padrão (8080) e abre o navegador automaticamente
+./bin/mcskin --web
+
+# Escolhe outra porta e não abre o navegador sozinho
+./bin/mcskin --web --port 8090 --no-browser
+```
+
+> No Windows, executar `mcskin.exe` sem nenhum argumento já inicia o modo web automaticamente.
+
+### 📦 Tela 1 — Conversor de Skin
+
+Arraste um PNG existente (64x64, 64x32 clássico ou 128x128) e gere o `.mcpack` na hora. Um QR Code local permite abrir a mesma tela direto no celular ou tablet, sem cabos.
+
+<img src="docs/screenshots/conversor-skin.png" alt="Tela do Conversor de Skin" width="420">
+
+### 🧊 Tela 2 — Criador de Skins 3D
+
+Pinte diretamente sobre um boneco 3D interativo, com raycasting pixel-a-pixel, paletas rápidas do Minecraft, ferramentas de Lápis/Balde/Borracha/Pipeta, Desfazer/Refazer, isolamento de partes do corpo e camadas (Corpo Base vs. Camada 3D/Jaqueta). A câmera é centralizada automaticamente para mostrar o boneco inteiro, com controles de **zoom** e um botão de **Tela Cheia** para aproveitar toda a tela do aparelho.
+
+<img src="docs/screenshots/editor-3d-boneco.jpg" alt="Editor 3D do boneco no navegador" width="640">
+
+### 📜 Tela 3 — Folha 2D Desenrolada (com Grade de Pixels)
+
+Para precisão máxima, a folha 2D desenrolada mostra cada seção do corpo (Cabeça, Tronco, Braços, Pernas) já rotulada, sincronizada em tempo real com o boneco 3D. Ative a **Grade de Pixels** para ver exatamente onde cada pixel começa e termina antes de pintar.
+
+<img src="docs/screenshots/editor-2d-folha-grade.jpg" alt="Folha 2D desenrolada com grade de pixels ativada" width="640">
+
+### 🖥️ Tela Cheia + Zoom em Ação
+
+Com um clique, o editor expande para tela cheia e a câmera do boneco 3D é redimensionada automaticamente para ocupar o máximo de espaço disponível, mantendo o personagem inteiro e centralizado.
+
+<img src="docs/screenshots/editor-tela-cheia.jpg" alt="Editor em modo tela cheia" width="640">
 
 ---
 
@@ -151,6 +207,7 @@ O arquivo `.mcpack` gerado é um arquivo ZIP válido em conformidade com o padr�
 - **Formato**: PNG válido (RGBA).
 - **Dimensões aceitas**:
   - `64x64` pixels (padrão moderno do Minecraft).
+  - `64x32` pixels (formato clássico, legado do Minecraft pré-1.8).
   - `128x128` pixels (skins de alta resolução em conformidade Bedrock).
 
 ---

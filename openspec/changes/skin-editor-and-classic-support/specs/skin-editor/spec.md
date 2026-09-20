@@ -16,12 +16,53 @@ The editor SHALL provide an interactive 3D character viewport rendered with an e
 - **WHEN** the user clicks any of the quick orientation buttons (Frente, Costas, Lado Esquerdo, Lado Direito, Cima)
 - **THEN** the camera animates smoothly or snaps directly to the requested perspective
 
+#### Scenario: Pixel-accurate rendering and picking
+- **WHEN** the 3D viewport renders the character texture or the user paints via raycasting, at any zoom level
+- **THEN** the canvas render resolution accounts for the device pixel ratio and the texture uses nearest-neighbor sampling, so each texture pixel appears as one sharp, correctly aligned square and the pixel actually painted always matches the square visually under the pointer
+
+### Requirement: Zoom Controls for Precision Painting
+The editor SHALL provide zoom controls for both the 3D viewport and the 2D unwrapped sheet, allowing the user to magnify the view enough to see and paint individual texture pixels precisely.
+
+#### Scenario: Zooming the 3D viewport
+- **WHEN** the user drags the zoom slider, presses the zoom +/- buttons, scrolls the mouse wheel, or pinches on a touchscreen over the 3D viewport
+- **THEN** the camera distance changes smoothly within a clamped min/max range, without clipping through the model or reversing orientation
+
+#### Scenario: Zooming the 2D unwrapped sheet
+- **WHEN** the user presses the zoom +/- buttons, scrolls the mouse wheel, or pinches on a touchscreen over the 2D sheet
+- **THEN** the sheet magnification increases or decreases inside a scrollable container while every texture pixel keeps rendering as a single, correctly aligned square (no blur, no distortion, no offset between adjacent pixels)
+
+### Requirement: Pixel Grid Line Toggle
+The editor SHALL provide a single toggle button that shows or hides pixel-boundary grid lines on both the 3D viewport and the 2D unwrapped sheet, to help the user distinguish and paint individual texture pixels.
+
+#### Scenario: Enabling the pixel grid
+- **WHEN** the user clicks the grid toggle button while it is off
+- **THEN** thin grid lines are drawn along every texture pixel boundary on the 2D sheet and overlaid on the 3D model's texture, without altering the underlying skin pixel data used for PNG export or `.mcpack` generation
+
+#### Scenario: Disabling the pixel grid
+- **WHEN** the user clicks the grid toggle button while it is on
+- **THEN** the grid lines are removed from both views immediately, restoring the plain texture display
+
+### Requirement: Fullscreen Editing Mode
+The editor SHALL allow the user to expand the editor into fullscreen to maximize available drawing space on any device.
+
+#### Scenario: Entering fullscreen
+- **WHEN** the user clicks the fullscreen toggle button
+- **THEN** the editor requests fullscreen on the editor container, hiding non-essential chrome so the 3D viewport and 2D sheet occupy the maximum available screen space
+
+#### Scenario: Exiting fullscreen
+- **WHEN** the user clicks the fullscreen toggle again, presses Esc, or the browser exits fullscreen for any reason
+- **THEN** the editor detects the fullscreen change and restores the normal layout without losing the current texture or tool state
+
 ### Requirement: Unwrapped 2D Sheet Painting Mode
 The editor SHALL provide an unwrapped 2D texture sheet view displaying clearly labeled sections (Cabeça, Tronco, Braços, Pernas) for high-precision pixel painting on touchscreens.
 
 #### Scenario: Switching to 2D unwrapped sheet view
 - **WHEN** the user selects the 2D Sheet mode tab
 - **THEN** the editor renders the magnified 2D pixel grid with labeled body sections, synchronizing all edits bidirectionally with the 3D model
+
+#### Scenario: Pixel-accurate grid at any zoom level
+- **WHEN** the 2D sheet is rendered, whether at default size or zoomed in
+- **THEN** each rendered grid square corresponds to exactly one texture pixel with grid lines drawn precisely on pixel boundaries, so a tap or click always paints the pixel visually under the pointer
 
 ### Requirement: Child-Friendly Touch Ergonomics and Drawing Tools
 The editor SHALL provide touch-optimized controls designed for children aged 6 and older, including a dedicated "Pintar" vs "Girar" mode switch, essential drawing tools, and Minecraft-themed quick palettes.

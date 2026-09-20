@@ -56,7 +56,14 @@ Strict adherence to Test-Driven Development:
 3. **REFACTOR Phase**:
    - Clean up code, verify formatting with `go fmt ./...` and `go vet ./...`.
 
-### 4. AI Agent Governance & Bounded Execution Loops
+### 4. Fullscreen, Zoom, and Pixel-Accurate Rendering
+- **Fullscreen**: Use the standard Fullscreen API (`element.requestFullscreen()` / vendor-prefixed fallbacks) on the `.editor-card` container, toggled by a topbar button. Listen for `fullscreenchange` (and `Esc`) to restore the normal layout and re-flow the 3D/2D canvases without losing the in-memory texture buffer or tool state.
+- **3D Viewport Zoom**: Expose the existing but currently hardcoded `Viewport.prototype.zoom` (fixed at `42`, no UI control today) through a slider/+/- buttons plus `wheel` and touch pinch handlers, clamped to a sane min/max distance so the camera never clips through the model or inverts.
+- **2D Sheet Zoom**: `render2DSheet()` today computes a single fixed `scale = cW / texW` tied to the canvas's hardcoded backing-store width (512px), with no user-adjustable magnification. Introduce a `zoomFactor` that multiplies `scale`, re-rendering into a canvas sized `texW * scale * zoomFactor` inside the already-scrollable `.canvas-2d-container`, keeping `ctx2D.imageSmoothingEnabled = false` and the existing `image-rendering: pixelated` CSS so pixels stay crisp at any zoom level.
+- **Pixel-Accuracy Root Cause**: `Viewport._initGL` already sets `TEXTURE_MIN_FILTER`/`TEXTURE_MAG_FILTER` to `gl.NEAREST`, so texture sampling itself is correct. The reported "squares that don't match pixels" comes from (a) no zoom control combined with a small fixed-size canvas, making individual 64x64/64x32/128x128 texture pixels indistinguishable on the rendered model, and (b) the WebGL canvas backing store not accounting for `devicePixelRatio`, so browsers upscale/blur the rendered frame on HiDPI screens. Fix by resizing the canvas backing store to `displayWidth * devicePixelRatio` (updating `gl.viewport` and the projection aspect ratio to match) so rendered squares and raycaster-picked pixels stay aligned 1:1 with the underlying texture at every zoom level.
+- **Pixel Grid Toggle**: `textureCanvas` remains the single pristine source of truth read by PNG export (`toDataURL`) and `.mcpack` generation (`toBlob`) — grid lines must never be baked into it. For the 2D sheet, draw grid lines directly on `editor2DCanvas` after the texture blit in `render2DSheet()`, spaced by the current `scale`. For the 3D viewport, build a separate display canvas (skin pixels copied from `textureCanvas` plus 1px grid lines drawn per texel) and feed that to `viewport3D.setTexture()` only when the toggle is on; pass `textureCanvas` directly when it is off.
+
+### 5. AI Agent Governance & Bounded Execution Loops
 - **Loop Limits**: Maximum 3 iterations on any test failure or defect remediation (`max_attempts = 3`).
 - **Halting**: Stop immediately if an identical failure repeats across 2 consecutive iterations.
 - **Automatic QA Trigger**: Upon completing implementation tasks, automatically invoke the `feature-qa-reviewer` persona to evaluate Bedrock `.mcpack` compliance, child ergonomics, and touch responsiveness.
@@ -69,3 +76,7 @@ Strict adherence to Test-Driven Development:
   - *Mitigation*: Cap the undo/redo stack at 20 snapshots using lightweight `ImageData` objects.
 - **[Risk] Browser WebGL Incompatibility on Older Hardware**: Some very old devices or embedded webviews might disable WebGL.
   - *Mitigation*: Fallback notification guiding the user to the 2D Unwrapped Sheet mode, which relies exclusively on standard Canvas 2D.
+- **[Risk] Fullscreen API Inconsistency Across Browsers/Devices**: Some mobile browsers (notably iOS Safari) restrict or omit the standard Fullscreen API.
+  - *Mitigation*: Feature-detect `requestFullscreen` support; when unavailable, fall back to a CSS-only "maximized" layout (fixed-position full-viewport overlay) that still hides non-essential chrome.
+- **[Risk] Resizing the WebGL Canvas Backing Store for DPR Regresses Performance on Low-End Devices**: Rendering at full `devicePixelRatio` (e.g. 3x on some phones) increases fragment shader workload.
+  - *Mitigation*: Clamp the effective device pixel ratio used for the canvas backing store (e.g. cap at 2x) to balance sharpness and performance.
