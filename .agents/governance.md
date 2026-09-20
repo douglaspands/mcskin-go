@@ -1,6 +1,6 @@
 # AI Agent Governance: Graph & Loop Engineering Specification
 
-This document formalizes the AI agent execution policies for the `png-to-mcpack` repository. It provides deterministic constraints for autonomous harnesses (e.g. Antigravity, Claude Code, Cursor, Copilot, Cline, Devin).
+This document formalizes the AI agent execution policies for the `png-to-mcpack` repository. It provides deterministic constraints for supported terminal harnesses: Antigravity and Claude Code.
 
 ---
 
