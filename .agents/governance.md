@@ -24,7 +24,7 @@ stateDiagram-v2
 | State | Prerequisites | Exit Condition | Invariants |
 | :--- | :--- | :--- | :--- |
 | **SpecPlanning** | User request / feature need | Planning artifacts validated by `openspec validate` | No application code may be modified during this state |
-| **RedTesting** | Plan complete, task selected | Test suite authored and verified failing | Tests must fail due to missing implementation, not syntax errors |
+| **RedTesting** | Plan complete, task selected | Test suite authored and verified failing | Tests must fail due to missing implementation, not syntax errors. All unit tests must be 100% mocked with zero integration |
 | **GreenImplementation** | Verified failing test | Test suite passes | Implement only the minimal code necessary to satisfy tests |
 | **Verification** | All package tests pass | Full suite `go test ./...` and `go build ./...` succeed | Zero regressions across existing capabilities |
 | **Completed** | Clean git status | Git commit created following Conventional Commits | All tasks marked `[x]` |
@@ -100,4 +100,28 @@ Antigravity executes `.agents/scripts/command-gate.py` on the `PreToolUse` event
 - Returns `"decision": "allow"` for Tier 1 harmless commands.
 - Returns `"decision": "deny"` with an actionable explanation for Tier 3 destructive commands.
 - Returns `"decision": "ask"` for Tier 2 commands to ensure user visibility.
+
+---
+
+## 5. Host & Environment Security Protocol
+
+To protect the host operating system and execution environment:
+
+### 5.1 Workspace Boundary Isolation
+- AI harnesses must operate strictly inside `/home/douglas/Workspace/minecraft/png-to-mcpack`.
+- Access, modification, or deletion of files outside this root (e.g. `~/.ssh`, `~/.bashrc`, `~/.config`, `/etc`, `/usr`) is strictly forbidden and blocked.
+
+### 5.2 Zero Privilege Escalation
+- Harnesses run under standard non-privileged user permissions. Commands requiring `sudo`, `su`, or modifying file ownership (`chown`, `chmod 777`) are hard-blocked.
+
+### 5.3 Process Safety & Air-Gapped Execution
+- All build and test runs must be air-gapped (no external network or socket connections).
+- Commands execute synchronously with strict timeouts (max 30s) to prevent orphan processes, hangs, or fork bombs.
+- No background daemonizing, shell hooking, crontab manipulation, or persistence mechanisms.
+
+### 5.4 Strict Unit Test Mocking Standards
+- Unit tests must be 100% isolated and pure: all I/O must be mocked using in-memory abstractions (`io.Reader`, `bytes.Buffer`, mock structs).
+- No unit test may perform persistent filesystem writes (outside ephemeral `t.TempDir()`), network I/O, or OS process execution.
+- Integration tests that verify real packaging pipelines must be explicitly segregated from unit tests.
+
 

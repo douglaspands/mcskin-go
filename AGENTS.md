@@ -51,6 +51,11 @@ You **MUST** adhere to strict TDD:
 3. **REFACTOR Phase**:
    - Clean up code, remove duplication, and optimize without breaking existing test suites.
 
+### Strict Unit Test Isolation (100% Mocked / Zero Integration)
+- **Zero External Integration**: Unit tests MUST NOT have external integration. All external dependencies, filesystem I/O, and data streams must be completely mocked using in-memory representations (`io.Reader`, `bytes.Buffer`, mock structs).
+- **No Network or OS Side-Effects**: Unit tests must never initiate network calls, spawn arbitrary external system processes, or write to persistent filesystem paths outside transient test runners (`t.TempDir()`).
+- **Segregation of Concerns**: Integration tests verifying end-to-end pipelines (e.g., `internal/converter/converter_test.go`) must be clearly segregated from pure unit tests.
+
 ---
 
 ## 4. AI Agent Governance: Graph & Loop Engineering
@@ -92,6 +97,16 @@ To guarantee safe, efficient, and bounded execution cycles:
 
 - **Requires Explicit Confirmation (Tier 2)**:
   - Any unfamiliar shell commands or network calls.
+
+### Host & Environment Security Protocol
+To guarantee the absolute protection and stability of the host environment:
+- **Sandbox Boundary Confinement**: AI harnesses must operate exclusively within the repository directory (`/home/douglas/Workspace/minecraft/png-to-mcpack`). Never read, modify, or delete files outside this directory (including `/etc`, `/usr`, `~/.ssh`, `~/.bashrc`, `~/.config`, and parent paths).
+- **Zero Privilege Escalation**: Commands invoking `sudo`, `su`, or altering file ownership/permissions (`setuid`, `chmod 777`) are strictly forbidden.
+- **Process Protection**:
+  - Commands must execute synchronously with bounded timeouts (max 30s) to prevent resource exhaustion, fork bombs, or hung processes.
+  - No background daemonizing, crontab manipulation, or persistence mechanisms.
+  - Air-gapped execution: all test suites, builds, and tooling must execute offline without outbound network requests.
+- **Filesystem Integrity**: All automated modifications must be scoped and idempotent. Destructive wildcards (`rm -rf *`, `rm -rf /`) are blocked at both prompt and mechanical gate levels.
 
 ---
 

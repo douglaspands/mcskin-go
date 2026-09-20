@@ -2,6 +2,7 @@ package pack_test
 
 import (
 	"archive/zip"
+	"bytes"
 	"io"
 	"os"
 	"path/filepath"
@@ -9,6 +10,63 @@ import (
 
 	"png-to-mcpack/internal/pack"
 )
+
+func TestWriteMCPack_InMemory(t *testing.T) {
+	var buf bytes.Buffer
+	manifestData := []byte(`{"format_version": 2}`)
+	skinsData := []byte(`{"skins": []}`)
+	langData := []byte(`skinpack.test=Test`)
+	textureData := []byte("fake-png-bytes")
+	textureFilename := "test_skin.png"
+
+	err := pack.WriteMCPack(&buf, manifestData, skinsData, langData, textureData, textureFilename)
+	if err != nil {
+		t.Fatalf("unexpected error writing in-memory mcpack: %v", err)
+	}
+
+	zr, err := zip.NewReader(bytes.NewReader(buf.Bytes()), int64(buf.Len()))
+	if err != nil {
+		t.Fatalf("failed to open in-memory zip reader: %v", err)
+	}
+
+	expectedEntries := map[string][]byte{
+		"manifest.json":    manifestData,
+		"skins.json":       skinsData,
+		"texts/en_US.lang": langData,
+		textureFilename:    textureData,
+	}
+
+	foundEntries := make(map[string]bool)
+
+	for _, file := range zr.File {
+		foundEntries[file.Name] = true
+		expectedData, exists := expectedEntries[file.Name]
+		if !exists {
+			t.Errorf("unexpected entry in zip archive: %s", file.Name)
+			continue
+		}
+
+		rc, err := file.Open()
+		if err != nil {
+			t.Fatalf("failed to open entry %s: %v", file.Name, err)
+		}
+		content, err := io.ReadAll(rc)
+		rc.Close()
+		if err != nil {
+			t.Fatalf("failed to read entry %s: %v", file.Name, err)
+		}
+
+		if string(content) != string(expectedData) {
+			t.Errorf("content mismatch for %s: expected %q, got %q", file.Name, string(expectedData), string(content))
+		}
+	}
+
+	for expected := range expectedEntries {
+		if !foundEntries[expected] {
+			t.Errorf("missing expected entry in zip: %s", expected)
+		}
+	}
+}
 
 func TestCreateMCPack(t *testing.T) {
 	tempDir := t.TempDir()
@@ -40,10 +98,10 @@ func TestCreateMCPack(t *testing.T) {
 	defer reader.Close()
 
 	expectedEntries := map[string][]byte{
-		"manifest.json":      manifestData,
-		"skins.json":         skinsData,
-		"texts/en_US.lang":   langData,
-		textureFilename:      textureData,
+		"manifest.json":    manifestData,
+		"skins.json":       skinsData,
+		"texts/en_US.lang": langData,
+		textureFilename:    textureData,
 	}
 
 	foundEntries := make(map[string]bool)

@@ -34,12 +34,30 @@ The following commands are hard-blocked by project policy. You must NEVER propos
 
 ## 2. Methodology & Architecture
 - **TDD First**: Always write tests in `*_test.go` and verify RED before implementing code (GREEN).
+- **Strict Unit Test Isolation (100% Mocked / Zero Integration)**:
+  - Unit tests MUST NOT have external integration. All external dependencies, filesystem I/O, or data streams must be mocked using in-memory representations (`io.Reader`, `bytes.Buffer`, mock structs).
+  - Unit tests must NEVER touch the network, spawn external system processes, or write to persistent filesystem paths outside transient ephemeral test runners (`t.TempDir()`).
+  - Integration tests must be strictly segregated from unit tests (e.g., dedicated integration test suites or files).
 - **Zero Dependencies**: Go standard library only.
 - **Cross-Platform**: Windows (`.exe`) and Linux paths (`filepath.ToSlash` for ZIP entries).
 
 ---
 
-## 3. Token Conservation & Proactive Skill Creation
+## 3. Host & Environment Security Protocol for AI Harnesses
+To guarantee the safety and integrity of the host machine and execution environment:
+- **Workspace Confinement**: Agents are strictly confined to the repository root (`/home/douglas/Workspace/minecraft/png-to-mcpack`). Never access, modify, or delete files outside this boundary (especially `/etc`, `/usr`, `~/.ssh`, `~/.bashrc`, `~/.config`, or other workspace directories).
+- **Zero Privilege Escalation**: Commands invoking `sudo`, `su`, or modifying system user permissions (`setuid`, `chmod 777`) are strictly prohibited and hard-blocked.
+- **Process & Resource Protection**:
+  - No background daemonizing, shell hooking, persistence mechanisms, or crontab modifications.
+  - Commands must execute synchronously with bounded timeouts (maximum 30s) to prevent hangs or resource exhaustion.
+  - Air-gapped execution: development, tests, and builds must never initiate outbound network connections.
+- **Filesystem Safety & Idempotence**:
+  - All automated writes must be scoped and idempotent.
+  - Destructive wildcards (`rm -rf *`, `rm -rf /`, `rm -rf .`) are completely blocked by policy and mechanical gates.
+
+---
+
+## 4. Token Conservation & Proactive Skill Creation
 - **Proactive Skill Proposal**: Whenever you identify a repetitive, multi-step, or verbose workflow where creating a specialized **SKILL** (`.agents/skills/<name>/SKILL.md`) would conserve context window tokens through progressive disclosure, you MUST:
   1. Clearly explain the workflow opportunity and the token savings benefit.
   2. Propose the name, scope, and structure of the recommended SKILL.
