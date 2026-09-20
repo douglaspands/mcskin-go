@@ -7,7 +7,7 @@ import { playSound } from "./fx.js";
 
 const GRID_OVERLAY_SCALE = 8;
 const ZOOM_3D_STEP = 4;
-const PAN_Y_STEP = 2;
+const PAN_Y_STEP = 4;
 const PAN_Y_MIN = -10;
 const PAN_Y_MAX = 20;
 
@@ -34,17 +34,11 @@ export function buildGridOverlayCanvas(textureCanvas, texW, texH) {
   gCtx.lineWidth = 1;
   for (let gx = 0; gx <= texW; gx++) {
     const lx = gx * scale + 0.5;
-    gCtx.beginPath();
-    gCtx.moveTo(lx, 0);
-    gCtx.lineTo(lx, gridCanvas.height);
-    gCtx.stroke();
+    gCtx.beginPath(); gCtx.moveTo(lx, 0); gCtx.lineTo(lx, gridCanvas.height); gCtx.stroke();
   }
   for (let gy = 0; gy <= texH; gy++) {
     const ly = gy * scale + 0.5;
-    gCtx.beginPath();
-    gCtx.moveTo(0, ly);
-    gCtx.lineTo(gridCanvas.width, ly);
-    gCtx.stroke();
+    gCtx.beginPath(); gCtx.moveTo(0, ly); gCtx.lineTo(gridCanvas.width, ly); gCtx.stroke();
   }
   return gridCanvas;
 }
@@ -130,37 +124,26 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
   // Floating vertical 3D zoom controls
   const setZoom = (z) => { viewport3D?.setZoom(z); };
   document.getElementById("btnZoom3DIn")?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    if (viewport3D) setZoom(viewport3D.zoom - ZOOM_3D_STEP);
-    playSound("click");
+    e.stopPropagation(); if (viewport3D) setZoom(viewport3D.zoom - ZOOM_3D_STEP); playSound("click");
   });
   document.getElementById("btnZoom3DOut")?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    if (viewport3D) setZoom(viewport3D.zoom + ZOOM_3D_STEP);
-    playSound("click");
+    e.stopPropagation(); if (viewport3D) setZoom(viewport3D.zoom + ZOOM_3D_STEP); playSound("click");
   });
   document.getElementById("btnZoom3DReset")?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    viewport3D?.resetCamera();
-    playSound("click");
+    e.stopPropagation(); viewport3D?.resetCamera(); playSound("click");
   });
 
-  // Discrete vertical height adjustment (Subir / Descer) — shifts the camera
-  // look-at target's Y component, same pattern focusPart() already uses.
+  // Discrete vertical height adjustment (Subir / Descer) — shifts camera look-at Y target
   const panY = (delta) => {
     if (!viewport3D) return;
     viewport3D.target[1] = Math.max(PAN_Y_MIN, Math.min(PAN_Y_MAX, viewport3D.target[1] + delta));
     viewport3D.render();
   };
   document.getElementById("btnPanUp")?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    panY(PAN_Y_STEP);
-    playSound("click");
+    e.stopPropagation(); panY(-PAN_Y_STEP); playSound("click");
   });
   document.getElementById("btnPanDown")?.addEventListener("click", (e) => {
-    e.stopPropagation();
-    panY(-PAN_Y_STEP);
-    playSound("click");
+    e.stopPropagation(); panY(PAN_Y_STEP); playSound("click");
   });
 
   // Mannequin Widget body part focusing
@@ -182,8 +165,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
   // Snap view buttons
   document.querySelectorAll(".btn-snap").forEach((btn) => {
     btn.addEventListener("click", () => {
-      const dir = btn.getAttribute("data-dir");
-      viewport3D?.snapTo(dir);
+      viewport3D?.snapTo(btn.getAttribute("data-dir"));
       playSound("click");
     });
   });
@@ -193,18 +175,27 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
   let lastX = 0, lastY = 0;
   let pinchStartDist = null, pinchStartZoom = null;
 
+  const stage3D = document.getElementById("stage3D");
+  stage3D?.addEventListener("contextmenu", (e) => e.preventDefault());
+  editor3DCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
+
+  const isInteractiveEl = (t) => t?.closest?.("button, .mannequin-widget, .zoom-vertical-controls, .floating-mode-pill, .color-bottom-sheet");
+
   const getDistance = (touches) => {
     const dx = touches[0].clientX - touches[1].clientX;
     const dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
   };
 
-  editor3DCanvas.addEventListener("wheel", (e) => {
+  const onWheel = (e) => {
     e.preventDefault();
     if (viewport3D) setZoom(viewport3D.zoom + (e.deltaY > 0 ? ZOOM_3D_STEP * 0.6 : -ZOOM_3D_STEP * 0.6));
-  }, { passive: false });
+  };
+  editor3DCanvas.addEventListener("wheel", onWheel, { passive: false });
+  stage3D?.addEventListener("wheel", onWheel, { passive: false });
 
   const handlePointerStart = (e) => {
+    if (isInteractiveEl(e.target)) return;
     isPointerDown = true;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
@@ -232,11 +223,15 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
       const dy = clientY - lastY;
       lastX = clientX;
       lastY = clientY;
-      viewport3D.rotY += (dx / rect.width) * 4.0;
-      viewport3D.rotX += (dy / rect.height) * 4.0;
-      viewport3D.rotX = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, viewport3D.rotX));
-      viewport3D.setHoverPixel(null);
-      viewport3D.render();
+      if (e.buttons === 2 || e.shiftKey) {
+        panY((dy / (rect.height || 1)) * 24);
+      } else {
+        viewport3D.rotY += (dx / rect.width) * 4.0;
+        viewport3D.rotX += (dy / rect.height) * 4.0;
+        viewport3D.rotX = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, viewport3D.rotX));
+        viewport3D.setHoverPixel(null);
+        viewport3D.render();
+      }
     } else if (getTouchMode() === "paint" && viewport3D) {
       const hit = viewport3D.pickPixel(clientX, clientY, getCurrentLayer() === "overlay");
       if (hit) {
@@ -251,6 +246,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
     viewport3D?.setHoverPixel(null);
   };
 
+  stage3D?.addEventListener("mousedown", handlePointerStart);
   editor3DCanvas.addEventListener("mousedown", handlePointerStart);
   window.addEventListener("mousemove", handlePointerMove);
   window.addEventListener("mouseup", handlePointerEnd);
@@ -262,7 +258,8 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
   });
   editor3DCanvas.addEventListener("mouseleave", () => { viewport3D?.setHoverPixel(null); });
 
-  editor3DCanvas.addEventListener("touchstart", (e) => {
+  const onTouchStart = (e) => {
+    if (isInteractiveEl(e.target)) return;
     if (e.cancelable) e.preventDefault();
     if (e.touches.length === 2) {
       isPointerDown = false;
@@ -271,7 +268,10 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
       return;
     }
     handlePointerStart(e);
-  }, { passive: false });
+  };
+
+  stage3D?.addEventListener("touchstart", onTouchStart, { passive: false });
+  editor3DCanvas.addEventListener("touchstart", onTouchStart, { passive: false });
 
   editor3DCanvas.addEventListener("touchmove", (e) => {
     if (e.cancelable) e.preventDefault();

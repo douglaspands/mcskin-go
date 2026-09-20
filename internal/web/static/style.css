@@ -254,7 +254,7 @@
       box-shadow: var(--pixel-shadow);
       border-radius: 6px;
       padding: 10px;
-      display: flex;
+      display: none;
       flex-direction: column;
       gap: 12px;
       transition: all 0.25s ease;
@@ -1167,6 +1167,13 @@
       border-color: var(--mc-diamond);
     }
 
+    .btn-toggle-grid.active {
+      background: var(--mc-green);
+      border-color: #5da632;
+      color: #fff;
+      box-shadow: inset 1px 1px 0 #7cd332;
+    }
+
     /* Faixa de Dica Contextual Diretamente Acima dos Botões Inferiores */
     .dock-hint-strip {
       width: 100%;
@@ -1290,7 +1297,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      pointer-events: none;
+      pointer-events: auto;
     }
 
     .character-steve-model {
@@ -1860,6 +1867,7 @@
       left: 0;
       overflow: hidden;
       z-index: 1;
+      pointer-events: auto;
     }
 
     #editor3DCanvas {
@@ -1868,6 +1876,7 @@
       display: block;
       outline: none;
       touch-action: none;
+      pointer-events: auto;
     }
 
     .converter-view-wrap.active {
@@ -1878,8 +1887,12 @@
       display: flex !important;
     }
 
-    /* Breakpoints Responsivos Canônicos */
+    /* Breakpoints Responsivos Canônicos (Mobile, Tablet e Desktop) */
     @media (max-width: 640px) {
+      .viewport-container {
+        max-width: 100%;
+        padding: 0 4px;
+      }
       .header-tabs {
         display: none !important;
       }
@@ -1892,18 +1905,44 @@
       .converter-responsive-grid {
         grid-template-columns: 1fr !important;
       }
+      .editor-file-actions-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
     }
 
-    @media (min-width: 641px) {
+    @media (min-width: 641px) and (max-width: 1023px) {
+      .viewport-container {
+        max-width: 860px;
+        padding: 0 8px;
+        margin: 0 auto;
+      }
       .header-tabs {
         display: flex;
       }
+      #btnMenuText {
+        display: none !important;
+      }
+      .desktop-sidebar-menu {
+        display: none !important;
+      }
       .converter-responsive-grid {
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1.05fr 1fr !important;
+        align-items: start;
+      }
+      .editor-file-actions-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
       }
     }
 
     @media (min-width: 1024px) {
+      .viewport-container {
+        max-width: 1240px;
+        padding: 0 10px;
+        margin: 0 auto;
+      }
+      .header-tabs {
+        display: flex;
+      }
       #btnMenuText {
         display: inline;
       }
@@ -1915,5 +1954,12 @@
       }
       .compact-header {
         margin: 6px 0 8px 0;
+      }
+      .converter-responsive-grid {
+        grid-template-columns: 1.05fr 1fr !important;
+        align-items: start;
+      }
+      .editor-file-actions-grid {
+        grid-template-columns: repeat(4, 1fr) !important;
       }
     }

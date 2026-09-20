@@ -203,40 +203,44 @@ export function render2DSheet() {
  */
 export function initEditor2D({ getToolState, onPickColor }) {
   const canvas = document.getElementById("editor2DCanvas");
-  if (!canvas) return;
+  if (canvas) {
+    const setZoom = (z) => {
+      zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, z));
+      const slider = document.getElementById("zoom2DSlider");
+      if (slider) slider.value = zoomFactor2D;
+      render2DSheet();
+    };
 
-  const setZoom = (z) => {
-    zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, z));
-    const slider = document.getElementById("zoom2DSlider");
-    if (slider) slider.value = zoomFactor2D;
-    render2DSheet();
-  };
+    document.getElementById("zoom2DSlider")?.addEventListener("input", (e) => setZoom(parseFloat(e.target.value)));
+    document.getElementById("btnZoom2DIn")?.addEventListener("click", () => { setZoom(zoomFactor2D + ZOOM_2D_STEP); playSound("click"); });
+    document.getElementById("btnZoom2DOut")?.addEventListener("click", () => { setZoom(zoomFactor2D - ZOOM_2D_STEP); playSound("click"); });
 
-  document.getElementById("zoom2DSlider")?.addEventListener("input", (e) => setZoom(parseFloat(e.target.value)));
-  document.getElementById("btnZoom2DIn")?.addEventListener("click", () => { setZoom(zoomFactor2D + ZOOM_2D_STEP); playSound("click"); });
-  document.getElementById("btnZoom2DOut")?.addEventListener("click", () => { setZoom(zoomFactor2D - ZOOM_2D_STEP); playSound("click"); });
+    let isDrawing = false;
+    const getCoord = (e) => {
+      const rect = canvas.getBoundingClientRect(), cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: Math.floor(((cx - rect.left) / rect.width) * texW), y: Math.floor(((cy - rect.top) / rect.height) * texH) };
+    };
+
+    const handleStart = (e) => { isDrawing = true; lastPaintedCoord = null; pushUndo(); const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); };
+    const handleMove = (e) => { if (isDrawing) { const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); } };
+    const handleEnd = () => { isDrawing = false; lastPaintedCoord = null; };
+
+    canvas.addEventListener("mousedown", handleStart); window.addEventListener("mousemove", handleMove); window.addEventListener("mouseup", handleEnd);
+    canvas.addEventListener("touchstart", (e) => { if (e.cancelable) e.preventDefault(); handleStart(e); }, { passive: false });
+    canvas.addEventListener("touchmove", (e) => { if (e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
+    canvas.addEventListener("touchend", handleEnd);
+  }
+
   document.getElementById("btnToggleGrid")?.addEventListener("click", () => {
     gridEnabled = !gridEnabled;
     document.getElementById("btnToggleGrid")?.classList.toggle("active", gridEnabled);
     syncTexture(); playSound("click");
   });
 
-  let isDrawing = false;
-  const getCoord = (e) => {
-    const rect = canvas.getBoundingClientRect(), cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: Math.floor(((cx - rect.left) / rect.width) * texW), y: Math.floor(((cy - rect.top) / rect.height) * texH) };
-  };
-
-  const handleStart = (e) => { isDrawing = true; lastPaintedCoord = null; pushUndo(); const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); };
-  const handleMove = (e) => { if (isDrawing) { const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); } };
-  const handleEnd = () => { isDrawing = false; lastPaintedCoord = null; };
-
-  canvas.addEventListener("mousedown", handleStart); window.addEventListener("mousemove", handleMove); window.addEventListener("mouseup", handleEnd);
-  canvas.addEventListener("touchstart", (e) => { if (e.cancelable) e.preventDefault(); handleStart(e); }, { passive: false });
-  canvas.addEventListener("touchmove", (e) => { if (e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
-  canvas.addEventListener("touchend", handleEnd);
   document.getElementById("btnUndo")?.addEventListener("click", undo);
   document.getElementById("btnRedo")?.addEventListener("click", redo);
+  document.getElementById("btnUndoIcon")?.addEventListener("click", undo);
+  document.getElementById("btnRedoIcon")?.addEventListener("click", redo);
 
   document.getElementById("btnDownloadPng")?.addEventListener("click", () => {
     promptSkinName((name) => {
