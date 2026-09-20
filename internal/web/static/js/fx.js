@@ -22,15 +22,15 @@ export function playSound(type) {
     if (type === "click") {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
-      osc.type = "square";
-      osc.frequency.setValueAtTime(420, now);
-      osc.frequency.exponentialRampToValueAtTime(840, now + 0.06);
-      gain.gain.setValueAtTime(0.12, now);
-      gain.gain.linearRampToValueAtTime(0.01, now + 0.06);
+      osc.type = "triangle";
+      osc.frequency.setValueAtTime(520, now);
+      osc.frequency.exponentialRampToValueAtTime(180, now + 0.035);
+      gain.gain.setValueAtTime(0.04, now);
+      gain.gain.linearRampToValueAtTime(0.001, now + 0.035);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       osc.start(now);
-      osc.stop(now + 0.06);
+      osc.stop(now + 0.035);
     } else if (type === "success") {
       const melody = [
         { f: 523.25, t: 0.00 }, // C5
