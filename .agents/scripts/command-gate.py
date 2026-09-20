@@ -37,6 +37,7 @@ def evaluate_command(cmd: str):
         r'^git\s+(?:status|diff|log|show|branch|add|commit|rev-parse|check-ignore)\b',
         r'^(?:ls|cat|head|tail|grep|find|which|stat|file|unzip|mkdir|touch)\b',
         r'^rm\s+-rf\s+(?:bin|files/\*\.mcpack|/tmp/.*)\b',
+        r'^python3\s+\.agents/skills/bedrock-skin-pack-verifier/scripts/verify-mcpack\.py\b',
     ]
 
     # Split compound commands separated by && or ;
