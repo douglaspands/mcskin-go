@@ -1,0 +1,56 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Run Tests
+        run: go test -v ./...
+
+      - name: Build and Package Release Assets
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
+          LDFLAGS="-s -w -X main.version=${TAG} -X main.commit=${GITHUB_SHA} -X main.date=${BUILD_DATE}"
+
+          mkdir -p dist build-linux build-windows
+
+          # Build Linux amd64
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o build-linux/png-to-mcpack ./cmd/png-to-mcpack
+          cp README.md build-linux/
+          tar -czf "dist/png-to-mcpack_${TAG}_linux_amd64.tar.gz" -C build-linux png-to-mcpack README.md
+
+          # Build Windows amd64
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o build-windows/png-to-mcpack.exe ./cmd/png-to-mcpack
+          cp README.md build-windows/
+          (cd build-windows && zip "../dist/png-to-mcpack_${TAG}_windows_amd64.zip" png-to-mcpack.exe README.md)
+
+          # Generate SHA256 Checksums
+          (cd dist && sha256sum png-to-mcpack_${TAG}_linux_amd64.tar.gz png-to-mcpack_${TAG}_windows_amd64.zip > checksums.txt)
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.tar.gz
+            dist/*.zip
+            dist/checksums.txt
+          generate_release_notes: true

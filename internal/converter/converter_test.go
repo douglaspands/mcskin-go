@@ -3,13 +3,17 @@ package converter_test
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/json"
 	"image"
 	"image/color"
 	"image/png"
+	"io"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
+	"png-to-mcpack/internal/bedrock"
 	"png-to-mcpack/internal/converter"
 )
 
@@ -29,7 +33,26 @@ func writeTestSkinFile(t *testing.T, path string, width, height int) {
 	}
 }
 
-func TestConvert_SameDirectoryAndBasename(t *testing.T) {
+func readZipEntry(t *testing.T, zr *zip.ReadCloser, name string) []byte {
+	for _, f := range zr.File {
+		if f.Name == name {
+			rc, err := f.Open()
+			if err != nil {
+				t.Fatalf("failed to open zip entry %s: %v", name, err)
+			}
+			defer rc.Close()
+			data, err := io.ReadAll(rc)
+			if err != nil {
+				t.Fatalf("failed to read zip entry %s: %v", name, err)
+			}
+			return data
+		}
+	}
+	t.Fatalf("zip entry not found: %s", name)
+	return nil
+}
+
+func TestConvert_DefaultDualModel(t *testing.T) {
 	tempDir := t.TempDir()
 	skinPath := filepath.Join(tempDir, "player_skin.png")
 	writeTestSkinFile(t, skinPath, 64, 64)
@@ -38,7 +61,6 @@ func TestConvert_SameDirectoryAndBasename(t *testing.T) {
 
 	res, err := converter.Convert(converter.Options{
 		InputPath: skinPath,
-		Slim:      false,
 		Overwrite: true,
 	})
 	if err != nil {
@@ -47,6 +69,9 @@ func TestConvert_SameDirectoryAndBasename(t *testing.T) {
 
 	if res.OutputPath != expectedMcpackPath {
 		t.Fatalf("expected output path %q, got %q", expectedMcpackPath, res.OutputPath)
+	}
+	if res.Model != bedrock.ModelModeBoth {
+		t.Errorf("expected result model to be %q, got %q", bedrock.ModelModeBoth, res.Model)
 	}
 
 	info, err := os.Stat(expectedMcpackPath)
@@ -64,27 +89,95 @@ func TestConvert_SameDirectoryAndBasename(t *testing.T) {
 	}
 	defer zr.Close()
 
-	hasManifest := false
-	hasSkins := false
-	hasLang := false
-	hasTexture := false
-
-	for _, f := range zr.File {
-		switch f.Name {
-		case "manifest.json":
-			hasManifest = true
-		case "skins.json":
-			hasSkins = true
-		case "texts/en_US.lang":
-			hasLang = true
-		case "player_skin.png":
-			hasTexture = true
-		}
+	skinsBytes := readZipEntry(t, zr, "skins.json")
+	var skinsCfg bedrock.SkinsConfig
+	if err := json.Unmarshal(skinsBytes, &skinsCfg); err != nil {
+		t.Fatalf("failed to unmarshal skins.json: %v", err)
 	}
 
-	if !hasManifest || !hasSkins || !hasLang || !hasTexture {
-		t.Fatalf("mcpack archive missing required entries: manifest=%v, skins=%v, lang=%v, texture=%v",
-			hasManifest, hasSkins, hasLang, hasTexture)
+	if len(skinsCfg.Skins) != 2 {
+		t.Fatalf("expected 2 skin entries in dual-model pack, got %d", len(skinsCfg.Skins))
+	}
+	if skinsCfg.Skins[0].Geometry != "geometry.humanoid.custom" {
+		t.Errorf("expected first skin geometry classic, got %s", skinsCfg.Skins[0].Geometry)
+	}
+	if skinsCfg.Skins[1].Geometry != "geometry.humanoid.customSlim" {
+		t.Errorf("expected second skin geometry slim, got %s", skinsCfg.Skins[1].Geometry)
+	}
+	if skinsCfg.Skins[0].Texture != "player_skin.png" || skinsCfg.Skins[1].Texture != "player_skin.png" {
+		t.Errorf("both skins should reference player_skin.png")
+	}
+
+	langBytes := readZipEntry(t, zr, "texts/en_US.lang")
+	langStr := string(langBytes)
+	if !strings.Contains(langStr, "player_skin_classic") || !strings.Contains(langStr, "player_skin_slim") {
+		t.Errorf("expected lang to contain classic and slim entries, got: %s", langStr)
+	}
+}
+
+func TestConvert_SingleModelOverrides(t *testing.T) {
+	tempDir := t.TempDir()
+	skinPath := filepath.Join(tempDir, "override.png")
+	writeTestSkinFile(t, skinPath, 64, 64)
+
+	// Test Classic override
+	resClassic, err := converter.Convert(converter.Options{
+		InputPath: skinPath,
+		Model:     bedrock.ModelModeClassic,
+		Overwrite: true,
+	})
+	if err != nil {
+		t.Fatalf("unexpected classic conversion error: %v", err)
+	}
+	if resClassic.Model != bedrock.ModelModeClassic {
+		t.Errorf("expected model %q, got %q", bedrock.ModelModeClassic, resClassic.Model)
+	}
+
+	zrClassic, err := zip.OpenReader(resClassic.OutputPath)
+	if err != nil {
+		t.Fatalf("failed to open mcpack: %v", err)
+	}
+	defer zrClassic.Close()
+
+	var skinsCfgClassic bedrock.SkinsConfig
+	if err := json.Unmarshal(readZipEntry(t, zrClassic, "skins.json"), &skinsCfgClassic); err != nil {
+		t.Fatalf("failed to unmarshal skins.json: %v", err)
+	}
+	if len(skinsCfgClassic.Skins) != 1 {
+		t.Fatalf("expected 1 skin entry for classic override, got %d", len(skinsCfgClassic.Skins))
+	}
+	if skinsCfgClassic.Skins[0].Geometry != "geometry.humanoid.custom" {
+		t.Errorf("expected classic geometry, got %s", skinsCfgClassic.Skins[0].Geometry)
+	}
+
+	// Test Slim override
+	resSlim, err := converter.Convert(converter.Options{
+		InputPath: skinPath,
+		Model:     bedrock.ModelModeSlim,
+		Overwrite: true,
+	})
+	if err != nil {
+		t.Fatalf("unexpected slim conversion error: %v", err)
+	}
+	if resSlim.Model != bedrock.ModelModeSlim {
+		t.Errorf("expected model %q, got %q", bedrock.ModelModeSlim, resSlim.Model)
+	}
+
+	zrSlim, err := zip.OpenReader(resSlim.OutputPath)
+	if err != nil {
+		t.Fatalf("failed to open mcpack: %v", err)
+	}
+	defer zrSlim.Close()
+
+	var skinsCfgSlim bedrock.SkinsConfig
+	if err := json.Unmarshal(readZipEntry(t, zrSlim, "skins.json"), &skinsCfgSlim); err != nil {
+		t.Fatalf("failed to unmarshal skins.json: %v", err)
+	}
+	if len(skinsCfgSlim.Skins) != 1 {
+		t.Fatalf("expected 1 skin entry for slim override, got %d", len(skinsCfgSlim.Skins))
+	}
+	if skinsCfgSlim.Skins[0].Geometry != "geometry.humanoid.customSlim" {
+		t.Errorf("expected slim geometry, got %s", skinsCfgSlim.Skins[0].Geometry)
 	}
 }
 

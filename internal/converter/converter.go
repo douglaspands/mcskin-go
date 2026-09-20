@@ -17,7 +17,8 @@ import (
 // Options holds parameters for a conversion execution.
 type Options struct {
 	InputPath string
-	Slim      bool
+	Model     bedrock.ModelMode // Defaults to ModelModeBoth if empty
+	Slim      bool              // Kept for backwards compatibility
 	Overwrite bool
 }
 
@@ -26,6 +27,7 @@ type Result struct {
 	OutputPath string
 	OutputSize int64
 	SkinName   string
+	Model      bedrock.ModelMode
 	Slim       bool
 }
 
@@ -68,6 +70,16 @@ func Convert(opts Options) (*Result, error) {
 		return nil, fmt.Errorf("skin validation failed: %w", err)
 	}
 
+	// Resolve model mode
+	modelMode := opts.Model
+	if modelMode == "" {
+		if opts.Slim {
+			modelMode = bedrock.ModelModeSlim
+		} else {
+			modelMode = bedrock.ModelModeBoth
+		}
+	}
+
 	// Generate unique identifiers
 	headerUUID, err := bedrock.NewUUID()
 	if err != nil {
@@ -88,7 +100,7 @@ func Convert(opts Options) (*Result, error) {
 		return nil, fmt.Errorf("failed to marshal manifest: %w", err)
 	}
 
-	skinsCfg, err := bedrock.GenerateSkinsJSON(skinName, filename, opts.Slim)
+	skinsCfg, err := bedrock.GenerateSkinsJSON(skinName, filename, modelMode)
 	if err != nil {
 		return nil, fmt.Errorf("failed to build skins.json: %w", err)
 	}
@@ -97,7 +109,7 @@ func Convert(opts Options) (*Result, error) {
 		return nil, fmt.Errorf("failed to marshal skins.json: %w", err)
 	}
 
-	langBytes := []byte(bedrock.GenerateLang(skinName))
+	langBytes := []byte(bedrock.GenerateLang(skinName, modelMode))
 
 	// Package into .mcpack zip archive
 	if err := pack.CreateMCPack(outputPath, manifestBytes, skinsBytes, langBytes, textureData, filename); err != nil {
@@ -113,6 +125,7 @@ func Convert(opts Options) (*Result, error) {
 		OutputPath: outputPath,
 		OutputSize: stat.Size(),
 		SkinName:   skinName,
-		Slim:       opts.Slim,
+		Model:      modelMode,
+		Slim:       modelMode == bedrock.ModelModeSlim,
 	}, nil
 }

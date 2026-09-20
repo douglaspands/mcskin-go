@@ -125,12 +125,22 @@ def verify_mcpack(filepath: str):
                 if not skins or not isinstance(skins, list):
                     errors.append("skins.json missing skins array")
                 else:
-                    skin = skins[0]
-                    geom = skin.get("geometry", "")
-                    metadata["geometry"] = geom
-                    if geom not in ["geometry.humanoid.custom", "geometry.humanoid.customSlim"]:
-                        errors.append(f"Invalid skin geometry {geom}")
-                    metadata["skin_type"] = "slim (3px)" if "Slim" in geom else "classic (4px)"
+                    metadata["skins_count"] = len(skins)
+                    models = []
+                    for idx, skin in enumerate(skins):
+                        geom = skin.get("geometry", "")
+                        tex = skin.get("texture", "")
+                        if geom not in ["geometry.humanoid.custom", "geometry.humanoid.customSlim"]:
+                            errors.append(f"Skin #{idx} invalid geometry {geom}")
+                        if tex not in namelist:
+                            errors.append(f"Skin #{idx} references non-existent texture {tex}")
+                        models.append("slim (3px)" if "Slim" in geom else "classic (4px)")
+
+                    if len(models) > 1 and "slim (3px)" in models and "classic (4px)" in models:
+                        metadata["skin_type"] = "both (classic & slim)"
+                    elif models:
+                        metadata["skin_type"] = models[0]
+                    metadata["models"] = models
 
             # Validate localization
             if lang_data:

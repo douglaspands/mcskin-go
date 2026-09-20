@@ -4,6 +4,15 @@ import (
 	"fmt"
 )
 
+// ModelMode specifies the humanoid model configuration for the skin pack.
+type ModelMode string
+
+const (
+	ModelModeBoth    ModelMode = "both"
+	ModelModeClassic ModelMode = "classic"
+	ModelModeSlim    ModelMode = "slim"
+)
+
 // Header represents the pack header in manifest.json.
 type Header struct {
 	Name        string `json:"name"`
@@ -61,26 +70,58 @@ func GenerateManifest(packName, description, headerUUID, moduleUUID string) (*Ma
 }
 
 // GenerateSkinsJSON creates a valid Minecraft Bedrock skins.json structure.
-func GenerateSkinsJSON(skinName, textureFilename string, slim bool) (*SkinsConfig, error) {
-	geometry := "geometry.humanoid.custom"
-	if slim {
-		geometry = "geometry.humanoid.customSlim"
-	}
+func GenerateSkinsJSON(skinName, textureFilename string, mode ModelMode) (*SkinsConfig, error) {
+	var skins []SkinEntry
 
-	return &SkinsConfig{
-		Skins: []SkinEntry{
+	switch mode {
+	case ModelModeSlim:
+		skins = []SkinEntry{
 			{
 				LocalizationName: skinName,
-				Geometry:         geometry,
+				Geometry:         "geometry.humanoid.customSlim",
 				Texture:          textureFilename,
 				Type:             "free",
 			},
-		},
+		}
+	case ModelModeClassic:
+		skins = []SkinEntry{
+			{
+				LocalizationName: skinName,
+				Geometry:         "geometry.humanoid.custom",
+				Texture:          textureFilename,
+				Type:             "free",
+			},
+		}
+	default: // ModelModeBoth or empty
+		skins = []SkinEntry{
+			{
+				LocalizationName: skinName + "_classic",
+				Geometry:         "geometry.humanoid.custom",
+				Texture:          textureFilename,
+				Type:             "free",
+			},
+			{
+				LocalizationName: skinName + "_slim",
+				Geometry:         "geometry.humanoid.customSlim",
+				Texture:          textureFilename,
+				Type:             "free",
+			},
+		}
+	}
+
+	return &SkinsConfig{
+		Skins:         skins,
 		SerializeName: skinName,
 	}, nil
 }
 
 // GenerateLang creates standard Bedrock en_US localization key-value pairs.
-func GenerateLang(skinName string) string {
-	return fmt.Sprintf("skinpack.%s=%s\nskin.%s.%s=%s\n", skinName, skinName, skinName, skinName, skinName)
+func GenerateLang(skinName string, mode ModelMode) string {
+	switch mode {
+	case ModelModeSlim, ModelModeClassic:
+		return fmt.Sprintf("skinpack.%s=%s\nskin.%s.%s=%s\n", skinName, skinName, skinName, skinName, skinName)
+	default: // ModelModeBoth or empty
+		return fmt.Sprintf("skinpack.%s=%s\nskin.%s.%s_classic=%s (Classic)\nskin.%s.%s_slim=%s (Slim)\n",
+			skinName, skinName, skinName, skinName, skinName, skinName, skinName, skinName)
+	}
 }

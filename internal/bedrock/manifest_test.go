@@ -2,6 +2,7 @@ package bedrock_test
 
 import (
 	"encoding/json"
+	"strings"
 	"testing"
 
 	"png-to-mcpack/internal/bedrock"
@@ -46,11 +47,53 @@ func TestGenerateManifest(t *testing.T) {
 	}
 }
 
+func TestGenerateSkinsJSON_BothModels(t *testing.T) {
+	skinName := "custom_skin"
+	texture := "skin.png"
+
+	skinsCfg, err := bedrock.GenerateSkinsJSON(skinName, texture, bedrock.ModelModeBoth)
+	if err != nil {
+		t.Fatalf("unexpected error generating skins.json: %v", err)
+	}
+
+	if len(skinsCfg.Skins) != 2 {
+		t.Fatalf("expected 2 skin entries for dual-model pack, got %d", len(skinsCfg.Skins))
+	}
+
+	classic := skinsCfg.Skins[0]
+	if classic.LocalizationName != skinName+"_classic" {
+		t.Errorf("expected classic localization_name %q, got %q", skinName+"_classic", classic.LocalizationName)
+	}
+	if classic.Geometry != "geometry.humanoid.custom" {
+		t.Errorf("expected classic geometry 'geometry.humanoid.custom', got %q", classic.Geometry)
+	}
+	if classic.Texture != texture {
+		t.Errorf("expected classic texture %q, got %q", texture, classic.Texture)
+	}
+	if classic.Type != "free" {
+		t.Errorf("expected skin type 'free', got %q", classic.Type)
+	}
+
+	slim := skinsCfg.Skins[1]
+	if slim.LocalizationName != skinName+"_slim" {
+		t.Errorf("expected slim localization_name %q, got %q", skinName+"_slim", slim.LocalizationName)
+	}
+	if slim.Geometry != "geometry.humanoid.customSlim" {
+		t.Errorf("expected slim geometry 'geometry.humanoid.customSlim', got %q", slim.Geometry)
+	}
+	if slim.Texture != texture {
+		t.Errorf("expected slim texture %q, got %q", texture, slim.Texture)
+	}
+	if slim.Type != "free" {
+		t.Errorf("expected skin type 'free', got %q", slim.Type)
+	}
+}
+
 func TestGenerateSkinsJSON_ClassicModel(t *testing.T) {
 	skinName := "steve_skin"
 	texture := "skin.png"
 
-	skinsCfg, err := bedrock.GenerateSkinsJSON(skinName, texture, false)
+	skinsCfg, err := bedrock.GenerateSkinsJSON(skinName, texture, bedrock.ModelModeClassic)
 	if err != nil {
 		t.Fatalf("unexpected error generating skins.json: %v", err)
 	}
@@ -59,6 +102,9 @@ func TestGenerateSkinsJSON_ClassicModel(t *testing.T) {
 		t.Fatalf("expected 1 skin entry, got %d", len(skinsCfg.Skins))
 	}
 	skin := skinsCfg.Skins[0]
+	if skin.LocalizationName != skinName {
+		t.Errorf("expected localization_name %q, got %q", skinName, skin.LocalizationName)
+	}
 	if skin.Geometry != "geometry.humanoid.custom" {
 		t.Errorf("expected classic geometry 'geometry.humanoid.custom', got %q", skin.Geometry)
 	}
@@ -74,7 +120,7 @@ func TestGenerateSkinsJSON_SlimModel(t *testing.T) {
 	skinName := "alex_skin"
 	texture := "skin.png"
 
-	skinsCfg, err := bedrock.GenerateSkinsJSON(skinName, texture, true)
+	skinsCfg, err := bedrock.GenerateSkinsJSON(skinName, texture, bedrock.ModelModeSlim)
 	if err != nil {
 		t.Fatalf("unexpected error generating skins.json: %v", err)
 	}
@@ -83,32 +129,41 @@ func TestGenerateSkinsJSON_SlimModel(t *testing.T) {
 		t.Fatalf("expected 1 skin entry, got %d", len(skinsCfg.Skins))
 	}
 	skin := skinsCfg.Skins[0]
+	if skin.LocalizationName != skinName {
+		t.Errorf("expected localization_name %q, got %q", skinName, skin.LocalizationName)
+	}
 	if skin.Geometry != "geometry.humanoid.customSlim" {
 		t.Errorf("expected slim geometry 'geometry.humanoid.customSlim', got %q", skin.Geometry)
 	}
 }
 
-func TestGenerateLang(t *testing.T) {
+func TestGenerateLang_BothModels(t *testing.T) {
 	skinName := "my_skin"
-	lang := bedrock.GenerateLang(skinName)
+	lang := bedrock.GenerateLang(skinName, bedrock.ModelModeBoth)
+
+	expectedSkinPack := "skinpack.my_skin=my_skin"
+	expectedClassic := "skin.my_skin.my_skin_classic=my_skin (Classic)"
+	expectedSlim := "skin.my_skin.my_skin_slim=my_skin (Slim)"
+
+	if !strings.Contains(lang, expectedSkinPack) {
+		t.Fatalf("expected lang to contain %q, got: %s", expectedSkinPack, lang)
+	}
+	if !strings.Contains(lang, expectedClassic) {
+		t.Fatalf("expected lang to contain %q, got: %s", expectedClassic, lang)
+	}
+	if !strings.Contains(lang, expectedSlim) {
+		t.Fatalf("expected lang to contain %q, got: %s", expectedSlim, lang)
+	}
+}
+
+func TestGenerateLang_SingleModel(t *testing.T) {
+	skinName := "my_skin"
+	lang := bedrock.GenerateLang(skinName, bedrock.ModelModeClassic)
 
 	expectedSkinPack := "skinpack.my_skin=my_skin"
 	expectedSkin := "skin.my_skin.my_skin=my_skin"
 
-	if !containsSubstring(lang, expectedSkinPack) || !containsSubstring(lang, expectedSkin) {
+	if !strings.Contains(lang, expectedSkinPack) || !strings.Contains(lang, expectedSkin) {
 		t.Fatalf("expected lang to contain %q and %q, got: %s", expectedSkinPack, expectedSkin, lang)
 	}
-}
-
-func containsSubstring(s, sub string) bool {
-	return len(s) >= len(sub) && (s == sub || (len(s) > len(sub) && (s[:len(sub)] == sub || s[len(s)-len(sub):] == sub || findSub(s, sub))))
-}
-
-func findSub(s, sub string) bool {
-	for i := 0; i <= len(s)-len(sub); i++ {
-		if s[i:i+len(sub)] == sub {
-			return true
-		}
-	}
-	return false
 }

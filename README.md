@@ -9,6 +9,16 @@
 
 ---
 
+## ✨ Destaques
+
+- **Pacote Dual-Model por Padrão**: Por padrão, gera **ambos os modelos (Clássico/Steve e Slim/Alex)** dentro do mesmo arquivo `.mcpack`. Ao importar no jogo, o jogador escolhe diretamente no vestiário qual modelo prefere usar!
+- **Otimização de Armazenamento**: Os dois modelos compartilham a mesma textura PNG na raiz do pacote, evitando duplicação do tamanho do arquivo.
+- **Zero Dependências**: Construído exclusivamente com a biblioteca padrão do Go.
+- **Multiplataforma**: Binários nativos para Linux e Windows (`amd64`).
+- **Automação de Release**: Binários compactados (`.tar.gz` e `.zip`) com somas de verificação SHA256 publicados automaticamente a cada tag de versão no GitHub.
+
+---
+
 ## 🚀 Como Usar
 
 O `png-to-mcpack` foi desenvolvido para ser direto e simples: basta passar o caminho da imagem da sua skin PNG e o pacote `.mcpack` será gerado automaticamente no mesmo diretório.
@@ -23,33 +33,56 @@ png-to-mcpack [opções] <caminho/para/skin.png>
 
 | Opção | Descrição |
 | :--- | :--- |
-| `--slim` | Define o modelo com geometria humanoide fina (braços de 3px / Alex). Padrão: clássico (4px / Steve). |
+| *(sem flag)* | **Padrão:** Gera ambos os modelos (Clássico 4px e Slim 3px) no mesmo pacote. |
+| `--both` | Força explicitamente a inclusão dos dois modelos (Clássico e Slim). |
+| `--classic` | Restringe a geração apenas ao modelo clássico (braços de 4px / Steve). |
+| `--slim` | Restringe a geração apenas ao modelo fino (braços de 3px / Alex). |
 | `--force` | Sobrescreve o arquivo `.mcpack` de saída se ele já existir (padrão: `true`). |
 | `-i`, `--input` | Informa o caminho do arquivo PNG de entrada via parâmetro nomeado. |
+| `-v`, `--version` | Exibe a versão, commit e data de compilação do binário. |
 | `-h`, `--help` | Exibe a mensagem de ajuda com todos os parâmetros. |
+
+> **Nota:** As opções `--classic` e `--slim` são mutuamente exclusivas e não podem ser combinadas.
 
 ---
 
 ### Exemplos Práticos
 
-#### 1. Conversão Padrão (Modelo Clássico - Steve, braços de 4px)
+#### 1. Conversão Padrão (Ambos os Modelos: Clássico e Slim)
+
+Por padrão, quando nenhum modelo for especificado, o pacote gerará ambas as variantes:
 
 ```bash
 ./bin/png-to-mcpack minhas_skins/guerreiro.png
 ```
 
-**Resultado:**
-- O arquivo `minhas_skins/guerreiro.mcpack` é criado imediatamente na mesma pasta.
+**Saída:**
+```text
+Successfully converted "guerreiro" to Bedrock skin pack [both (classic & slim)]:
+  Output: minhas_skins/guerreiro.mcpack (2855 bytes)
+```
+- O arquivo `minhas_skins/guerreiro.mcpack` é criado imediatamente contendo as skins `guerreiro (Classic)` e `guerreiro (Slim)`.
 
-#### 2. Modelo Fino / Slim (Alex, braços de 3px)
-
-Para skins desenhadas no formato Slim (braços com 3 pixels de largura):
+#### 2. Restringir Apenas ao Modelo Clássico (Steve, braços de 4px)
 
 ```bash
-./bin/png-to-mcpack --slim minhas_skins/arqueira.png
+./bin/png-to-mcpack --classic minhas_skins/steve_custom.png
 ```
 
-#### 3. No Windows (Prompt de Comando ou PowerShell)
+#### 3. Restringir Apenas ao Modelo Fino / Slim (Alex, braços de 3px)
+
+```bash
+./bin/png-to-mcpack --slim minhas_skins/alex_custom.png
+```
+
+#### 4. Consultar Versão do Binário
+
+```bash
+./bin/png-to-mcpack --version
+# Exemplo: png-to-mcpack version v1.0.0 (commit: 9b600f4, built at: 2026-09-20T03:21:18Z)
+```
+
+#### 5. No Windows (Prompt de Comando ou PowerShell)
 
 ```cmd
 bin\png-to-mcpack.exe C:\Users\SeuUsuario\Imagens\skin_personalizada.png
@@ -69,8 +102,11 @@ Após gerar o arquivo `.mcpack`, a importação no jogo é automática:
    - Toque no arquivo e selecione **"Abrir com o Minecraft"**.
 3. **Equipando a Skin no Jogo:**
    - No menu principal do Minecraft, acesse o **Vestiário** (Dressing Room) > ícone de cabide (**Capas Clássicas**).
-   - O seu pacote com o nome da skin aparecerá na lista de capas disponíveis.
-   - Clique na skin e selecione **Equipar**!
+   - O seu pacote aparecerá na lista de capas disponíveis.
+   - Se gerado com a opção padrão (dual-model), você verá duas capas:
+     - **`<Nome> (Classic)`** (braços normais de 4 pixels)
+     - **`<Nome> (Slim)`** (braços finos de 3 pixels)
+   - Clique no modelo desejado e selecione **Equipar**!
 
 ---
 
@@ -81,10 +117,32 @@ O arquivo `.mcpack` gerado é um arquivo ZIP válido em conformidade com o padr�
 ```text
 [nome_da_skin].mcpack
 ├── manifest.json       # Manifesto com UUIDs v4 (RFC-4122) únicos para identificação do pacote
-├── skins.json          # Registro da skin e mapeamento de geometria (geometry.humanoid.custom ou customSlim)
+├── skins.json          # Registro das skins e mapeamento de geometria (classic e slim)
 ├── texts/
-│   └── en_US.lang      # Chaves de localização para exibição do nome do pacote e da skin
-└── [nome_da_skin].png  # Imagem da textura copiada para a raiz do pacote
+│   └── en_US.lang      # Chaves de localização para exibição dos nomes das skins no jogo
+└── [nome_da_skin].png  # Imagem da textura compartilhada na raiz do pacote
+```
+
+### Exemplo de `skins.json` (Dual-Model Padrão)
+
+```json
+{
+  "skins": [
+    {
+      "localization_name": "guerreiro_classic",
+      "geometry": "geometry.humanoid.custom",
+      "texture": "guerreiro.png",
+      "type": "free"
+    },
+    {
+      "localization_name": "guerreiro_slim",
+      "geometry": "geometry.humanoid.customSlim",
+      "texture": "guerreiro.png",
+      "type": "free"
+    }
+  ],
+  "serialize_name": "guerreiro"
+}
 ```
 
 ### Requisitos da Imagem de Entrada
@@ -93,6 +151,18 @@ O arquivo `.mcpack` gerado é um arquivo ZIP válido em conformidade com o padr�
 - **Dimensões aceitas**:
   - `64x64` pixels (padrão moderno do Minecraft).
   - `128x128` pixels (skins de alta resolução em conformidade Bedrock).
+
+---
+
+## 📥 Downloads das Releases (GitHub Actions CI/CD)
+
+As versões oficiais são geradas automaticamente através do workflow de integração contínua [`.github/workflows/release.yml`](.github/workflows/release.yml) sempre que uma tag de versão (`v*`) é criada:
+
+- **Linux (`amd64`)**: Arquivo `png-to-mcpack_<tag>_linux_amd64.tar.gz` contendo o executável estático e a documentação.
+- **Windows (`amd64`)**: Arquivo `png-to-mcpack_<tag>_windows_amd64.zip` contendo o `png-to-mcpack.exe` e a documentação.
+- **Integridade**: Cada release acompanha o arquivo `checksums.txt` com as somas de verificação SHA256 de todos os pacotes.
+
+Para baixar a versão mais recente, acesse a página de **[Releases no GitHub](https://github.com/douglas/png-to-mcpack/releases)**.
 
 ---
 
@@ -113,7 +183,7 @@ Esta seção é destinada a quem deseja compilar o projeto do código-fonte, rod
 O repositório inclui um `Makefile` com comandos prontos:
 
 ```bash
-# Compila os binários para Linux e Windows na pasta bin/
+# Compila os binários para Linux e Windows na pasta bin/ com injeção de versão
 make build
 
 # Compila apenas para Linux (amd64)
@@ -134,64 +204,31 @@ make clean
 
 ---
 
-### Compilação Manual (sem Make)
-
-Você pode compilar diretamente utilizando os comandos do Go:
-
-#### Para Linux (`amd64`):
-```bash
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w" -o bin/png-to-mcpack ./cmd/png-to-mcpack
-```
-
-#### Para Windows (`amd64`):
-```bash
-CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="-s -w" -o bin/png-to-mcpack.exe ./cmd/png-to-mcpack
-```
-
----
-
 ### Execução dos Testes
 
 O projeto segue rigorosamente o padrão **Test-Driven Development (TDD)** e **isolamento total de testes unitários**:
 
 ```bash
-# Executa a suíte de testes com detalhes
+# Executa a suíte completa de testes
 go test -v ./...
 
-# Executa apenas um teste específico (exemplo)
-go test -v -run TestValidateSkin ./internal/skin/...
+# Executa testes direcionados por pacote
+go test -v ./internal/bedrock/...
+go test -v ./internal/converter/...
+go test -v ./cmd/png-to-mcpack/...
 ```
 
 > **Regra de Isolamento**: Todos os testes unitários são 100% mockados em memória (`bytes.Buffer`, `bytes.Reader`). Nenhum teste unitário faz requisições de rede ou cria arquivos persistentes fora de diretórios temporários transitórios (`t.TempDir()`).
 
 ---
 
-### Estrutura dos Pacotes
+### Verificação com a Skill Bedrock Verifier
 
-```text
-.
-├── cmd/
-│   └── png-to-mcpack/      # Ponto de entrada CLI (parse de argumentos e saída)
-├── internal/
-│   ├── skin/               # Validação de dimensões PNG (64x64, 128x128) e decodificação
-│   ├── bedrock/            # Geração de manifest.json, skins.json, en_US.lang e UUIDv4
-│   ├── pack/               # Criação do arquivo ZIP/.mcpack com caminhos sanitizados
-│   └── converter/          # Orquestração do pipeline (leitura, geração e escrita no disco)
-├── .agents/                # Governança de IA, políticas de autonomia, scripts e skills
-└── openspec/               # Especificações formais e ciclo de vida OpenSpec
+Para validar a integridade técnica de um `.mcpack` gerado (UUIDs, esquemas JSON, geometrias e dimensões):
+
+```bash
+python3 .agents/skills/bedrock-skin-pack-verifier/scripts/verify-mcpack.py caminho/para/skin.mcpack
 ```
-
----
-
-### Princípios de Arquitetura e Governança
-
-- **Zero Dependências Externas**: Utilização exclusiva de pacotes nativos da biblioteca padrão do Go (`image/png`, `archive/zip`, `crypto/rand`, `encoding/json`, `path/filepath`).
-- **Compatibilidade Cruzada**: Caminhos dentro do arquivo `.mcpack` utilizam obrigatoriamente `filepath.ToSlash()` para garantir compatibilidade entre Linux, Windows e consoles.
-- **Governança de Agentes de IA (Harnesses)**:
-  - O projeto possui regras formais documentadas em [`AGENTS.md`](AGENTS.md), [`GEMINI.md`](GEMINI.md) e [`.agents/governance.md`](.agents/governance.md).
-  - **Isolamento Mandatório de Branch**: Todo comando `/opsx-propose` inicia obrigatoriamente com a criação da branch `feat/<nome_spec>` (`git checkout -b feat/<nome_spec>`).
-  - **Squash Merge na Conclusão**: Ao arquivar uma alteração via `/opsx-archive`, é solicitada a confirmação do usuário para realizar o merge em `main` via método squash (`git checkout main && git merge --squash feat/<nome_spec>`).
-  - **Gate Mecânico de Segurança**: O script `.agents/scripts/command-gate.py` inspeciona e autoriza apenas comandos seguros de compilação, testes e inspeção, bloqueando comandos destrutivos.
 
 ---
 

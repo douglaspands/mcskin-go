@@ -49,7 +49,27 @@ func TestRun_HelpFlag(t *testing.T) {
 	}
 }
 
-func TestRun_ValidFile(t *testing.T) {
+func TestRun_VersionFlag(t *testing.T) {
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"--version"}, &stdout, &stderr)
+	if code != 0 {
+		t.Errorf("expected exit code 0 for --version, got %d", code)
+	}
+	if !strings.Contains(stdout.String(), "png-to-mcpack version") {
+		t.Errorf("expected version info in stdout, got: %s", stdout.String())
+	}
+
+	stdout.Reset()
+	codeShort := run([]string{"-v"}, &stdout, &stderr)
+	if codeShort != 0 {
+		t.Errorf("expected exit code 0 for -v, got %d", codeShort)
+	}
+	if !strings.Contains(stdout.String(), "png-to-mcpack version") {
+		t.Errorf("expected version info in stdout for -v, got: %s", stdout.String())
+	}
+}
+
+func TestRun_DefaultBothModels(t *testing.T) {
 	tempDir := t.TempDir()
 	skinPath := filepath.Join(tempDir, "hero.png")
 	writeTestPNG(t, skinPath)
@@ -68,6 +88,29 @@ func TestRun_ValidFile(t *testing.T) {
 	if !strings.Contains(stdout.String(), "hero.mcpack") {
 		t.Errorf("expected output to mention created mcpack, got: %s", stdout.String())
 	}
+	if !strings.Contains(stdout.String(), "both") {
+		t.Errorf("expected output to mention 'both' models, got: %s", stdout.String())
+	}
+}
+
+func TestRun_ClassicFlag(t *testing.T) {
+	tempDir := t.TempDir()
+	skinPath := filepath.Join(tempDir, "steve.png")
+	writeTestPNG(t, skinPath)
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"--classic", skinPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("expected exit code 0 with --classic, got %d. stderr: %s", code, stderr.String())
+	}
+
+	expectedMcpack := filepath.Join(tempDir, "steve.mcpack")
+	if _, err := os.Stat(expectedMcpack); err != nil {
+		t.Fatalf("expected mcpack file at %s: %v", expectedMcpack, err)
+	}
+	if !strings.Contains(stdout.String(), "classic") {
+		t.Errorf("expected output to mention classic, got: %s", stdout.String())
+	}
 }
 
 func TestRun_SlimFlag(t *testing.T) {
@@ -84,6 +127,40 @@ func TestRun_SlimFlag(t *testing.T) {
 	expectedMcpack := filepath.Join(tempDir, "alex.mcpack")
 	if _, err := os.Stat(expectedMcpack); err != nil {
 		t.Fatalf("expected mcpack file at %s: %v", expectedMcpack, err)
+	}
+	if !strings.Contains(stdout.String(), "slim") {
+		t.Errorf("expected output to mention slim, got: %s", stdout.String())
+	}
+}
+
+func TestRun_BothFlagExplicit(t *testing.T) {
+	tempDir := t.TempDir()
+	skinPath := filepath.Join(tempDir, "dual.png")
+	writeTestPNG(t, skinPath)
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"--both", skinPath}, &stdout, &stderr)
+	if code != 0 {
+		t.Fatalf("expected exit code 0 with --both, got %d. stderr: %s", code, stderr.String())
+	}
+
+	if !strings.Contains(stdout.String(), "both") {
+		t.Errorf("expected output to mention both, got: %s", stdout.String())
+	}
+}
+
+func TestRun_MutuallyExclusiveFlags(t *testing.T) {
+	tempDir := t.TempDir()
+	skinPath := filepath.Join(tempDir, "conflict.png")
+	writeTestPNG(t, skinPath)
+
+	var stdout, stderr bytes.Buffer
+	code := run([]string{"--classic", "--slim", skinPath}, &stdout, &stderr)
+	if code == 0 {
+		t.Errorf("expected error exit code when --classic and --slim are passed together, got 0")
+	}
+	if !strings.Contains(stderr.String(), "cannot be used together") && !strings.Contains(stderr.String(), "mutually exclusive") {
+		t.Errorf("expected mutually exclusive error message in stderr, got: %s", stderr.String())
 	}
 }
 
