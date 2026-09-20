@@ -24,6 +24,143 @@ document.addEventListener("DOMContentLoaded", function() {
   var confettiCanvas = document.getElementById("confettiCanvas");
 
   // =========================================================================
+  // Modal de Confirmação do Nome da Skin antes do Download (Compartilhado)
+  // =========================================================================
+  var skinNameModal = document.getElementById("skinNameModal");
+  var skinNameInput = document.getElementById("skinNameInput");
+  var btnConfirmSkinName = document.getElementById("btnConfirmSkinName");
+  var btnCancelSkinName = document.getElementById("btnCancelSkinName");
+  var currentSkinName = "";
+  var hasConfirmedSkinName = false;
+  var pendingDownloadAction = null;
+
+  function updateSkinNameDisplays(name) {
+    var display = name || "Sem nome";
+    var edDisplay = document.getElementById("editorSkinNameDisplay");
+    var edText = document.getElementById("editorCurrentNameText");
+    var convText = document.getElementById("converterCurrentNameText");
+    var convBadge = document.getElementById("converterSkinNameBadge");
+    var edPill = document.getElementById("editorNamePill");
+    if (edDisplay) edDisplay.textContent = display;
+    if (edText) edText.textContent = display;
+    if (convText) convText.textContent = display;
+    if (convBadge) convBadge.style.display = name ? "inline-flex" : "none";
+    if (edPill) edPill.style.display = name ? "flex" : "none";
+  }
+
+  function generateDefaultSkinName() {
+    var now = new Date();
+    var pad = function(n) { return (n < 10 ? "0" : "") + n; };
+    var yyyy = now.getFullYear();
+    var mm = pad(now.getMonth() + 1);
+    var dd = pad(now.getDate());
+    var hh = pad(now.getHours());
+    var min = pad(now.getMinutes());
+    return "skin_" + yyyy + mm + dd + "_" + hh + min;
+  }
+
+  function sanitizeName(n) {
+    var clean = (n || "").replace(/[^a-zA-Z0-9_-]/g, "_").trim();
+    return clean || "custom_skin";
+  }
+
+  function promptSkinName(suggestedName, actionCallback, forceModal) {
+    if (typeof suggestedName === "function") {
+      forceModal = actionCallback;
+      actionCallback = suggestedName;
+      suggestedName = null;
+    }
+
+    // Se o usuário já preencheu/confirmou o nome uma vez e não for abertura forçada,
+    // não precisa solicitar toda vez: executa diretamente a ação com o nome já escolhido!
+    if (hasConfirmedSkinName && currentSkinName && !forceModal) {
+      if (actionCallback) {
+        actionCallback(currentSkinName);
+      }
+      return;
+    }
+
+    pendingDownloadAction = actionCallback;
+    var nameToUse = suggestedName || currentSkinName || generateDefaultSkinName();
+    nameToUse = sanitizeName(nameToUse);
+
+    if (skinNameInput) {
+      skinNameInput.value = nameToUse;
+    }
+    if (skinNameModal) {
+      skinNameModal.style.display = "flex";
+      if (skinNameInput) {
+        setTimeout(function() {
+          skinNameInput.focus();
+          skinNameInput.select();
+        }, 50);
+      }
+    }
+  }
+
+  function closeSkinNameModal() {
+    if (skinNameModal) {
+      skinNameModal.style.display = "none";
+    }
+    pendingDownloadAction = null;
+  }
+
+  if (btnCancelSkinName) {
+    btnCancelSkinName.addEventListener("click", closeSkinNameModal);
+  }
+
+  if (skinNameModal) {
+    skinNameModal.addEventListener("click", function(e) {
+      if (e.target === skinNameModal) closeSkinNameModal();
+    });
+  }
+
+  function confirmSkinDownload() {
+    var chosen = sanitizeName(skinNameInput ? skinNameInput.value : "");
+    if (!chosen) chosen = currentSkinName || generateDefaultSkinName();
+    currentSkinName = chosen;
+    hasConfirmedSkinName = true;
+    updateSkinNameDisplays(chosen);
+
+    var cb = pendingDownloadAction;
+    closeSkinNameModal();
+    if (cb) cb(chosen);
+  }
+
+  if (btnConfirmSkinName) {
+    btnConfirmSkinName.addEventListener("click", confirmSkinDownload);
+  }
+
+  if (skinNameInput) {
+    skinNameInput.addEventListener("keydown", function(e) {
+      if (e.key === "Enter") {
+        confirmSkinDownload();
+      } else if (e.key === "Escape") {
+        closeSkinNameModal();
+      }
+    });
+  }
+
+  var btnConverterRename = document.getElementById("btnConverterRename");
+  if (btnConverterRename) {
+    btnConverterRename.addEventListener("click", function() {
+      promptSkinName(currentSkinName, null, true);
+    });
+  }
+  var btnEditSkinName = document.getElementById("btnEditSkinName");
+  if (btnEditSkinName) {
+    btnEditSkinName.addEventListener("click", function() {
+      promptSkinName(currentSkinName, null, true);
+    });
+  }
+  var btnRenameSkin = document.getElementById("btnRenameSkin");
+  if (btnRenameSkin) {
+    btnRenameSkin.addEventListener("click", function() {
+      promptSkinName(currentSkinName, null, true);
+    });
+  }
+
+  // =========================================================================
   // Web Audio Synth (Sons 8-Bit Minecraft sem arquivos externos)
   // =========================================================================
   var audioCtx = null;
@@ -297,6 +434,10 @@ document.addEventListener("DOMContentLoaded", function() {
         loadedImage = img;
         fileNameDisplay.textContent = file.name;
         fileDimsDisplay.textContent = w + " x " + h + " pixels (" + (h === 32 ? "Clássica Antiga" : "Moderna HD") + ")";
+        var rawBase = file.name.replace(/\.[^/.]+$/, "");
+        currentSkinName = sanitizeName(rawBase);
+        hasConfirmedSkinName = false;
+        updateSkinNameDisplays(currentSkinName);
 
         // Renderiza personagem no canvas
         renderSkinCharacter(img, getSelectedModel());
@@ -315,56 +456,59 @@ document.addEventListener("DOMContentLoaded", function() {
   btnConvert.addEventListener("click", function() {
     if (!selectedFile) return;
 
-    btnConvert.disabled = true;
-    btnConvert.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>";
-    hideErrors();
-    successBanner.classList.remove("active");
+    var initialSuggestion = currentSkinName || selectedFile.name.replace(/\.[^/.]+$/, "");
+    promptSkinName(initialSuggestion, function(confirmedName) {
+      btnConvert.disabled = true;
+      btnConvert.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>";
+      hideErrors();
+      successBanner.classList.remove("active");
 
-    var modelValue = getSelectedModel();
-    var formData = new FormData();
-    formData.append("skin", selectedFile);
-    formData.append("name", selectedFile.name.replace(/\.[^/.]+$/, ""));
-    formData.append("model", modelValue);
+      var modelValue = getSelectedModel();
+      var formData = new FormData();
+      formData.append("skin", selectedFile, confirmedName + ".png");
+      formData.append("name", confirmedName);
+      formData.append("model", modelValue);
 
-    fetch("/api/convert", {
-      method: "POST",
-      body: formData
-    })
-    .then(function(res) {
-      if (!res.ok) {
-        return res.json().then(function(errData) {
-          throw new Error(errData.error || "Erro ao gerar arquivo");
-        });
-      }
-      return res.blob();
-    })
-    .then(function(blob) {
-      playSound("success");
-      launchConfetti();
+      fetch("/api/convert", {
+        method: "POST",
+        body: formData
+      })
+      .then(function(res) {
+        if (!res.ok) {
+          return res.json().then(function(errData) {
+            throw new Error(errData.error || "Erro ao gerar arquivo");
+          });
+        }
+        return res.blob();
+      })
+      .then(function(blob) {
+        playSound("success");
+        launchConfetti();
 
-      var cleanName = selectedFile.name.replace(/\.[^/.]+$/, "") + ".mcpack";
-      var blobUrl = window.URL.createObjectURL(blob);
+        var cleanName = confirmedName + ".mcpack";
+        var blobUrl = window.URL.createObjectURL(blob);
 
-      // Dispara o download automático no navegador
-      var a = document.createElement("a");
-      a.href = blobUrl;
-      a.download = cleanName;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
+        // Dispara o download automático no navegador
+        var a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = cleanName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
 
-      // Atualiza o botão de baixar novamente
-      downloadFallbackBtn.href = blobUrl;
-      downloadFallbackBtn.download = cleanName;
-      successBanner.classList.add("active");
+        // Atualiza o botão de baixar novamente
+        downloadFallbackBtn.href = blobUrl;
+        downloadFallbackBtn.download = cleanName;
+        successBanner.classList.add("active");
 
-      btnConvert.disabled = false;
-      btnConvert.innerHTML = "<span>⚡ BAIXAR PACOTE .MCPACK! ⚡</span>";
-    })
-    .catch(function(err) {
-      showError(err.message);
-      btnConvert.disabled = false;
-      btnConvert.innerHTML = "<span>⚡ BAIXAR PACOTE .MCPACK! ⚡</span>";
+        btnConvert.disabled = false;
+        btnConvert.innerHTML = "<span>⚡ BAIXAR PACOTE .MCPACK! ⚡</span>";
+      })
+      .catch(function(err) {
+        showError(err.message);
+        btnConvert.disabled = false;
+        btnConvert.innerHTML = "<span>⚡ BAIXAR PACOTE .MCPACK! ⚡</span>";
+      });
     });
   });
 
@@ -595,7 +739,7 @@ document.addEventListener("DOMContentLoaded", function() {
   // nunca é alterado. A ampliação é necessária porque, no tamanho nativo da
   // textura (1 unidade = 1 pixel do skin), uma linha de 1px cobre a coluna/
   // linha inteira do pixel vizinho, escurecendo quase toda a superfície.
-  var GRID_OVERLAY_SCALE = 4;
+  var GRID_OVERLAY_SCALE = 8;
 
   function buildGridOverlayCanvas() {
     var scale = GRID_OVERLAY_SCALE;
@@ -606,7 +750,7 @@ document.addEventListener("DOMContentLoaded", function() {
     gCtx.imageSmoothingEnabled = false;
     gCtx.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, gridCanvas.width, gridCanvas.height);
 
-    gCtx.strokeStyle = "rgba(0, 0, 0, 0.35)";
+    gCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
     gCtx.lineWidth = 1;
     for (var gx = 0; gx <= texW; gx++) {
       var lx = gx * scale + 0.5;
@@ -654,6 +798,7 @@ document.addEventListener("DOMContentLoaded", function() {
       // Cabeça
       fillBox(8, 8, 8, 8, skinTone); // Rosto
       fillBox(8, 0, 8, 8, hair);     // Cabelo topo
+      fillBox(16, 0, 8, 8, hair);    // Pescoço / fundo da cabeça
       fillBox(0, 8, 8, 8, hair);     // Cabelo lados
       fillBox(16, 8, 8, 8, hair);
       fillBox(24, 8, 8, 8, hair);    // Cabelo trás
@@ -673,37 +818,50 @@ document.addEventListener("DOMContentLoaded", function() {
 
       // Braço Direito
       var armW = (currentModelType === "slim") ? 3 : 4;
+      fillBox(44, 16, armW, 4, shirt);    // Ombro D topo
+      fillBox(44 + armW, 16, armW, 4, skinTone); // Palma D fundo
       fillBox(44, 20, armW, 4, shirt);
       fillBox(44, 24, armW, 8, skinTone);
       fillBox(40, 20, 4, 12, skinTone);
       fillBox(44 + armW, 20, 4, 12, skinTone);
 
       // Pernas
+      fillBox(4, 16, 4, 4, pants); // Perna D topo
+      fillBox(8, 16, 4, 4, shoes); // Perna D sola
       fillBox(4, 20, 4, 10, pants);
       fillBox(12, 20, 4, 10, pants);
       fillBox(0, 20, 4, 10, pants);
       fillBox(8, 20, 4, 10, pants);
+      fillBox(0, 30, 4, 2, shoes); // Lados do sapato D
       fillBox(4, 30, 4, 2, shoes);
+      fillBox(8, 30, 4, 2, shoes);
       fillBox(12, 30, 4, 2, shoes);
 
       if (texH >= 64) {
         // Braço Esquerdo
+        fillBox(36, 48, armW, 4, shirt); // Ombro E topo
+        fillBox(36 + armW, 48, armW, 4, skinTone); // Palma E fundo
         fillBox(36, 52, armW, 4, shirt);
         fillBox(36, 56, armW, 8, skinTone);
         fillBox(32, 52, 4, 12, skinTone);
         fillBox(40 + armW, 52, 4, 12, skinTone);
         // Perna Esquerda
+        fillBox(20, 48, 4, 4, pants); // Perna E topo
+        fillBox(24, 48, 4, 4, shoes); // Perna E sola
         fillBox(20, 52, 4, 10, pants);
         fillBox(28, 52, 4, 10, pants);
         fillBox(16, 52, 4, 10, pants);
         fillBox(24, 52, 4, 10, pants);
+        fillBox(16, 62, 4, 2, shoes); // Lados do sapato E
         fillBox(20, 62, 4, 2, shoes);
+        fillBox(24, 62, 4, 2, shoes);
         fillBox(28, 62, 4, 2, shoes);
       }
     } else if (type === "alex") {
       var skinTone = "#e0ac69", hair = "#b25119", shirt = "#5c7444", pants = "#4a3b32", boots = "#30261f";
       fillBox(8, 8, 8, 8, skinTone);
       fillBox(8, 0, 8, 8, hair);
+      fillBox(16, 0, 8, 8, hair); // Pescoço
       fillBox(0, 8, 8, 8, hair);
       fillBox(16, 8, 8, 8, hair);
       fillBox(24, 8, 8, 8, hair);
@@ -721,25 +879,41 @@ document.addEventListener("DOMContentLoaded", function() {
       fillBox(28, 16, 8, 4, shirt);
 
       var armW = 3;
+      fillBox(44, 16, armW, 4, shirt); // Ombro D topo
+      fillBox(44 + armW, 16, armW, 4, skinTone); // Palma D fundo
       fillBox(44, 20, armW, 4, shirt);
       fillBox(44, 24, armW, 8, skinTone);
       fillBox(40, 20, 4, 12, skinTone);
       fillBox(44 + armW, 20, 4, 12, skinTone);
 
+      fillBox(4, 16, 4, 4, pants); // Perna D topo
+      fillBox(8, 16, 4, 4, boots); // Perna D sola
       fillBox(4, 20, 4, 9, pants);
       fillBox(12, 20, 4, 9, pants);
+      fillBox(0, 20, 4, 9, pants);
+      fillBox(8, 20, 4, 9, pants);
+      fillBox(0, 29, 4, 3, boots); // Botas D lados
       fillBox(4, 29, 4, 3, boots);
+      fillBox(8, 29, 4, 3, boots);
       fillBox(12, 29, 4, 3, boots);
 
       if (texH >= 64) {
+        fillBox(36, 48, armW, 4, shirt); // Ombro E topo
+        fillBox(36 + armW, 48, armW, 4, skinTone); // Palma E fundo
         fillBox(36, 52, armW, 4, shirt);
         fillBox(36, 56, armW, 8, skinTone);
         fillBox(32, 52, 4, 12, skinTone);
         fillBox(40 + armW, 52, 4, 12, skinTone);
 
+        fillBox(20, 48, 4, 4, pants); // Perna E topo
+        fillBox(24, 48, 4, 4, boots); // Perna E sola
         fillBox(20, 52, 4, 9, pants);
         fillBox(28, 52, 4, 9, pants);
+        fillBox(16, 52, 4, 10, pants);
+        fillBox(24, 52, 4, 10, pants);
+        fillBox(16, 61, 4, 3, boots); // Botas E lados
         fillBox(20, 61, 4, 3, boots);
+        fillBox(24, 61, 4, 3, boots);
         fillBox(28, 61, 4, 3, boots);
       }
     } else if (type === "blank") {
@@ -865,9 +1039,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // Desenha textura atual
     ctx2D.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, cW, texH * scale);
 
-    // Grade de Pixels (opcional, apenas visual)
+    // Grade de Pixels (opcional, apenas visual, estilo guia fotográfica sutil)
     if (gridEnabled) {
-      ctx2D.strokeStyle = "rgba(0, 0, 0, 0.45)";
+      ctx2D.strokeStyle = "rgba(255, 255, 255, 0.12)";
       ctx2D.lineWidth = 1;
       for (var gx = 0; gx <= texW; gx++) {
         var lx = Math.round(gx * scale) + 0.5;
@@ -1077,33 +1251,55 @@ document.addEventListener("DOMContentLoaded", function() {
       if (viewport3D) viewport3D.render();
     });
 
-    // 5.2 Controles de Zoom do Boneco 3D
-    var zoom3DSlider = document.getElementById("zoom3DSlider");
+    // 5.2 Controles Verticais Flutuantes de Zoom do Boneco 3D (🔍+, ⟲, 🔍−)
     var btnZoom3DIn = document.getElementById("btnZoom3DIn");
     var btnZoom3DOut = document.getElementById("btnZoom3DOut");
-    var ZOOM_3D_STEP = 5;
+    var btnZoom3DReset = document.getElementById("btnZoom3DReset");
+    var ZOOM_3D_STEP = 4;
 
     function setViewport3DZoom(z) {
       if (!viewport3D) return;
-      var applied = viewport3D.setZoom(z);
-      if (zoom3DSlider) zoom3DSlider.value = applied;
+      viewport3D.setZoom(z);
     }
 
-    if (zoom3DSlider) {
-      zoom3DSlider.addEventListener("input", function() {
-        setViewport3DZoom(parseFloat(zoom3DSlider.value));
-      });
-    }
     if (btnZoom3DIn) {
-      btnZoom3DIn.addEventListener("click", function() {
+      btnZoom3DIn.addEventListener("click", function(e) {
+        e.stopPropagation();
         if (viewport3D) setViewport3DZoom(viewport3D.zoom - ZOOM_3D_STEP);
         playSound("click");
       });
     }
     if (btnZoom3DOut) {
-      btnZoom3DOut.addEventListener("click", function() {
+      btnZoom3DOut.addEventListener("click", function(e) {
+        e.stopPropagation();
         if (viewport3D) setViewport3DZoom(viewport3D.zoom + ZOOM_3D_STEP);
         playSound("click");
+      });
+    }
+    if (btnZoom3DReset) {
+      btnZoom3DReset.addEventListener("click", function(e) {
+        e.stopPropagation();
+        if (viewport3D) viewport3D.resetCamera();
+        playSound("click");
+      });
+    }
+
+    // 5.2.1 Bonequinho 2D Flutuante (Foco de Partes do Corpo)
+    var mannequinWidget = document.getElementById("mannequinWidget");
+    if (mannequinWidget) {
+      var mannequinParts = mannequinWidget.querySelectorAll(".mannequin-part");
+      mannequinParts.forEach(function(el) {
+        function handlePartClick(e) {
+          e.stopPropagation();
+          e.preventDefault();
+          var part = el.getAttribute("data-mannequin-part");
+          if (viewport3D && part) {
+            viewport3D.focusPart(part);
+            playSound("click");
+          }
+        }
+        el.addEventListener("click", handlePartClick);
+        el.addEventListener("touchend", handlePartClick);
       });
     }
 
@@ -1266,7 +1462,18 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     }
 
-    // 13. Abrir Skin (Upload PNG)
+    // 13. Nova Skin e Abrir Skin (Upload PNG)
+    var btnNewSkin = document.getElementById("btnNewSkin");
+    if (btnNewSkin) {
+      btnNewSkin.addEventListener("click", function() {
+        currentSkinName = "";
+        hasConfirmedSkinName = false;
+        updateSkinNameDisplays("");
+        loadTemplate("blank");
+        playSound("click");
+      });
+    }
+
     var btnUploadSkin = document.getElementById("btnUploadSkin");
     var editorFileInput = document.getElementById("editorFileInput");
     if (btnUploadSkin && editorFileInput) {
@@ -1276,6 +1483,12 @@ document.addEventListener("DOMContentLoaded", function() {
       editorFileInput.addEventListener("change", function() {
         if (editorFileInput.files && editorFileInput.files.length > 0) {
           var file = editorFileInput.files[0];
+          if (file.name) {
+            var rawName = file.name.replace(/\.[^/.]+$/, "");
+            currentSkinName = sanitizeName(rawName);
+            hasConfirmedSkinName = true;
+            updateSkinNameDisplays(currentSkinName);
+          }
           var reader = new FileReader();
           reader.onload = function(e) {
             var img = new Image();
@@ -1324,6 +1537,7 @@ document.addEventListener("DOMContentLoaded", function() {
           pushUndo();
           var hit = viewport3D.pickPixel(clientX, clientY, currentLayer === "overlay");
           if (hit) {
+            viewport3D.setHoverPixel(hit);
             paintPixel(hit.pixelX, hit.pixelY);
           }
         }
@@ -1344,10 +1558,12 @@ document.addEventListener("DOMContentLoaded", function() {
           viewport3D.rotX += dy * 0.012;
           // Limita inclinação vertical
           viewport3D.rotX = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, viewport3D.rotX));
+          if (viewport3D.hoverPixel) viewport3D.setHoverPixel(null);
           viewport3D.render();
         } else if (touchMode === "paint" && viewport3D) {
           var hit = viewport3D.pickPixel(clientX, clientY, currentLayer === "overlay");
           if (hit) {
+            viewport3D.setHoverPixel(hit);
             paintPixel(hit.pixelX, hit.pixelY);
           }
         }
@@ -1356,8 +1572,23 @@ document.addEventListener("DOMContentLoaded", function() {
       function handlePointerEnd() {
         isPointerDown = false;
         lastPaintedCoord = null;
+        if (viewport3D) viewport3D.setHoverPixel(null);
       }
 
+      function handleCanvasMouseMove(e) {
+        if (isPointerDown || !viewport3D) return;
+        var hit = viewport3D.pickPixel(e.clientX, e.clientY, currentLayer === "overlay");
+        viewport3D.setHoverPixel(hit);
+      }
+
+      function handleCanvasMouseLeave() {
+        if (viewport3D && viewport3D.hoverPixel) {
+          viewport3D.setHoverPixel(null);
+        }
+      }
+
+      editor3DCanvas.addEventListener("mousemove", handleCanvasMouseMove);
+      editor3DCanvas.addEventListener("mouseleave", handleCanvasMouseLeave);
       editor3DCanvas.addEventListener("mousedown", handlePointerStart);
       window.addEventListener("mousemove", handlePointerMove);
       window.addEventListener("mouseup", handlePointerEnd);
@@ -1407,9 +1638,8 @@ document.addEventListener("DOMContentLoaded", function() {
         var rect = editor2DCanvas.getBoundingClientRect();
         var clientX = e.touches ? e.touches[0].clientX : e.clientX;
         var clientY = e.touches ? e.touches[0].clientY : e.clientY;
-        var scale = editor2DCanvas.width / texW;
-        var px = Math.floor((clientX - rect.left) / scale);
-        var py = Math.floor((clientY - rect.top) / scale);
+        var px = Math.floor(((clientX - rect.left) / rect.width) * texW);
+        var py = Math.floor(((clientY - rect.top) / rect.height) * texH);
         return { x: px, y: py };
       }
 
@@ -1470,13 +1700,15 @@ document.addEventListener("DOMContentLoaded", function() {
     var btnDownloadPng = document.getElementById("btnDownloadPng");
     if (btnDownloadPng) {
       btnDownloadPng.addEventListener("click", function() {
-        var a = document.createElement("a");
-        a.href = textureCanvas.toDataURL("image/png");
-        a.download = "skin_" + currentModelType + "_" + texW + "x" + texH + ".png";
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        playSound("click");
+        promptSkinName(function(skinName) {
+          var a = document.createElement("a");
+          a.href = textureCanvas.toDataURL("image/png");
+          a.download = skinName + ".png";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          playSound("click");
+        });
       });
     }
 
@@ -1484,68 +1716,69 @@ document.addEventListener("DOMContentLoaded", function() {
     var btnEditorConvert = document.getElementById("btnEditorConvert");
     if (btnEditorConvert) {
       btnEditorConvert.addEventListener("click", function() {
-        btnEditorConvert.disabled = true;
-        btnEditorConvert.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>";
-        playSound("click");
+        promptSkinName(function(skinName) {
+          btnEditorConvert.disabled = true;
+          btnEditorConvert.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>";
+          playSound("click");
 
-        textureCanvas.toBlob(function(blob) {
-          if (!blob) {
-            btnEditorConvert.disabled = false;
-            btnEditorConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>";
-            return;
-          }
-          var cleanName = "skin_customizada_" + currentModelType;
-          var formData = new FormData();
-          formData.append("skin", blob, cleanName + ".png");
-          formData.append("name", cleanName);
-          formData.append("model", currentModelType === "slim" ? "slim" : "classic");
-
-          fetch("/api/convert", {
-            method: "POST",
-            body: formData
-          })
-          .then(function(res) {
-            if (!res.ok) {
-              return res.json().then(function(err) {
-                throw new Error(err.error || "Erro ao gerar mcpack");
-              });
+          textureCanvas.toBlob(function(blob) {
+            if (!blob) {
+              btnEditorConvert.disabled = false;
+              btnEditorConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>";
+              return;
             }
-            return res.blob();
-          })
-          .then(function(mcpackBlob) {
-            var blobUrl = URL.createObjectURL(mcpackBlob);
-            var a = document.createElement("a");
-            a.href = blobUrl;
-            a.download = cleanName + ".mcpack";
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            var formData = new FormData();
+            formData.append("skin", blob, skinName + ".png");
+            formData.append("name", skinName);
+            formData.append("model", currentModelType === "slim" ? "slim" : "classic");
 
-            playSound("success");
-            launchConfetti();
-
-            var banner = document.getElementById("editorSuccessBanner");
-            var msg = document.getElementById("editorSuccessMsg");
-            var fallback = document.getElementById("editorDownloadFallbackBtn");
-            if (banner && msg) {
-              msg.innerHTML = "Seu pacote <strong>" + cleanName + ".mcpack</strong> foi baixado com sucesso!<br>Dê 2 cliques nele no seu aparelho para abrir diretamente no Minecraft.";
-              banner.style.display = "block";
-              if (fallback) {
-                fallback.href = blobUrl;
-                fallback.download = cleanName + ".mcpack";
-                fallback.style.display = "inline-block";
+            fetch("/api/convert", {
+              method: "POST",
+              body: formData
+            })
+            .then(function(res) {
+              if (!res.ok) {
+                return res.json().then(function(err) {
+                  throw new Error(err.error || "Erro ao gerar mcpack");
+                });
               }
-            }
+              return res.blob();
+            })
+            .then(function(mcpackBlob) {
+              var blobUrl = URL.createObjectURL(mcpackBlob);
+              var a = document.createElement("a");
+              a.href = blobUrl;
+              a.download = skinName + ".mcpack";
+              document.body.appendChild(a);
+              a.click();
+              document.body.removeChild(a);
 
-            btnEditorConvert.disabled = false;
-            btnEditorConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>";
-          })
-          .catch(function(err) {
-            alert("Erro ao criar pacote: " + err.message);
-            btnEditorConvert.disabled = false;
-            btnEditorConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>";
-          });
-        }, "image/png");
+              playSound("success");
+              launchConfetti();
+
+              var banner = document.getElementById("editorSuccessBanner");
+              var msg = document.getElementById("editorSuccessMsg");
+              var fallback = document.getElementById("editorDownloadFallbackBtn");
+              if (banner && msg) {
+                msg.innerHTML = "Seu pacote <strong>" + skinName + ".mcpack</strong> foi baixado com sucesso!<br>Dê 2 cliques nele no seu aparelho para abrir diretamente no Minecraft.";
+                banner.style.display = "block";
+                if (fallback) {
+                  fallback.href = blobUrl;
+                  fallback.download = skinName + ".mcpack";
+                  fallback.style.display = "inline-block";
+                }
+              }
+
+              btnEditorConvert.disabled = false;
+              btnEditorConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>";
+            })
+            .catch(function(err) {
+              alert("Erro ao criar pacote: " + err.message);
+              btnEditorConvert.disabled = false;
+              btnEditorConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>";
+            });
+          }, "image/png");
+        });
       });
     }
   }

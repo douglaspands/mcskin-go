@@ -49,10 +49,16 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
    - Proceed to archive only after receiving a formal `APROVADO` verdict.
 5. **Archive (`/opsx-archive`)**:
    - Once all tasks are complete, verified, and approved by PO/QA, archive the change to sync specs.
-   - **MANDATORY SQUASH MERGE REQUEST**: Immediately after archiving and synchronization are finished, request user confirmation to merge the feature branch into `main` using squash:
-     ```bash
-     git checkout main && git merge --squash feat/<nome_spec>
-     ```
+   - **MANDATORY SQUASH MERGE OR PULL REQUEST PROMPT**: Immediately after archiving and synchronization are finished, request user confirmation to choose between:
+     1. **Local Squash Merge into `main`**:
+        ```bash
+        git checkout main && git merge --squash feat/<nome_spec>
+        ```
+     2. **GitHub Pull Request**:
+        ```bash
+        git push origin feat/<nome_spec>
+        gh pr create --base main --head feat/<nome_spec> --title "feat: <nome_spec>"
+        ```
 
 ---
 
@@ -102,7 +108,7 @@ To guarantee safe, efficient, and bounded execution cycles:
   - **Go Toolchain**: `go test ...`, `go build ...`, `go vet ...`, `go run ...`, `go fmt ...`, `go mod tidy`, `go mod verify`, `go version`, `go doc`.
   - **Build Automation**: `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make lint`, `make clean`.
   - **OpenSpec**: `openspec ...`
-  - **Git Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`.
+  - **Git & GitHub Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status`.
   - **Inspections**: `ls`, `cat`, `head`, `tail`, `grep`, `find`, `stat`, `unzip -l`, `unzip -p`.
   - **Targeted Cleanup**: `rm -rf bin/`, `rm -rf files/*.mcpack`.
 

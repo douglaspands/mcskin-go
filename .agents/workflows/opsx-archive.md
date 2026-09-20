@@ -166,11 +166,21 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Spec sync status (synced / sync skipped / no delta specs)
    - Note about any warnings (incomplete artifacts/tasks)
 
-7. **Squash Merge to Main (Mandatory User Confirmation)**
+7. **Squash Merge or GitHub Pull Request (Mandatory User Confirmation)**
 
-   Immediately after the archive is complete and verified, prompt the user to squash merge the feature branch into `main`:
-   > "The change `<change-name>` has been successfully archived. Would you like to squash merge `feat/<change-name>` into `main`?
-   > Run: `git checkout main && git merge --squash feat/<change-name>`"
+   Immediately after the archive is complete and verified, prompt the user to choose between squash merge or opening a GitHub Pull Request:
+   > "The change `<change-name>` has been successfully archived. Would you like to merge into `main` or open a Pull Request on GitHub?
+   > 
+   > **Option 1: Local Squash Merge into `main`**
+   > ```bash
+   > git checkout main && git merge --squash feat/<change-name>
+   > ```
+   > 
+   > **Option 2: Open Pull Request on GitHub**
+   > ```bash
+   > git push origin feat/<change-name>
+   > gh pr create --base main --head feat/<change-name> --title "feat: <change-name>"
+   > ```"
 
 **Output On Success**
 

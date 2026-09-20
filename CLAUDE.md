@@ -7,7 +7,7 @@ Please strictly follow the rules and procedures defined in [AGENTS.md](AGENTS.md
 - **Host & Environment Security**: Strictly confined to workspace root. Zero privilege escalation (`sudo`/`su`). Air-gapped test runs. Bounded 30s execution timeouts.
 - **OpenSpec**: Use `/opsx-propose`, `/opsx-apply`, and `/opsx-archive` for feature lifecycles.
   - **First Step on Propose**: The first action upon initiating a proposal MUST be `git checkout -b feat/<nome_spec>` for rollback isolation.
-  - **Squash Merge on Archive**: After archiving completes, request user approval to squash merge into `main` (`git checkout main && git merge --squash feat/<nome_spec>`).
-- **Allowed Harmless Commands**: `go test ...`, `go build ...`, `go vet ...`, `go run ...`, `go fmt ...`, `go mod tidy`, `make`, `git status`, `git diff`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`.
+  - **Squash Merge or Pull Request on Archive**: After archiving completes, prompt user to choose between local squash merge into `main` (`git checkout main && git merge --squash feat/<nome_spec>`) or creating a GitHub Pull Request (`git push origin feat/<nome_spec> && gh pr create ...`).
+- **Allowed Harmless Commands**: `go test ...`, `go build ...`, `go vet ...`, `go run ...`, `go fmt ...`, `go mod tidy`, `make`, `git status`, `git diff`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr ...`.
 - **Prohibited Destructive Commands**: Never execute `rm -rf` outside build artifacts, `git push --force`, `git reset --hard`, `git clean -f`, or privilege escalation (`sudo`).
 - **Governance**: State graph phases, max 3-iteration cap per failure, halt on repeated errors, token optimization.

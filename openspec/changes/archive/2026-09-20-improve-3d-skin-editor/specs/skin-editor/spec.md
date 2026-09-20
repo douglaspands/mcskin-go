@@ -1,9 +1,6 @@
-# skin-editor Specification
+# Spec Delta: skin-editor
 
-## Purpose
-Provides an embedded, child-friendly 3D and 2D unwrapped Minecraft skin editor for PCs, tablets, and smartphones, supporting layer toggles, quick palettes, touch controls, PNG import/export, and direct .mcpack generation.
-
-## Requirements
+## MODIFIED Requirements
 
 ### Requirement: Interactive 3D Viewport and Painting
 The editor SHALL provide an interactive 3D character viewport rendered with an embedded, zero-external-network 3D engine, supporting direct face painting via raycasting, dynamic camera target focusing per body part, and quick orientation snap controls.
@@ -53,43 +50,6 @@ The editor SHALL provide a single toggle button that shows or hides subtle photo
 #### Scenario: Precise grid cell alignment and hover highlight
 - **WHEN** the user hovers or clicks within any visible grid cell on the 3D model or 2D sheet while the grid is active
 - **THEN** a visual reticle or subtle highlight outlines the exact targeted grid cell, and painting applies strictly within that cell's pixel bounds without spilling into adjacent pixels
-
-### Requirement: Fullscreen Editing Mode
-The editor SHALL allow the user to expand the editor into fullscreen to maximize available drawing space on any device.
-
-#### Scenario: Entering fullscreen
-- **WHEN** the user clicks the fullscreen toggle button
-- **THEN** the editor requests fullscreen on the editor container, hiding non-essential chrome so the 3D viewport and 2D sheet occupy the maximum available screen space
-
-#### Scenario: Exiting fullscreen
-- **WHEN** the user clicks the fullscreen toggle again, presses Esc, or the browser exits fullscreen for any reason
-- **THEN** the editor detects the fullscreen change and restores the normal layout without losing the current texture or tool state
-
-### Requirement: Unwrapped 2D Sheet Painting Mode
-The editor SHALL provide an unwrapped 2D texture sheet view displaying clearly labeled sections (Cabeça, Tronco, Braços, Pernas) for high-precision pixel painting on touchscreens.
-
-#### Scenario: Switching to 2D unwrapped sheet view
-- **WHEN** the user selects the 2D Sheet mode tab
-- **THEN** the editor renders the magnified 2D pixel grid with labeled body sections, synchronizing all edits bidirectionally with the 3D model
-
-#### Scenario: Pixel-accurate grid at any zoom level
-- **WHEN** the 2D sheet is rendered, whether at default size or zoomed in
-- **THEN** each rendered grid square corresponds to exactly one texture pixel with grid lines drawn precisely on pixel boundaries, so a tap or click always paints the pixel visually under the pointer
-
-### Requirement: Child-Friendly Touch Ergonomics and Drawing Tools
-The editor SHALL provide touch-optimized controls designed for children aged 6 and older, including a dedicated "Pintar" vs "Girar" mode switch, essential drawing tools, and Minecraft-themed quick palettes.
-
-#### Scenario: Touch gesture differentiation
-- **WHEN** the user is in "Pintar" mode on a touchscreen
-- **THEN** single-finger drags draw pixels on the target surface without orbiting or rotating the camera
-
-#### Scenario: Camera orbit in rotation mode
-- **WHEN** the user is in "Girar" mode on a touchscreen
-- **THEN** single-finger drags smoothly orbit the camera around the character without modifying texture pixels
-
-#### Scenario: Drawing tools and history
-- **WHEN** the user activates Pencil, Bucket (flood fill), Eraser, or Eyedropper, or triggers Undo / Redo
-- **THEN** the corresponding tool operation executes correctly with Web Audio click feedback
 
 ### Requirement: Body Part Isolation and Layer Management
 The editor SHALL permit users to toggle visibility for individual body parts and focus specific parts via an interactive 2D paper doll mannequin widget, as well as switch between the base body layer and the 3D overlay layer.

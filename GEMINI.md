@@ -18,9 +18,10 @@ You are explicitly permitted and encouraged to autonomously execute harmless dev
   - `./bin/png-to-mcpack ...`
 - **OpenSpec**:
   - `openspec ...`
-- **Git (safe inspection & local workflow)**:
+- **Git & GitHub (safe inspection & PR workflow)**:
   - `git status`, `git diff`, `git log`, `git show`, `git branch`, `git add`, `git commit`
-  - `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`
+  - `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`
+  - `gh pr create ...`, `gh pr view ...`, `gh pr status`
 - **Inspections**:
   - `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p`
 
@@ -57,10 +58,16 @@ The following commands are hard-blocked by project policy. You must NEVER propos
       3. Scope Boundary: Halt if fix requires expanding requirements beyond the spec (trigger `/openspec-update-change`).
       4. Targeted Verification: Re-run tests before re-evaluating with QA.
     - Proceed to archive only upon formal approval (`APROVADO`).
-  - **Final Step on `/opsx-archive`**: After all tasks and spec synchronization are completed, explicitly request user confirmation to merge the feature branch into `main` using the squash method:
-    ```bash
-    git checkout main && git merge --squash feat/<nome_spec>
-    ```
+  - **Final Step on `/opsx-archive`**: After all tasks and spec synchronization are completed, explicitly request user confirmation to choose between:
+    1. Merge the feature branch into `main` using the squash method:
+       ```bash
+       git checkout main && git merge --squash feat/<nome_spec>
+       ```
+    2. Create a Pull Request on GitHub:
+       ```bash
+       git push origin feat/<nome_spec>
+       gh pr create --base main --head feat/<nome_spec> --title "feat: <nome_spec>"
+       ```
 
 ---
 
