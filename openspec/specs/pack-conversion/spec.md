@@ -1,0 +1,57 @@
+# pack-conversion Specification
+
+## Purpose
+Enables conversion of PNG Minecraft skin textures into fully compliant Minecraft Bedrock `.mcpack` skin pack archives saved directly alongside the source image.
+
+## Requirements
+
+### Requirement: PNG Image Validation
+The system SHALL validate that the input file is a valid PNG image matching standard Minecraft skin dimensions (64x64 or 128x128 pixels) and 8-bit RGBA color format.
+
+#### Scenario: Valid 64x64 skin PNG
+- **WHEN** an input file is a valid 64x64 RGBA PNG image
+- **THEN** the system successfully reads and validates the texture data without errors
+
+#### Scenario: Non-PNG or corrupt file
+- **WHEN** an input file is not a valid PNG image or contains corrupted headers
+- **THEN** the system rejects the file and returns a descriptive validation error
+
+#### Scenario: Unsupported image dimensions
+- **WHEN** an input PNG has dimensions different from supported Minecraft skin dimensions (e.g. 100x100 pixels)
+- **THEN** the system rejects the image with an invalid dimensions error message
+
+### Requirement: Output Path and Extension Matching
+The system SHALL generate the resulting `.mcpack` file in the identical directory as the input `.png` file, using the exact same base filename with only the extension changed from `.png` to `.mcpack`.
+
+#### Scenario: File placement in source directory
+- **WHEN** a PNG file located at `files/example-skin.png` is converted
+- **THEN** the output archive is created at `files/example-skin.mcpack`
+
+#### Scenario: Existing output file handling
+- **WHEN** an output `.mcpack` already exists at the destination path
+- **THEN** the system safely overwrites the target file when overwrite is authorized or halts with an error if overwrite is disabled
+
+### Requirement: Bedrock Skin Pack Manifest Generation
+The system SHALL generate a valid Bedrock `manifest.json` containing `format_version: 2`, a header with a generated RFC-4122 UUIDv4, and a `skin_pack` module with a separate unique UUIDv4.
+
+#### Scenario: Valid manifest schema and UUID uniqueness
+- **WHEN** constructing the manifest for a converted skin
+- **THEN** `manifest.json` contains two distinct UUIDv4 values and valid Bedrock skin pack metadata
+
+### Requirement: Bedrock Skin Metadata Generation
+The system SHALL generate `skins.json` defining the skin entry, geometry (`geometry.humanoid.custom` or `geometry.humanoid.customSlim`), localization key, and texture path.
+
+#### Scenario: Standard geometry assignment
+- **WHEN** a skin is processed without slim flags
+- **THEN** `skins.json` specifies `geometry.humanoid.custom` for classic 4-pixel arm models
+
+#### Scenario: Slim model geometry assignment
+- **WHEN** a skin is processed with slim model configuration
+- **THEN** `skins.json` specifies `geometry.humanoid.customSlim` for 3-pixel arm models
+
+### Requirement: MCPack Archive Packaging
+The system SHALL assemble a ZIP-compressed archive with the `.mcpack` file extension containing `manifest.json`, `skins.json`, `texts/en_US.lang`, and the PNG texture file located at the archive root.
+
+#### Scenario: Valid mcpack zip archive creation
+- **WHEN** packaging is executed
+- **THEN** the resulting `.mcpack` is readable by standard zip tools and contains all required manifest, skin, and texture files without unneeded parent directory nesting
