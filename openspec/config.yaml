@@ -13,7 +13,7 @@ context: |
   AI Agent Governance:
     - State Graph: [Plan/OpenSpec] -> [TDD: Write Tests (Red)] -> [Implement (Green)] -> [Verify & Lint] -> [Commit].
     - Loop Engineering: Max 3 repair attempts per failing test. Halt on repeated identical errors.
-    - Token Optimization: Run targeted tests (go test -run TestX ./...), keep responses concise, avoid dumping binaries. Proactively propose creating a SKILL whenever a repetitive workflow can save tokens, and request user approval.
+    - Token Optimization: Run targeted tests (go test -run TestX ./...), keep responses concise, avoid dumping binaries. Proactively propose creating a SKILL whenever a repetitive workflow can save tokens, specify required autonomy permissions, and upon user approval grant those permissions in the safety gate to avoid repetitive prompts.
     - Autonomy: Autonomous execution for local read, test, build, and git commit. Permission required for destructive commands.
   Git Conventions: Conventional Commits format (feat, fix, test, refactor, docs, chore).
 

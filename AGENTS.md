@@ -71,7 +71,7 @@ To guarantee safe, efficient, and bounded execution cycles:
 - **Targeted Test Execution**: Run targeted tests (e.g., `go test -v -run TestSpecific ./internal/...`) while iterating. Do not run verbose full-suite tests on every minor edit.
 - **Context Hygiene**: Do not dump binary files, large images, or massive directory trees into the context.
 - **Concise Communication**: Keep outputs structured, actionable, and focused on code changes and verification results.
-- **Proactive Skill Suggestion**: Whenever a recurring, multi-step, or verbose workflow is identified that could save context tokens via progressive disclosure, proactively suggest creating a new SKILL to the user and request their approval before implementing it.
+- **Proactive Skill Suggestion & Autonomy Provisioning**: Whenever a recurring, multi-step, or verbose workflow is identified that could save context tokens via progressive disclosure, proactively suggest creating a new SKILL. The proposal MUST explicitly list the authorizations and permissions needed for the skill to operate autonomously. Once approved by the user, immediately provision those permissions into the command safety gate (`.agents/scripts/command-gate.py`) and project documentation to avoid repetitive permission prompts.
 
 ### Safe Autonomy Boundaries
 

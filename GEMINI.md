@@ -40,8 +40,12 @@ The following commands are hard-blocked by project policy. You must NEVER propos
 ---
 
 ## 3. Token Conservation & Proactive Skill Creation
-- **Proactive Skill Detection**: Whenever you identify a repetitive, multi-step, or verbose workflow where creating a specialized **SKILL** (`.agents/skills/<name>/SKILL.md`) would conserve context window tokens through progressive disclosure, you MUST:
-  1. Clearly explain to the user the workflow opportunity and the token savings benefit.
+- **Proactive Skill Proposal**: Whenever you identify a repetitive, multi-step, or verbose workflow where creating a specialized **SKILL** (`.agents/skills/<name>/SKILL.md`) would conserve context window tokens through progressive disclosure, you MUST:
+  1. Clearly explain the workflow opportunity and the token savings benefit.
   2. Propose the name, scope, and structure of the recommended SKILL.
-  3. Explicitly ask for user approval before creating it.
+  3. **Specify Required Autonomy Permissions**: Inform the exact commands, scripts, and file access needed for the SKILL to run autonomously (Tier 1).
+  4. Explicitly ask for user approval for both the skill and its permissions before implementing it.
+- **Autonomous Permission Provisioning**: Upon user approval:
+  1. Create the skill files in `.agents/skills/<name>/`.
+  2. Immediately configure and grant the authorized permissions in the command safety gate (`.agents/scripts/command-gate.py`) and project documentation (`GEMINI.md`, `AGENTS.md`, `.agents/governance.md`) so that agents can execute the skill autonomously without repeatedly asking for permission.
 

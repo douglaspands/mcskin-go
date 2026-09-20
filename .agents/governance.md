@@ -64,11 +64,14 @@ To minimize token consumption and maximize response efficiency:
    - Restrict log outputs to relevant stack traces or failure messages.
 3. **Structured Communication**:
    - Omit discursive pleasantries; report task status, diff summaries, and verification commands directly.
-4. **Proactive Skill Suggestion for Token Efficiency**:
+4. **Proactive Skill Suggestion & Autonomy Provisioning**:
    - Whenever an agent detects a repetitive, multi-step, or verbose workflow where creating a specialized SKILL (`.agents/skills/<name>/SKILL.md`) would reduce context window load via progressive disclosure, the agent MUST:
-     - Proactively present the proposal to the user.
-     - Detail the token conservation rationale and proposed skill structure.
+     - Proactively present the proposal to the user with the token conservation rationale and skill design.
+     - **Explicitly specify all required authorizations**: List exact shell commands, scripts, and file scopes needed for the skill to run autonomously without repeated user prompts.
      - Await explicit user approval before creating the skill.
+   - **Post-Approval Action**:
+     - Implement the skill and its support scripts.
+     - Immediately update `.agents/scripts/command-gate.py`, `GEMINI.md`, `AGENTS.md`, and this governance document to add the authorized commands to Tier 1 (Auto-Allowed), ensuring frictionless autonomous execution without repetitive permission requests.
 
 ---
 
