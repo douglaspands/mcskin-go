@@ -122,7 +122,7 @@ To guarantee safe, efficient, and bounded execution cycles:
 - **Harmless & Auto-Allowed Commands (Tier 1)**:
   - **Go Toolchain**: `go test ...`, `go build ...`, `go vet ...`, `go run ...`, `go fmt ...`, `go mod tidy`, `go mod verify`, `go version`, `go doc`.
   - **Build Automation**: `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make build-darwin-arm64`, `make build-all`, `make lint`, `make clean`.
-  - **Packaging & Testing Scripts**: `./scripts/test-compact.sh`, `./scripts/package-mac-app.sh`.
+  - **Packaging & Testing Scripts**: `./scripts/test-compact.sh`, `./scripts/package-mac-app.sh`, `./scripts/run-regression-suite.sh`.
   - **OpenSpec**: `openspec ...`
   - **Git & GitHub Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status`.
   - **Inspections**: `ls`, `cat`, `head`, `tail`, `grep`, `find`, `stat`, `unzip -l`, `unzip -p`.

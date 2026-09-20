@@ -14,6 +14,7 @@ You are explicitly permitted and encouraged to autonomously execute harmless dev
   - `go version`, `go doc`, `go list`
 - **Build automation**:
   - `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make lint`, `make clean`
+  - `./scripts/test-compact.sh`, `./scripts/package-mac-app.sh`, `./scripts/run-regression-suite.sh`
   - `./bin/mcskin ...`
   - `./bin/png-to-mcpack ...`
 - **OpenSpec**:

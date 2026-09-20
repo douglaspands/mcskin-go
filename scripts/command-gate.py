@@ -33,6 +33,7 @@ def evaluate_command(cmd: str):
         r'^(?:(?:[A-Z0-9_]+=[^\s]+\s+)*)go\s+(?:test|build|vet|run|fmt|mod\s+(?:tidy|verify|download)|version|env|doc|list)\b',
         r'^(?:(?:[A-Z0-9_]+=[^\s]+\s+)*)make(?:\s+[a-zA-Z0-9_-]+)*$',
         r'^\./bin/(?:mcskin|png-to-mcpack)\b',
+        r'^\./scripts/(?:test-compact\.sh|package-mac-app\.sh|run-regression-suite\.sh)\b',
         r'^(?:build-linux|build-windows)/(?:mcskin|png-to-mcpack)(?:\.exe)?\b',
         r'^openspec\s+',
         r'^git\s+(?:status|diff|log|show|branch|add|commit|rev-parse|check-ignore|checkout|merge\s+--squash|rm)\b',
