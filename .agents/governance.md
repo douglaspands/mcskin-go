@@ -69,14 +69,27 @@ To minimize token consumption and maximize response efficiency:
 
 ## 4. Autonomy & Permission Matrix
 
-| Command / Operation | Autonomy Tier | Policy |
-| :--- | :--- | :--- |
-| `cat`, `head`, `view_file` | **Tier 1 (Autonomous)** | Allowed without confirmation |
-| `go test`, `go build`, `go vet` | **Tier 1 (Autonomous)** | Allowed without confirmation |
-| `git status`, `git diff`, `git add` | **Tier 1 (Autonomous)** | Allowed without confirmation |
-| `git commit` (Conventional Commits) | **Tier 1 (Autonomous)** | Allowed when tests pass |
-| Editing project Go and Markdown files | **Tier 1 (Autonomous)** | Allowed within scope of active task |
-| Deleting build artifacts (`/bin/`, `*.mcpack`) | **Tier 2 (Inform User)** | Execute and log action |
-| `rm -rf` outside build artifacts | **Tier 3 (User Confirmation Required)** | Prohibited without explicit confirmation |
-| Modifying files outside repo boundary | **Tier 3 (User Confirmation Required)** | Strictly prohibited |
-| `git push --force` | **Tier 3 (User Confirmation Required)** | Strictly prohibited |
+Commands are categorized into 3 permission tiers, enforced both via prompt rules and mechanically via `.agents/hooks.json`:
+
+| Category | Allowed Commands | Autonomy Tier | Enforcement |
+| :--- | :--- | :--- | :--- |
+| **Go Toolchain** | `go test ...`, `go build ...`, `go vet ...`, `go run ...`, `go fmt ...`, `go mod tidy`, `go mod verify`, `go version`, `go doc` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
+| **Build & Test** | `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make lint`, `make clean` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
+| **Local Binary** | `./bin/png-to-mcpack ...` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
+| **OpenSpec** | `openspec ...` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
+| **Safe Git** | `git status`, `git diff`, `git log`, `git show`, `git branch`, `git add`, `git commit` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
+| **Inspection** | `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
+| **Artifact Cleanup**| `rm -rf bin/`, `rm -rf files/*.mcpack` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
+| **Unrecognized** | External network tools, arbitrary scripts | **Tier 2 (Ask User)** | Requires user approval |
+| **Dangerous Deletion** | `rm -rf /`, `rm -rf *`, `rm -rf .`, `rm -rf ..`, `rm -rf .git`, `rm -rf ~` | **Tier 3 (BLOCKED)** | Denied by security policy |
+| **Destructive Git** | `git push --force`, `git push -f`, `git reset --hard`, `git clean -f`, `git branch -D` | **Tier 3 (BLOCKED)** | Denied by security policy |
+| **System Modification** | `sudo`, `su`, `mkfs`, `dd if=`, `chmod -R 777`, `shutdown`, `reboot` | **Tier 3 (BLOCKED)** | Denied by security policy |
+| **Filesystem Escape** | Any modification or deletion outside `/home/douglas/Workspace/minecraft/png-to-mcpack` | **Tier 3 (BLOCKED)** | Denied by security policy |
+
+### 4.1 Mechanical Enforcement via `hooks.json`
+
+Antigravity executes `.agents/scripts/command-gate.py` on the `PreToolUse` event for `run_command`:
+- Returns `"decision": "allow"` for Tier 1 harmless commands.
+- Returns `"decision": "deny"` with an actionable explanation for Tier 3 destructive commands.
+- Returns `"decision": "ask"` for Tier 2 commands to ensure user visibility.
+

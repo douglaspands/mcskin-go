@@ -73,14 +73,24 @@ To guarantee safe, efficient, and bounded execution cycles:
 - **Concise Communication**: Keep outputs structured, actionable, and focused on code changes and verification results.
 
 ### Safe Autonomy Boundaries
-- **Autonomous Permissions**:
-  - Reading codebase files and documentation.
-  - Executing `go test`, `go build`, `go vet`.
-  - Checking `git status`, `git diff`, staging files, and committing.
-- **Requires Explicit Confirmation**:
-  - Destructive filesystem commands (`rm -rf` outside build artifacts).
-  - Modifying files outside the workspace repository.
-  - Force pushing to remote git branches (`git push --force`).
+
+- **Harmless & Auto-Allowed Commands (Tier 1)**:
+  - **Go Toolchain**: `go test ...`, `go build ...`, `go vet ...`, `go run ...`, `go fmt ...`, `go mod tidy`, `go mod verify`, `go version`, `go doc`.
+  - **Build Automation**: `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make lint`, `make clean`.
+  - **OpenSpec**: `openspec ...`
+  - **Git Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`.
+  - **Inspections**: `ls`, `cat`, `head`, `tail`, `grep`, `find`, `stat`, `unzip -l`, `unzip -p`.
+  - **Targeted Cleanup**: `rm -rf bin/`, `rm -rf files/*.mcpack`.
+
+- **Destructive & Strictly Blocked Commands (Tier 3)**:
+  - **Unbounded Deletion**: `rm -rf /`, `rm -rf *`, `rm -rf .`, `rm -rf ..`, `rm -rf .git`, `rm -rf ~`.
+  - **Destructive Git**: `git push --force`, `git push -f`, `git reset --hard`, `git clean -f`, `git branch -D`.
+  - **Disk & System Writes**: `dd if=`, `mkfs`, `fdisk`, `parted`, `shutdown`, `reboot`.
+  - **Privilege Escalation**: `sudo`, `su`.
+  - **Out-of-Scope Files**: Any write or deletion outside this workspace repository.
+
+- **Requires Explicit Confirmation (Tier 2)**:
+  - Any unfamiliar shell commands or network calls.
 
 ---
 
