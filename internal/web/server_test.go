@@ -252,13 +252,19 @@ func TestServeStatic(t *testing.T) {
 	testPaths := []string{
 		"/",
 		"/style.css",
-		"/qrcode.js",
-		"/app.js",
+		"/vendor/qrcode.js",
+		"/js/app.js",
+		"/js/converter.js",
+		"/js/editor3d.js",
+		"/js/editor2d.js",
+		"/js/palette.js",
+		"/js/network.js",
+		"/js/shutdown.js",
 		"/static/style.css",
-		"/static/qrcode.js",
-		"/static/app.js",
-		"/three.min.js",
-		"/static/three.min.js",
+		"/static/vendor/qrcode.js",
+		"/static/js/app.js",
+		"/vendor/three.min.js",
+		"/static/vendor/three.min.js",
 	}
 
 	for _, p := range testPaths {
@@ -343,9 +349,9 @@ func TestEditorStaticAssets_JavaScriptLogic(t *testing.T) {
 		t.Fatalf("failed to get static FS: %v", err)
 	}
 
-	threeBytes, err := fs.ReadFile(staticFS, "three.min.js")
+	threeBytes, err := fs.ReadFile(staticFS, "vendor/three.min.js")
 	if err != nil {
-		t.Fatalf("failed to read three.min.js: %v", err)
+		t.Fatalf("failed to read vendor/three.min.js: %v", err)
 	}
 	threeJS := string(threeBytes)
 
@@ -365,13 +371,22 @@ func TestEditorStaticAssets_JavaScriptLogic(t *testing.T) {
 		}
 	}
 
-	appBytes, err := fs.ReadFile(staticFS, "app.js")
+	appBytes, err := fs.ReadFile(staticFS, "js/app.js")
 	if err != nil {
-		t.Fatalf("failed to read app.js: %v", err)
+		t.Fatalf("failed to read js/app.js: %v", err)
 	}
 	appJS := string(appBytes)
+	if !strings.Contains(appJS, "import") {
+		t.Error("js/app.js missing ES6 import statement")
+	}
 
-	// 2. app.js complete UV template coverage (neck bottom, shoulder tops, palm bottoms, shoe sides, shoe soles)
+	editor2DBytes, err := fs.ReadFile(staticFS, "js/editor2d.js")
+	if err != nil {
+		t.Fatalf("failed to read js/editor2d.js: %v", err)
+	}
+	editor2DJS := string(editor2DBytes)
+
+	// 2. js/editor2d.js complete UV template coverage (neck bottom, shoulder tops, palm bottoms, shoe sides, shoe soles)
 	expectedTemplateCoverage := []string{
 		"16, 0, 8, 8",     // Neck bottom
 		"44, 16, armW, 4", // Right shoulder top
@@ -381,24 +396,36 @@ func TestEditorStaticAssets_JavaScriptLogic(t *testing.T) {
 		"8, 30, 4, 2",     // Right leg shoe side
 	}
 	for _, cov := range expectedTemplateCoverage {
-		if !strings.Contains(appJS, cov) {
-			t.Errorf("app.js missing template UV coverage: %s", cov)
+		if !strings.Contains(editor2DJS, cov) {
+			t.Errorf("js/editor2d.js missing template UV coverage: %s", cov)
 		}
 	}
 
-	// 3. app.js photography-style grid & coordinate normalization with getBoundingClientRect
+	editor3DBytes, err := fs.ReadFile(staticFS, "js/editor3d.js")
+	if err != nil {
+		t.Fatalf("failed to read js/editor3d.js: %v", err)
+	}
+	editor3DJS := string(editor3DBytes)
+
+	// 3. js/editor3d.js photography-style grid & coordinate normalization with getBoundingClientRect
 	expectedGridLogic := []string{
 		"rgba(255, 255, 255, 0.12)", // subtle photography grid
 		"rect.width",
 		"rect.height",
 	}
 	for _, grid := range expectedGridLogic {
-		if !strings.Contains(appJS, grid) {
-			t.Errorf("app.js missing grid logic: %s", grid)
+		if !strings.Contains(editor3DJS, grid) {
+			t.Errorf("js/editor3d.js missing grid logic: %s", grid)
 		}
 	}
 
-	// 4. app.js skin naming modal logic & upload filename retention
+	converterBytes, err := fs.ReadFile(staticFS, "js/converter.js")
+	if err != nil {
+		t.Fatalf("failed to read js/converter.js: %v", err)
+	}
+	converterJS := string(converterBytes)
+
+	// 4. js/converter.js skin naming modal logic & upload filename retention
 	expectedNamingLogic := []string{
 		"skinNameModal",
 		"skinNameInput",
@@ -407,8 +434,8 @@ func TestEditorStaticAssets_JavaScriptLogic(t *testing.T) {
 		"hasConfirmedSkinName",
 	}
 	for _, n := range expectedNamingLogic {
-		if !strings.Contains(appJS, n) {
-			t.Errorf("app.js missing naming modal logic: %s", n)
+		if !strings.Contains(converterJS, n) {
+			t.Errorf("js/converter.js missing naming modal logic: %s", n)
 		}
 	}
 }

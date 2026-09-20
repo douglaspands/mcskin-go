@@ -47,9 +47,11 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
      3. **Scope Boundary Guard**: Halt and request spec revision if remediation requires out-of-scope architectural changes.
      4. **Targeted Verification**: Re-run targeted unit tests before re-evaluating with QA.
    - Proceed to archive only after receiving a formal `APROVADO` verdict.
+   - **DO NOT Auto-Archive or Prompt PR During Apply**: Upon receiving `APROVADO` in `/opsx-apply`, commit the code, display the approval report, and instruct the user to execute `/opsx-archive`. Do NOT run `archive` automatically and do NOT prompt for PR/merge during the apply phase.
 5. **Archive (`/opsx-archive`)**:
+   - Triggered explicitly when the user runs `/opsx-archive` (or `openspec archive`).
    - Once all tasks are complete, verified, and approved by PO/QA, archive the change to sync specs.
-   - **MANDATORY SQUASH MERGE OR PULL REQUEST PROMPT**: Immediately after archiving and synchronization are finished, request user confirmation to choose between:
+   - **MANDATORY SQUASH MERGE OR PULL REQUEST PROMPT (ONLY AFTER ARCHIVE)**: Immediately after archiving and synchronization are finished within the archive workflow, request user confirmation to choose between:
      1. **Local Squash Merge into `main`**:
         ```bash
         git checkout main && git merge --squash feat/<nome_spec>
@@ -97,7 +99,11 @@ To guarantee safe, efficient, and bounded execution cycles:
 - **Idempotence**: All setup commands, scripts, and file generators must be idempotent (safe to execute multiple times without unintended side effects).
 
 ### Token & Resource Optimization
-- **Targeted Test Execution**: Run targeted tests (e.g., `go test -v -run TestSpecific ./internal/...`) while iterating. Do not run verbose full-suite tests on every minor edit.
+- **Born Modularized ("Nascem Otimizadas")**: All new and refactored application files in `cmd/`, `internal/`, and `internal/web/static/js/` SHALL NOT exceed 300 lines or 15 KB in size. Keep frontend code in discrete, cohesive ES6 modules with single architectural concerns and JSDoc documentation.
+- **Vendor Isolation**: Third-party libraries (such as Three.js or QRCode) MUST reside in `internal/web/static/vendor/` and are excluded from AI context reads.
+- **Targeted Test Execution & Compact Runner**: Run targeted tests (e.g., `go test -v -run TestSpecific ./internal/...`) while iterating. Prefer the compact test runner `./scripts/test-compact.sh` for multi-package runs to preserve tokens (silent on PASS, concise diffs on FAIL).
+- **Subagent Offloading**: Repetitive research, verbose test repair loops, and code investigations SHALL be offloaded to subagents so parent conversations receive only concise summaries.
+- **Token Guardian Skill**: Use the `token-guardian` skill (`.agents/skills/token-guardian/SKILL.md`) to inspect and enforce file size budgets before committing.
 - **Context Hygiene**: Do not dump binary files, large images, or massive directory trees into the context.
 - **Concise Communication**: Keep outputs structured, actionable, and focused on code changes and verification results.
 - **Proactive Skill Suggestion & Autonomy Provisioning**: Whenever a recurring, multi-step, or verbose workflow is identified that could save context tokens via progressive disclosure, proactively suggest creating a new SKILL. The proposal MUST explicitly list the authorizations and permissions needed for the skill to operate autonomously. Once approved by the user, immediately provision those permissions into the command safety gate (`.agents/scripts/command-gate.py`) and project documentation to avoid repetitive permission prompts.
@@ -106,7 +112,8 @@ To guarantee safe, efficient, and bounded execution cycles:
 
 - **Harmless & Auto-Allowed Commands (Tier 1)**:
   - **Go Toolchain**: `go test ...`, `go build ...`, `go vet ...`, `go run ...`, `go fmt ...`, `go mod tidy`, `go mod verify`, `go version`, `go doc`.
-  - **Build Automation**: `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make lint`, `make clean`.
+  - **Build Automation**: `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make build-darwin-arm64`, `make build-all`, `make lint`, `make clean`.
+  - **Packaging & Testing Scripts**: `./scripts/test-compact.sh`, `./scripts/package-mac-app.sh`.
   - **OpenSpec**: `openspec ...`
   - **Git & GitHub Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status`.
   - **Inspections**: `ls`, `cat`, `head`, `tail`, `grep`, `find`, `stat`, `unzip -l`, `unzip -p`.

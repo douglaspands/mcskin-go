@@ -128,7 +128,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
      When all tasks are complete (`state: "all_done"` or N/N tasks complete):
      - **Immediately and automatically invoke the `/feature-qa-reviewer` skill** (or execute the PO/QA verification protocol) to validate functional requirements, child usability (6+), Minecraft UX, cross-platform binaries, and Bedrock `.mcpack` compliance.
      - **Bounded Loop Engineering (Defect Remediation)**:
-       - If PO/QA issues an `APROVADO` verdict: Congratulate the user and proceed to suggest archiving (`/openspec-archive-change`).
+        - If PO/QA issues an `APROVADO` verdict: Congratulate the user, commit implementation changes, and instruct the user to run `/openspec-archive-change` (or `/opsx-archive`). **Do NOT run archive automatically and do NOT prompt for PR/merge during the apply phase.**
        - If PO/QA returns `REPROVADO` or identifies defects/regressions:
          Automatically request and apply adjustments using the harness **Loop Engineering protocol**, enforcing strict best practices to prevent infinite loops:
          1. **Iteration Cap**: Maximum **3 repair attempts** (`max_attempts = 3`).

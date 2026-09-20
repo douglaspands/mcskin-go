@@ -1,0 +1,279 @@
+/**
+ * @file editor3d.js
+ * @description Manages Three.js 3D viewport, subtle photography grid, camera snap/zoom controls, and 3D mesh interaction.
+ */
+
+import { playSound } from "./fx.js";
+
+const GRID_OVERLAY_SCALE = 8;
+const ZOOM_3D_STEP = 4;
+
+let viewport3D = null;
+let editor3DCanvas = null;
+
+/**
+ * Builds an upscaled canvas with subtle photography grid overlay for the 3D mannequin.
+ * @param {HTMLCanvasElement} textureCanvas - Source skin texture canvas.
+ * @param {number} texW - Skin texture width.
+ * @param {number} texH - Skin texture height.
+ * @returns {HTMLCanvasElement} Upscaled canvas with subtle grid overlay lines.
+ */
+export function buildGridOverlayCanvas(textureCanvas, texW, texH) {
+  const scale = GRID_OVERLAY_SCALE;
+  const gridCanvas = document.createElement("canvas");
+  gridCanvas.width = texW * scale;
+  gridCanvas.height = texH * scale;
+  const gCtx = gridCanvas.getContext("2d");
+  gCtx.imageSmoothingEnabled = false;
+  gCtx.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, gridCanvas.width, gridCanvas.height);
+
+  gCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+  gCtx.lineWidth = 1;
+  for (let gx = 0; gx <= texW; gx++) {
+    const lx = gx * scale + 0.5;
+    gCtx.beginPath();
+    gCtx.moveTo(lx, 0);
+    gCtx.lineTo(lx, gridCanvas.height);
+    gCtx.stroke();
+  }
+  for (let gy = 0; gy <= texH; gy++) {
+    const ly = gy * scale + 0.5;
+    gCtx.beginPath();
+    gCtx.moveTo(0, ly);
+    gCtx.lineTo(gridCanvas.width, ly);
+    gCtx.stroke();
+  }
+  return gridCanvas;
+}
+
+/**
+ * Returns current 3D viewport instance.
+ * @returns {object|null}
+ */
+export function getViewport3D() {
+  return viewport3D;
+}
+
+/**
+ * Updates texture rendered on the 3D mannequin.
+ * @param {HTMLCanvasElement} canvas - Texture canvas to apply.
+ */
+export function update3DTexture(canvas) {
+  if (viewport3D) {
+    viewport3D.updateTexture(canvas);
+    viewport3D.render();
+  }
+}
+
+/**
+ * Sets model type (classic vs slim) on 3D mannequin.
+ * @param {'classic'|'slim'} model
+ */
+export function set3DModel(model) {
+  if (viewport3D) {
+    viewport3D.modelType = model;
+    viewport3D.render();
+  }
+}
+
+/**
+ * Initializes Three.js 3D viewport, camera controls, mannequin widget, and pointer listeners.
+ * @param {object} options
+ * @param {Function} options.onPaintPixel - Called when 3D painting occurs (pixelX, pixelY).
+ * @param {Function} options.onPushUndo - Called before painting begins.
+ * @param {Function} options.getTouchMode - Returns 'paint' | 'rotate'.
+ * @param {Function} options.getCurrentLayer - Returns 'base' | 'overlay'.
+ */
+export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurrentLayer }) {
+  editor3DCanvas = document.getElementById("editor3DCanvas");
+  if (!editor3DCanvas || !window.Skin3D) return;
+
+  viewport3D = new window.Skin3D.Viewport(editor3DCanvas);
+
+  // Fullscreen handling
+  const editorCard = document.querySelector(".editor-card");
+  const btnFullscreen = document.getElementById("btnFullscreen");
+  const isFsActive = () => !!(document.fullscreenElement || document.webkitFullscreenElement || editorCard?.classList.contains("is-fullscreen-fallback"));
+
+  const onFsChange = () => {
+    if (btnFullscreen) btnFullscreen.innerHTML = isFsActive() ? "🡼 Sair da Tela Cheia" : "⛶ Tela Cheia";
+    setTimeout(() => { viewport3D?.render(); }, 60);
+  };
+
+  btnFullscreen?.addEventListener("click", () => {
+    if (!editorCard) return;
+    if (isFsActive()) {
+      if (document.exitFullscreen) document.exitFullscreen();
+      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      editorCard.classList.remove("is-fullscreen-fallback");
+    } else {
+      const req = editorCard.requestFullscreen || editorCard.webkitRequestFullscreen;
+      if (req) req.call(editorCard);
+      else editorCard.classList.add("is-fullscreen-fallback");
+    }
+    onFsChange();
+    playSound("click");
+  });
+
+  document.addEventListener("fullscreenchange", onFsChange);
+  document.addEventListener("webkitfullscreenchange", onFsChange);
+  window.addEventListener("resize", () => { viewport3D?.render(); });
+
+  // Floating vertical 3D zoom controls
+  const setZoom = (z) => { viewport3D?.setZoom(z); };
+  document.getElementById("btnZoom3DIn")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (viewport3D) setZoom(viewport3D.zoom - ZOOM_3D_STEP);
+    playSound("click");
+  });
+  document.getElementById("btnZoom3DOut")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (viewport3D) setZoom(viewport3D.zoom + ZOOM_3D_STEP);
+    playSound("click");
+  });
+  document.getElementById("btnZoom3DReset")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    viewport3D?.resetCamera();
+    playSound("click");
+  });
+
+  // Mannequin Widget body part focusing
+  const mannequin = document.getElementById("mannequinWidget");
+  mannequin?.querySelectorAll(".mannequin-part").forEach((el) => {
+    const handleFocus = (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      const part = el.getAttribute("data-mannequin-part");
+      if (viewport3D && part) {
+        viewport3D.focusPart(part);
+        playSound("click");
+      }
+    };
+    el.addEventListener("click", handleFocus);
+    el.addEventListener("touchend", handleFocus);
+  });
+
+  // Visibility and Snap buttons
+  document.querySelectorAll(".btn-part").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const part = btn.getAttribute("data-part");
+      const active = btn.classList.toggle("active");
+      if (viewport3D) {
+        viewport3D.partVisible[part] = active;
+        viewport3D.render();
+      }
+      playSound("click");
+    });
+  });
+
+  document.querySelectorAll(".btn-snap").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const dir = btn.getAttribute("data-dir");
+      viewport3D?.snapTo(dir);
+      playSound("click");
+    });
+  });
+
+  // 3D Pointer Events (Mouse, Touch, Pen)
+  let isPointerDown = false;
+  let lastX = 0, lastY = 0;
+  let pinchStartDist = null, pinchStartZoom = null;
+
+  const getDistance = (touches) => {
+    const dx = touches[0].clientX - touches[1].clientX;
+    const dy = touches[0].clientY - touches[1].clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  editor3DCanvas.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    if (viewport3D) setZoom(viewport3D.zoom + (e.deltaY > 0 ? ZOOM_3D_STEP * 0.6 : -ZOOM_3D_STEP * 0.6));
+  }, { passive: false });
+
+  const handlePointerStart = (e) => {
+    isPointerDown = true;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    lastX = clientX;
+    lastY = clientY;
+
+    if (getTouchMode() === "paint" && viewport3D) {
+      onPushUndo();
+      const hit = viewport3D.pickPixel(clientX, clientY, getCurrentLayer() === "overlay");
+      if (hit) {
+        viewport3D.setHoverPixel(hit);
+        onPaintPixel(hit.pixelX, hit.pixelY);
+      }
+    }
+  };
+
+  const handlePointerMove = (e) => {
+    if (!isPointerDown) return;
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    if (getTouchMode() === "rotate" && viewport3D) {
+      const rect = editor3DCanvas.getBoundingClientRect();
+      const dx = clientX - lastX;
+      const dy = clientY - lastY;
+      lastX = clientX;
+      lastY = clientY;
+      viewport3D.rotY += (dx / rect.width) * 4.0;
+      viewport3D.rotX += (dy / rect.height) * 4.0;
+      viewport3D.rotX = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, viewport3D.rotX));
+      viewport3D.setHoverPixel(null);
+      viewport3D.render();
+    } else if (getTouchMode() === "paint" && viewport3D) {
+      const hit = viewport3D.pickPixel(clientX, clientY, getCurrentLayer() === "overlay");
+      if (hit) {
+        viewport3D.setHoverPixel(hit);
+        onPaintPixel(hit.pixelX, hit.pixelY);
+      }
+    }
+  };
+
+  const handlePointerEnd = () => {
+    isPointerDown = false;
+    viewport3D?.setHoverPixel(null);
+  };
+
+  editor3DCanvas.addEventListener("mousedown", handlePointerStart);
+  window.addEventListener("mousemove", handlePointerMove);
+  window.addEventListener("mouseup", handlePointerEnd);
+
+  editor3DCanvas.addEventListener("mousemove", (e) => {
+    if (isPointerDown || !viewport3D) return;
+    const hit = viewport3D.pickPixel(e.clientX, e.clientY, getCurrentLayer() === "overlay");
+    viewport3D.setHoverPixel(hit);
+  });
+  editor3DCanvas.addEventListener("mouseleave", () => { viewport3D?.setHoverPixel(null); });
+
+  editor3DCanvas.addEventListener("touchstart", (e) => {
+    if (e.cancelable) e.preventDefault();
+    if (e.touches.length === 2) {
+      isPointerDown = false;
+      pinchStartDist = getDistance(e.touches);
+      pinchStartZoom = viewport3D ? viewport3D.zoom : null;
+      return;
+    }
+    handlePointerStart(e);
+  }, { passive: false });
+
+  editor3DCanvas.addEventListener("touchmove", (e) => {
+    if (e.cancelable) e.preventDefault();
+    if (e.touches.length === 2 && pinchStartDist && pinchStartZoom !== null) {
+      const newDist = getDistance(e.touches);
+      setZoom(pinchStartZoom * (pinchStartDist / newDist));
+      return;
+    }
+    handlePointerMove(e);
+  }, { passive: false });
+
+  editor3DCanvas.addEventListener("touchend", (e) => {
+    if (e.touches.length < 2) {
+      pinchStartDist = null;
+      pinchStartZoom = null;
+    }
+    handlePointerEnd();
+  });
+}

@@ -1613,4 +1613,127 @@ footer p {
   transform: translateY(-1px);
 }
 
+/* ==========================================================================
+   Shutdown UI & Modal
+   ========================================================================== */
+.footer-shutdown-wrap {
+  margin-top: 15px;
+  display: flex;
+  justify-content: center;
+}
+
+.btn-shutdown-server {
+  background: rgba(180, 40, 40, 0.2);
+  color: #ff8b8b;
+  border: 1px solid rgba(255, 71, 87, 0.4);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-shutdown-server:hover {
+  background: rgba(255, 71, 87, 0.4);
+  color: #ffffff;
+  border-color: #ff4757;
+  transform: translateY(-1px);
+}
+
+.shutdown-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.shutdown-modal-content {
+  background: #23272a;
+  border: 3px solid #ff4757;
+  border-radius: 10px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.8), inset 0 0 15px rgba(255, 71, 87, 0.2);
+  max-width: 440px;
+  width: 100%;
+  padding: 24px;
+  text-align: center;
+  color: #fff;
+}
+
+.shutdown-modal-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+}
+
+.btn-modal-danger {
+  background: linear-gradient(180deg, #ff4757 0%, #c0392b 100%);
+  border: 2px solid #e74c3c;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 6px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: filter 0.15s ease, transform 0.1s ease;
+}
+
+.btn-modal-danger:hover {
+  filter: brightness(1.15);
+  transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   Goodbye Screen Overlay
+   ========================================================================== */
+.goodbye-overlay {
+  position: fixed;
+  inset: 0;
+  background: #111417;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20000;
+  padding: 20px;
+}
+
+.goodbye-card {
+  background: #1e2227;
+  border: 3px solid #5da632;
+  border-radius: 12px;
+  padding: 40px 30px;
+  max-width: 480px;
+  text-align: center;
+  color: #fff;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9);
+}
+
+.goodbye-icon {
+  font-size: 3.5rem;
+  margin-bottom: 16px;
+}
+
+.goodbye-card h2 {
+  font-size: 1.6rem;
+  color: #7cd332;
+  margin-bottom: 12px;
+}
+
+.goodbye-card p {
+  color: #cbd5e0;
+  font-size: 1.05rem;
+  margin-bottom: 8px;
+}
+
+.goodbye-hint {
+  color: #a0aec0 !important;
+  font-size: 0.9rem !important;
+  margin-top: 16px;
+}
+
+
 

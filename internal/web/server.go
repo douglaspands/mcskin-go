@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"mcskin/internal/bedrock"
 	"mcskin/internal/converter"
@@ -15,9 +16,11 @@ import (
 
 // Config holds configuration parameters for the web server.
 type Config struct {
-	Port          int
-	AddrsProvider AddrsProviderFunc
-	StaticFS      fs.FS
+	Port            int
+	AddrsProvider   AddrsProviderFunc
+	StaticFS        fs.FS
+	ShutdownTrigger func() error
+	ShutdownDelay   time.Duration
 }
 
 // NewHandler constructs an http.Handler with all application routes.
@@ -27,6 +30,7 @@ func NewHandler(cfg Config) http.Handler {
 	// API Endpoints
 	mux.HandleFunc("/api/info", handleInfo(cfg))
 	mux.HandleFunc("/api/convert", handleConvert)
+	mux.HandleFunc("/api/shutdown", handleShutdown(cfg))
 
 	// Static Assets & Web UI
 	if cfg.StaticFS != nil {

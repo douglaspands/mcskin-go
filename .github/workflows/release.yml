@@ -31,7 +31,10 @@ jobs:
           BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ')
           LDFLAGS="-s -w -X main.version=${TAG} -X main.commit=${GITHUB_SHA} -X main.date=${BUILD_DATE}"
 
-          mkdir -p dist build-linux build-windows
+          mkdir -p dist build-linux build-windows build-darwin
+
+          # Generate icon assets if needed
+          go run scripts/gen-icons.go
 
           # Build Linux amd64
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o build-linux/mcskin ./cmd/mcskin
@@ -43,8 +46,15 @@ jobs:
           cp README.md build-windows/
           (cd build-windows && zip "../dist/mcskin_${TAG}_windows_amd64.zip" mcskin.exe README.md)
 
+          # Build macOS arm64 and package mcskin.app bundle
+          CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o build-darwin/mcskin ./cmd/mcskin
+          chmod +x scripts/package-mac-app.sh
+          ./scripts/package-mac-app.sh build-darwin/mcskin build-darwin
+          cp README.md build-darwin/
+          (cd build-darwin && zip -r "../dist/mcskin_${TAG}_darwin_arm64.zip" mcskin.app mcskin README.md)
+
           # Generate SHA256 Checksums
-          (cd dist && sha256sum mcskin_${TAG}_linux_amd64.tar.gz mcskin_${TAG}_windows_amd64.zip > checksums.txt)
+          (cd dist && sha256sum mcskin_${TAG}_linux_amd64.tar.gz mcskin_${TAG}_windows_amd64.zip mcskin_${TAG}_darwin_arm64.zip > checksums.txt)
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v2
