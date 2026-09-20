@@ -35,7 +35,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
 **Steps**
 
-1. **Understand the request and clarify material ambiguity**
+1. **Understand the request, derive change name & create feature branch (Mandatory First Action)**
 
    If no input is provided, ask the user (open-ended, no preset options):
    > "What change do you want to work on? Describe what you want to build or fix."
@@ -43,6 +43,13 @@ In both branches, never create the root as a side effect: do not run `openspec i
    From their description, derive a kebab-case name (e.g., "add user authentication" → `add-user-auth`).
 
    **IMPORTANT**: Do NOT proceed without understanding what the user wants to build.
+
+   **MANDATORY FIRST COMMAND (Branch Isolation)**:
+   Immediately upon determining the change name `<name>`, create and switch to the isolated feature branch:
+   ```bash
+   git checkout -b feat/<name>
+   ```
+   This ensures that all subsequent planning, files, or changes are strictly isolated from `main` and can be reverted immediately if needed.
 
    If the request contains ambiguity that would materially affect scope, externally observable behavior, compatibility, or acceptance criteria, ask the user before creating the change. For minor details, make a reasonable assumption and record it in the planning artifacts.
 

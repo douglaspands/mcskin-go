@@ -16,10 +16,14 @@ context: |
     - Host Security: Strict workspace containment. Zero sudo or privilege escalation. Air-gapped offline test execution. Synchronous commands bounded by 30s timeouts.
     - Token Optimization: Run targeted tests (go test -run TestX ./...), keep responses concise, avoid dumping binaries. Proactively propose creating a SKILL whenever a repetitive workflow can save tokens, specify required autonomy permissions, and upon user approval grant those permissions in the safety gate to avoid repetitive prompts.
     - Autonomy: Autonomous execution for local read, test, build, and git commit. Permission required for destructive commands.
-  Git Conventions: Conventional Commits format (feat, fix, test, refactor, docs, chore).
+  Git Conventions:
+    - Branching Strategy: The VERY FIRST action upon triggering `/opsx-propose` MUST be creating the branch `feat/<nome_spec>` (`git checkout -b feat/<nome_spec>`) to ensure safe rollback isolation.
+    - Merging Strategy: After `/opsx-archive` completes all change archiving and spec synchronization, request user confirmation to merge `feat/<nome_spec>` into `main` using the squash method (`git merge --squash`).
+    - Commits: Conventional Commits format (feat, fix, test, refactor, docs, chore).
 
 rules:
   proposal:
+    - "The very first action upon initiating a proposal MUST be creating the branch 'feat/<change-name>' for rollback isolation"
     - "Always include Why, What Changes, Capabilities, and Impact sections"
     - "Adhere to the zero external dependency principle"
   specs:
@@ -46,3 +50,4 @@ operations:
     guidance:
       - "Verify all tests pass (go test ./...) and binaries build before archiving"
       - "Summarize changes and spec synchronization outcome"
+      - "Request user approval to squash merge the feature branch into main (git checkout main && git merge --squash feat/<change-name>)"

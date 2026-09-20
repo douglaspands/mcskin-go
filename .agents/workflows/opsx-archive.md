@@ -166,6 +166,12 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Spec sync status (synced / sync skipped / no delta specs)
    - Note about any warnings (incomplete artifacts/tasks)
 
+7. **Squash Merge to Main (Mandatory User Confirmation)**
+
+   Immediately after the archive is complete and verified, prompt the user to squash merge the feature branch into `main`:
+   > "The change `<change-name>` has been successfully archived. Would you like to squash merge `feat/<change-name>` into `main`?
+   > Run: `git checkout main && git merge --squash feat/<change-name>`"
+
 **Output On Success**
 
 ```markdown

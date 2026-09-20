@@ -28,13 +28,21 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
 
 1. **Explore / Propose**:
    - For brainstorming or exploring ideas: run `/opsx-explore`.
-   - To propose a new feature: run `/opsx-propose "<feature description>"` or use `openspec new change "<change-name>"`.
+   - **MANDATORY FIRST STEP (Branch Isolation)**: The very first command executed upon triggering `/opsx-propose` MUST be creating and checking out a dedicated feature branch:
+     ```bash
+     git checkout -b feat/<nome_spec>
+     ```
+     This ensures complete sandbox isolation so that if anything deviates or fails, changes can be rolled back without impacting `main`.
 2. **Review Planning Artifacts**:
    - Ensure `proposal.md`, `specs/`, `design.md`, and `tasks.md` are coherent and validated (`openspec validate <change-name>`).
 3. **Implementation (`/opsx-apply`)**:
    - Work through tasks sequentially. Update tasks in `tasks.md` as they are completed (`- [ ]` -> `- [x]`).
 4. **Archive (`/opsx-archive`)**:
    - Once all tasks are complete and verified (`go test ./...` and `go build ./...`), archive the change to sync specs.
+   - **MANDATORY SQUASH MERGE REQUEST**: Immediately after archiving and synchronization are finished, request user confirmation to merge the feature branch into `main` using squash:
+     ```bash
+     git checkout main && git merge --squash feat/<nome_spec>
+     ```
 
 ---
 

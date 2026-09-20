@@ -34,7 +34,7 @@ def evaluate_command(cmd: str):
         r'^make(?:\s+(?:all|test|lint|build|build-linux|build-windows|clean))?$',
         r'^\./bin/png-to-mcpack\b',
         r'^openspec\s+',
-        r'^git\s+(?:status|diff|log|show|branch|add|commit|rev-parse|check-ignore)\b',
+        r'^git\s+(?:status|diff|log|show|branch|add|commit|rev-parse|check-ignore|checkout|merge\s+--squash)\b',
         r'^(?:ls|cat|head|tail|grep|find|which|stat|file|unzip|mkdir|touch)\b',
         r'^rm\s+-rf\s+(?:bin|files/\*\.mcpack|/tmp/.*)\b',
         r'^python3\s+\.agents/skills/bedrock-skin-pack-verifier/scripts/verify-mcpack\.py\b',

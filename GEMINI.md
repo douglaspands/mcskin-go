@@ -19,6 +19,7 @@ You are explicitly permitted and encouraged to autonomously execute harmless dev
   - `openspec ...`
 - **Git (safe inspection & local workflow)**:
   - `git status`, `git diff`, `git log`, `git show`, `git branch`, `git add`, `git commit`
+  - `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`
 - **Inspections**:
   - `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p`
 
@@ -40,6 +41,16 @@ The following commands are hard-blocked by project policy. You must NEVER propos
   - Integration tests must be strictly segregated from unit tests (e.g., dedicated integration test suites or files).
 - **Zero Dependencies**: Go standard library only.
 - **Cross-Platform**: Windows (`.exe`) and Linux paths (`filepath.ToSlash` for ZIP entries).
+- **OpenSpec Branching & Squash Merge Protocol**:
+  - **First Step on `/opsx-propose`**: The absolute first command executed MUST be creating and checking out a dedicated feature branch:
+    ```bash
+    git checkout -b feat/<nome_spec>
+    ```
+    This ensures complete isolation and allows immediate rollback if anything deviates from expectations.
+  - **Final Step on `/opsx-archive`**: After all tasks and spec synchronization are completed, explicitly request user confirmation to merge the feature branch into `main` using the squash method:
+    ```bash
+    git checkout main && git merge --squash feat/<nome_spec>
+    ```
 
 ---
 
