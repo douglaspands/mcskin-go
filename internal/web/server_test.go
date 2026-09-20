@@ -186,6 +186,56 @@ func TestHandleConvert_MissingFile(t *testing.T) {
 	}
 }
 
+func TestHandleConvert_Success_64x32(t *testing.T) {
+	pngData := createTestPNG(t, 64, 32)
+
+	var body bytes.Buffer
+	writer := multipart.NewWriter(&body)
+
+	part, err := writer.CreateFormFile("skin", "retro_steve.png")
+	if err != nil {
+		t.Fatalf("failed to create form file: %v", err)
+	}
+	if _, err := part.Write(pngData); err != nil {
+		t.Fatalf("failed to write png data: %v", err)
+	}
+
+	if err := writer.WriteField("name", "retro_steve"); err != nil {
+		t.Fatalf("failed to write name field: %v", err)
+	}
+	if err := writer.WriteField("model", "classic"); err != nil {
+		t.Fatalf("failed to write model field: %v", err)
+	}
+	writer.Close()
+
+	handler := web.NewHandler(web.Config{
+		Port:     8080,
+		StaticFS: fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("<h1>Test</h1>")}},
+	})
+
+	req := httptest.NewRequest(http.MethodPost, "/api/convert", &body)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+	rec := httptest.NewRecorder()
+
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d. Body: %s", rec.Code, rec.Body.String())
+	}
+
+	if rec.Header().Get("Content-Type") != "application/octet-stream" {
+		t.Errorf("expected Content-Type application/octet-stream, got %s", rec.Header().Get("Content-Type"))
+	}
+
+	zr, err := zip.NewReader(bytes.NewReader(rec.Body.Bytes()), int64(rec.Body.Len()))
+	if err != nil {
+		t.Fatalf("response is not a valid zip: %v", err)
+	}
+	if len(zr.File) < 4 {
+		t.Fatalf("expected at least 4 files in mcpack zip, got %d", len(zr.File))
+	}
+}
+
 func TestServeStatic(t *testing.T) {
 	staticFS, err := web.GetStaticFS()
 	if err != nil {
@@ -205,6 +255,8 @@ func TestServeStatic(t *testing.T) {
 		"/static/style.css",
 		"/static/qrcode.js",
 		"/static/app.js",
+		"/three.min.js",
+		"/static/three.min.js",
 	}
 
 	for _, p := range testPaths {

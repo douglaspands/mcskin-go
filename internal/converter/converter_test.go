@@ -275,3 +275,41 @@ func TestConvertBytes_InvalidDimensions(t *testing.T) {
 		t.Fatal("expected error for 32x32 dimensions, got nil")
 	}
 }
+
+func TestConvert_Valid64x32(t *testing.T) {
+	tempDir := t.TempDir()
+	skinPath := filepath.Join(tempDir, "classic_steve.png")
+	writeTestSkinFile(t, skinPath, 64, 32)
+
+	expectedMcpackPath := filepath.Join(tempDir, "classic_steve.mcpack")
+
+	res, err := converter.Convert(converter.Options{
+		InputPath: skinPath,
+		Overwrite: true,
+	})
+	if err != nil {
+		t.Fatalf("unexpected conversion error for 64x32 skin: %v", err)
+	}
+
+	if res.OutputPath != expectedMcpackPath {
+		t.Fatalf("expected output path %q, got %q", expectedMcpackPath, res.OutputPath)
+	}
+
+	// Verify mcpack contents
+	zr, err := zip.OpenReader(expectedMcpackPath)
+	if err != nil {
+		t.Fatalf("failed to open mcpack archive: %v", err)
+	}
+	defer zr.Close()
+
+	skinsBytes := readZipEntry(t, zr, "skins.json")
+	var skinsCfg bedrock.SkinsConfig
+	if err := json.Unmarshal(skinsBytes, &skinsCfg); err != nil {
+		t.Fatalf("failed to unmarshal skins.json: %v", err)
+	}
+
+	if len(skinsCfg.Skins) == 0 {
+		t.Fatal("expected at least 1 skin entry in skins.json")
+	}
+}
+

@@ -88,8 +88,8 @@ def verify_mcpack(filepath: str):
                         errors.append(f"Invalid texture PNG: {err}")
                     else:
                         metadata["texture_dimensions"] = f"{dims[0]}x{dims[1]}"
-                        if dims not in [(64, 64), (128, 128)]:
-                            errors.append(f"Unsupported dimensions {dims[0]}x{dims[1]} (must be 64x64 or 128x128)")
+                        if dims not in [(64, 64), (64, 32), (128, 128)]:
+                            errors.append(f"Unsupported dimensions {dims[0]}x{dims[1]} (must be 64x64, 64x32, or 128x128)")
                 except Exception as e:
                     errors.append(f"Error inspecting texture {texture_name}: {str(e)}")
 

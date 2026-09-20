@@ -6,6 +6,7 @@
   <title>CRIE SKINS LEGAIS - Minecraft Bedrock Skin Pack</title>
   <meta name="description" content="Converta sua imagem PNG em pacote de skin .mcpack para Minecraft Bedrock de forma super fácil e divertida!">
   <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/three.min.js"></script>
 </head>
 <body>
 
@@ -18,12 +19,24 @@
       <h1 class="site-title">
         <span class="icon">⛏️</span> CRIE SKINS LEGAIS <span class="icon">⛏️</span>
       </h1>
-      <p class="site-subtitle">Transforme suas skins PNG em pacotes .mcpack para jogar no celular, tablet ou PC!</p>
+      <p class="site-subtitle">Crie, edite e transforme suas skins em pacotes .mcpack para jogar no celular, tablet ou PC!</p>
+
+      <!-- Barra de Navegação Superior (Conversor vs Criador) -->
+      <nav class="main-nav" aria-label="Navegação Principal">
+        <button type="button" class="nav-tab active" id="tabConverter" data-target="viewConverter">
+          <span class="nav-icon">📦</span> Conversor de Skin
+        </button>
+        <button type="button" class="nav-tab" id="tabEditor" data-target="viewEditor">
+          <span class="nav-icon">🎨</span> Criador de Skins 3D
+        </button>
+      </nav>
     </div>
   </header>
 
   <main class="main-container">
-    <!-- Card Principal do Conversor -->
+    <!-- TELA 1: CONVERSOR & WI-FI -->
+    <div class="view-panel active" id="viewConverter">
+      <div class="converter-grid">
     <section class="mc-card">
       <h2 class="card-title">🎨 1. Escolha sua Skin</h2>
 
@@ -32,7 +45,7 @@
         <div class="dropzone-icon">✨</div>
         <div class="dropzone-text">Arraste sua skin aqui</div>
         <div class="dropzone-hint">ou toque para escolher a imagem PNG do seu aparelho</div>
-        <div class="dropzone-highlight">64x64 ou 128x128 pixels</div>
+        <div class="dropzone-highlight">64x64, 64x32 (Clássico) ou 128x128 pixels</div>
         <input type="file" id="skinInput" accept="image/png" style="display: none;">
       </div>
 
@@ -93,7 +106,7 @@
       <div class="status-card error" id="errorBanner">
         <div class="status-title">⚠️ Ops! Algo deu errado</div>
         <div class="status-msg" id="errorMessageText">
-          Verifique se a imagem é uma skin válida do Minecraft (tamanho 64x64 ou 128x128 pixels).
+          Verifique se a imagem é uma skin válida do Minecraft (tamanho 64x64, 64x32 ou 128x128 pixels).
         </div>
       </div>
     </section>
@@ -130,6 +143,156 @@
         </div>
       </div>
     </aside>
+      </div><!-- .converter-grid -->
+    </div><!-- #viewConverter -->
+
+    <!-- TELA 2: CRIADOR / EDITOR DE SKINS 3D & 2D -->
+    <div class="view-panel" id="viewEditor" style="display: none;">
+      <section class="mc-card editor-card">
+        <!-- Barra de Ação Rápida Superior -->
+        <div class="editor-topbar">
+          <div class="topbar-group">
+            <button type="button" class="btn-topbar" id="btnUndo" title="Desfazer ação">↩️ Desfazer</button>
+            <button type="button" class="btn-topbar" id="btnRedo" title="Refazer ação">↪️ Refazer</button>
+          </div>
+
+          <div class="topbar-group">
+            <span class="topbar-label">Modelo:</span>
+            <button type="button" class="btn-template active" id="tplSteve">👤 Steve</button>
+            <button type="button" class="btn-template" id="tplAlex">👱 Alex</button>
+            <button type="button" class="btn-template" id="tplBlank">⬜ Do Zero</button>
+          </div>
+
+          <div class="topbar-group">
+            <span class="topbar-label">Formato:</span>
+            <select id="editorDimSelect" class="mc-select">
+              <option value="64x64" selected>64x64 (Padrão)</option>
+              <option value="64x32">64x32 (Clássico)</option>
+              <option value="128x128">128x128 (HD)</option>
+            </select>
+          </div>
+
+          <div class="topbar-group">
+            <button type="button" class="btn-topbar" id="btnUploadSkin">📂 Abrir Skin (PNG)</button>
+            <input type="file" id="editorFileInput" accept="image/png" style="display: none;">
+          </div>
+        </div>
+
+        <!-- Área de Criação (Ferramentas à Esquerda, Canvas ao Centro) -->
+        <div class="editor-workspace">
+          <!-- Coluna Esquerda de Ferramentas -->
+          <aside class="editor-sidebar">
+            <!-- Alternador de Visualização: 3D vs Folha 2D -->
+            <div class="sidebar-section">
+              <div class="section-subtitle">Visualização:</div>
+              <div class="segmented-control">
+                <button type="button" class="seg-btn active" id="btnMode3D">🧊 Boneco 3D</button>
+                <button type="button" class="seg-btn" id="btnMode2D">📜 Folha 2D</button>
+              </div>
+            </div>
+
+            <!-- Modo de Toque (Essencial para Telas Sensíveis) -->
+            <div class="sidebar-section touch-mode-box">
+              <div class="section-subtitle">Dedo na Tela (Celular / Tablet):</div>
+              <div class="segmented-control">
+                <button type="button" class="seg-btn active" id="btnTouchPaint">🖌️ Pintar</button>
+                <button type="button" class="seg-btn" id="btnTouchRotate">🔄 Girar</button>
+              </div>
+            </div>
+
+            <!-- Ferramentas de Desenho -->
+            <div class="sidebar-section">
+              <div class="section-subtitle">Ferramentas:</div>
+              <div class="tools-grid">
+                <button type="button" class="btn-tool active" id="toolPencil" title="Lápis de Pixel">✏️ Lápis</button>
+                <button type="button" class="btn-tool" id="toolBucket" title="Balde de Tinta">🪣 Balde</button>
+                <button type="button" class="btn-tool" id="toolEraser" title="Borracha">🧹 Borracha</button>
+                <button type="button" class="btn-tool" id="toolPipette" title="Conta-Gotas">🎯 Pipeta</button>
+              </div>
+            </div>
+
+            <!-- Camadas -->
+            <div class="sidebar-section">
+              <div class="section-subtitle">Camada de Pintura:</div>
+              <div class="segmented-control">
+                <button type="button" class="seg-btn active" id="btnLayerBase">👕 Corpo Base</button>
+                <button type="button" class="seg-btn" id="btnLayerOverlay">🧥 Camada 3D</button>
+              </div>
+              <label class="glass-option" id="lblGlassMode">
+                <input type="checkbox" id="chkGlassMode">
+                <span>🪟 Modo Vidro (50% Transparente)</span>
+              </label>
+            </div>
+
+            <!-- Paleta de Cores Minecraft -->
+            <div class="sidebar-section">
+              <div class="section-subtitle">Cores Fáceis do Minecraft:</div>
+              <div class="palette-grid" id="paletteGrid"></div>
+              <div class="color-picker-row">
+                <label for="customColorPicker" class="color-picker-label">Qualquer Cor:</label>
+                <input type="color" id="customColorPicker" value="#2ecc71" class="color-input">
+                <div class="current-color-box" id="currentColorBox"></div>
+              </div>
+            </div>
+
+            <!-- Ocultar Partes -->
+            <div class="sidebar-section">
+              <div class="section-subtitle">Ocultar Partes (Pintar por dentro):</div>
+              <div class="parts-grid">
+                <button type="button" class="btn-part active" data-part="head">Cabeça</button>
+                <button type="button" class="btn-part active" data-part="torso">Tronco</button>
+                <button type="button" class="btn-part active" data-part="rightArm">Braço D</button>
+                <button type="button" class="btn-part active" data-part="leftArm">Braço E</button>
+                <button type="button" class="btn-part active" data-part="rightLeg">Perna D</button>
+                <button type="button" class="btn-part active" data-part="leftLeg">Perna E</button>
+              </div>
+            </div>
+          </aside>
+
+          <!-- Coluna Central de Desenho -->
+          <div class="editor-stage">
+            <!-- Visão 3D -->
+            <div class="viewport-3d-box" id="wrapper3D">
+              <canvas id="editor3DCanvas" width="440" height="440"></canvas>
+              <div class="snap-views-bar">
+                <button type="button" class="btn-snap" data-dir="front">👤 Frente</button>
+                <button type="button" class="btn-snap" data-dir="back">🔄 Costas</button>
+                <button type="button" class="btn-snap" data-dir="left">⬅️ Lado E</button>
+                <button type="button" class="btn-snap" data-dir="right">➡️ Lado D</button>
+                <button type="button" class="btn-snap" data-dir="top">⬆️ Cima</button>
+                <button type="button" class="btn-snap" data-dir="bottom">⬇️ Baixo</button>
+              </div>
+            </div>
+
+            <!-- Visão 2D Folha Aberta -->
+            <div class="viewport-2d-box" id="wrapper2D" style="display: none;">
+              <div class="sheet-hint">Toque nos quadradinhos das partes abertas para desenhar com precisão:</div>
+              <div class="canvas-2d-container">
+                <canvas id="editor2DCanvas" width="512" height="512"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ações Finais: Salvar PNG e Gerar Pacote -->
+        <div class="editor-actions">
+          <button type="button" class="btn-minecraft btn-download-png" id="btnDownloadPng">
+            <span>💾 BAIXAR SKIN (.PNG)</span>
+          </button>
+          <button type="button" class="btn-minecraft btn-editor-convert" id="btnEditorConvert">
+            <span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>
+          </button>
+        </div>
+
+        <div class="status-card success" id="editorSuccessBanner" style="display: none;">
+          <div class="status-title">🎉 Uhuuu! Sua skin está pronta!</div>
+          <div class="status-msg" id="editorSuccessMsg"></div>
+          <a id="editorDownloadFallbackBtn" class="btn-minecraft" style="margin-top: 14px; text-decoration: none; font-size: 1rem; padding: 12px; display: none;" href="#" download>
+            📥 Baixar Novamente
+          </a>
+        </div>
+      </section>
+    </div>
   </main>
 
   <!-- Modal para QR Code Gigante em Alta Definição -->

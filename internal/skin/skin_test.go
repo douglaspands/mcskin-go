@@ -46,6 +46,17 @@ func TestValidateSkin_Valid128x128(t *testing.T) {
 	}
 }
 
+func TestValidate_64x32(t *testing.T) {
+	data := createTestPNG(64, 32)
+	info, err := skin.Validate(bytes.NewReader(data))
+	if err != nil {
+		t.Fatalf("expected valid 64x32 skin to pass, got: %v", err)
+	}
+	if info.Width != 64 || info.Height != 32 {
+		t.Fatalf("expected dimensions 64x32, got %dx%d", info.Width, info.Height)
+	}
+}
+
 func TestValidateSkin_InvalidDimensions(t *testing.T) {
 	testCases := []struct {
 		name   string
@@ -54,7 +65,6 @@ func TestValidateSkin_InvalidDimensions(t *testing.T) {
 	}{
 		{"100x100", 100, 100},
 		{"32x32", 32, 32},
-		{"64x32_legacy", 64, 32},
 		{"64x128", 64, 128},
 	}
 
