@@ -64,6 +64,11 @@ To minimize token consumption and maximize response efficiency:
    - Restrict log outputs to relevant stack traces or failure messages.
 3. **Structured Communication**:
    - Omit discursive pleasantries; report task status, diff summaries, and verification commands directly.
+4. **Proactive Skill Suggestion for Token Efficiency**:
+   - Whenever an agent detects a repetitive, multi-step, or verbose workflow where creating a specialized SKILL (`.agents/skills/<name>/SKILL.md`) would reduce context window load via progressive disclosure, the agent MUST:
+     - Proactively present the proposal to the user.
+     - Detail the token conservation rationale and proposed skill structure.
+     - Await explicit user approval before creating the skill.
 
 ---
 

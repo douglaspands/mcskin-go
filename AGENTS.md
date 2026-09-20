@@ -71,6 +71,7 @@ To guarantee safe, efficient, and bounded execution cycles:
 - **Targeted Test Execution**: Run targeted tests (e.g., `go test -v -run TestSpecific ./internal/...`) while iterating. Do not run verbose full-suite tests on every minor edit.
 - **Context Hygiene**: Do not dump binary files, large images, or massive directory trees into the context.
 - **Concise Communication**: Keep outputs structured, actionable, and focused on code changes and verification results.
+- **Proactive Skill Suggestion**: Whenever a recurring, multi-step, or verbose workflow is identified that could save context tokens via progressive disclosure, proactively suggest creating a new SKILL to the user and request their approval before implementing it.
 
 ### Safe Autonomy Boundaries
 

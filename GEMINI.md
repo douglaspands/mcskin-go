@@ -36,3 +36,12 @@ The following commands are hard-blocked by project policy. You must NEVER propos
 - **TDD First**: Always write tests in `*_test.go` and verify RED before implementing code (GREEN).
 - **Zero Dependencies**: Go standard library only.
 - **Cross-Platform**: Windows (`.exe`) and Linux paths (`filepath.ToSlash` for ZIP entries).
+
+---
+
+## 3. Token Conservation & Proactive Skill Creation
+- **Proactive Skill Detection**: Whenever you identify a repetitive, multi-step, or verbose workflow where creating a specialized **SKILL** (`.agents/skills/<name>/SKILL.md`) would conserve context window tokens through progressive disclosure, you MUST:
+  1. Clearly explain to the user the workflow opportunity and the token savings benefit.
+  2. Propose the name, scope, and structure of the recommended SKILL.
+  3. Explicitly ask for user approval before creating it.
+
