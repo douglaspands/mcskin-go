@@ -1,0 +1,45 @@
+schema: spec-driven
+
+context: |
+  Project: png-to-mcpack (Minecraft Bedrock Skin Pack Converter)
+  Language & Toolchain: Go 1.25+, standard library only (image/png, archive/zip, crypto/rand, encoding/json, path/filepath). Zero third-party runtime dependencies.
+  Platform Compatibility: Cross-platform (Linux and Windows amd64). Use filepath.ToSlash() for zip entries.
+  Methodology: Test-Driven Development (TDD). Tests MUST be authored and verified RED before implementation code is written (GREEN phase).
+  Domain & Standards:
+    - Minecraft Bedrock .mcpack format: zip archive containing manifest.json (format_version: 2, RFC-4122 UUIDv4 header & module), skins.json, texts/en_US.lang, and texture.png.
+    - Skin models: classic (geometry.humanoid.custom, 4px arms) and slim (geometry.humanoid.customSlim, 3px arms).
+    - Image validation: 64x64 or 128x128 RGBA PNG only.
+    - Output location: Exact same directory as input PNG with matching basename and .mcpack extension.
+  AI Agent Governance:
+    - State Graph: [Plan/OpenSpec] -> [TDD: Write Tests (Red)] -> [Implement (Green)] -> [Verify & Lint] -> [Commit].
+    - Loop Engineering: Max 3 repair attempts per failing test. Halt on repeated identical errors.
+    - Token Optimization: Run targeted tests (go test -run TestX ./...), keep responses concise, avoid dumping binaries.
+    - Autonomy: Autonomous execution for local read, test, build, and git commit. Permission required for destructive commands.
+  Git Conventions: Conventional Commits format (feat, fix, test, refactor, docs, chore).
+
+rules:
+  proposal:
+    - "Always include Why, What Changes, Capabilities, and Impact sections"
+    - "Adhere to the zero external dependency principle"
+  specs:
+    - "Use strict WHEN / THEN acceptance scenarios"
+    - "Address cross-platform (Linux and Windows) behavior"
+  design:
+    - "Include package architecture and dependency decisions"
+    - "Define TDD test execution sequence prior to implementation logic"
+    - "Define AI Agent governance and loop limits"
+  tasks:
+    - "Structure tasks into TDD Red phase, Green implementation phase, and verification phase"
+    - "Group tasks into atomic, verifiable steps"
+
+operations:
+  apply:
+    guidance:
+      - "Strictly adhere to TDD: verify test failure (RED) before implementing code (GREEN)"
+      - "Never exceed 3 iteration loops on a failing test without user escalation"
+      - "Run targeted tests to optimize execution time and token usage"
+      - "Mark tasks complete immediately in tasks.md upon verification"
+  archive:
+    guidance:
+      - "Verify all tests pass (go test ./...) and binaries build before archiving"
+      - "Summarize changes and spec synchronization outcome"
