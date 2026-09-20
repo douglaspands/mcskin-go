@@ -1556,4 +1556,61 @@ footer p {
   color: #fff;
 }
 
+/* ==========================================================================
+   Nome da Skin e Indicadores de Arquivo
+   ========================================================================== */
+.converter-name-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(77, 238, 234, 0.4);
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin: 6px 0;
+  font-size: 0.85rem;
+  color: #fff;
+}
+
+.converter-name-badge strong {
+  color: #4deeea;
+}
+
+.editor-name-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(77, 238, 234, 0.3);
+  border-radius: 6px;
+  padding: 8px 16px;
+  margin-bottom: 12px;
+  font-size: 0.95rem;
+  color: #e0e0e0;
+}
+
+.editor-name-bar strong {
+  color: #4deeea;
+}
+
+.btn-rename-pill {
+  background: #2a2e33;
+  color: #fecb00;
+  border: 1px solid #4a5568;
+  border-radius: 4px;
+  padding: 3px 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-rename-pill:hover {
+  background: #38424d;
+  border-color: #fecb00;
+  color: #fff;
+  transform: translateY(-1px);
+}
+
 

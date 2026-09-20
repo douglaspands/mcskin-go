@@ -57,6 +57,10 @@
         <div class="preview-details">
           <div class="skin-file-name" id="fileNameDisplay">skin.png</div>
           <div class="skin-dims" id="fileDimsDisplay">64 x 64 pixels</div>
+          <div class="converter-name-badge" id="converterSkinNameBadge" style="display: none;">
+            <span>🏷️ Salvar como: <strong id="converterCurrentNameText"></strong></span>
+            <button type="button" class="btn-rename-pill" id="btnConverterRename" title="Alterar nome do arquivo">✏️ Alterar</button>
+          </div>
           <button type="button" class="btn-change-skin" id="btnChangeSkin">🔄 Escolher Outra</button>
         </div>
       </div>
@@ -175,6 +179,7 @@
           <div class="topbar-group">
             <button type="button" class="btn-topbar" id="btnUploadSkin">📂 Abrir Skin (PNG)</button>
             <input type="file" id="editorFileInput" accept="image/png" style="display: none;">
+            <button type="button" class="btn-topbar" id="btnEditSkinName" title="Alterar o nome do arquivo da skin">🏷️ <span id="editorSkinNameDisplay">Sem nome</span> ✏️</button>
           </div>
 
           <div class="topbar-group">
@@ -309,6 +314,10 @@
         </div>
 
         <!-- Ações Finais: Salvar PNG e Gerar Pacote -->
+        <div class="editor-name-bar" id="editorNamePill" style="display: none;">
+          <span>🏷️ Nome da Skin: <strong id="editorCurrentNameText"></strong></span>
+          <button type="button" class="btn-rename-pill" id="btnRenameSkin">✏️ Alterar</button>
+        </div>
         <div class="editor-actions">
           <button type="button" class="btn-minecraft btn-download-png" id="btnDownloadPng">
             <span>💾 BAIXAR SKIN (.PNG)</span>

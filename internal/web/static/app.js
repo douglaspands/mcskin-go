@@ -31,7 +31,22 @@ document.addEventListener("DOMContentLoaded", function() {
   var btnConfirmSkinName = document.getElementById("btnConfirmSkinName");
   var btnCancelSkinName = document.getElementById("btnCancelSkinName");
   var currentSkinName = "";
+  var hasConfirmedSkinName = false;
   var pendingDownloadAction = null;
+
+  function updateSkinNameDisplays(name) {
+    var display = name || "Sem nome";
+    var edDisplay = document.getElementById("editorSkinNameDisplay");
+    var edText = document.getElementById("editorCurrentNameText");
+    var convText = document.getElementById("converterCurrentNameText");
+    var convBadge = document.getElementById("converterSkinNameBadge");
+    var edPill = document.getElementById("editorNamePill");
+    if (edDisplay) edDisplay.textContent = display;
+    if (edText) edText.textContent = display;
+    if (convText) convText.textContent = display;
+    if (convBadge) convBadge.style.display = name ? "inline-flex" : "none";
+    if (edPill) edPill.style.display = name ? "flex" : "none";
+  }
 
   function generateDefaultSkinName() {
     var now = new Date();
@@ -49,15 +64,25 @@ document.addEventListener("DOMContentLoaded", function() {
     return clean || "custom_skin";
   }
 
-  function promptSkinName(suggestedName, actionCallback) {
+  function promptSkinName(suggestedName, actionCallback, forceModal) {
     if (typeof suggestedName === "function") {
+      forceModal = actionCallback;
       actionCallback = suggestedName;
       suggestedName = null;
     }
+
+    // Se o usuário já preencheu/confirmou o nome uma vez e não for abertura forçada,
+    // não precisa solicitar toda vez: executa diretamente a ação com o nome já escolhido!
+    if (hasConfirmedSkinName && currentSkinName && !forceModal) {
+      if (actionCallback) {
+        actionCallback(currentSkinName);
+      }
+      return;
+    }
+
     pendingDownloadAction = actionCallback;
     var nameToUse = suggestedName || currentSkinName || generateDefaultSkinName();
     nameToUse = sanitizeName(nameToUse);
-    currentSkinName = nameToUse;
 
     if (skinNameInput) {
       skinNameInput.value = nameToUse;
@@ -92,8 +117,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
   function confirmSkinDownload() {
     var chosen = sanitizeName(skinNameInput ? skinNameInput.value : "");
-    if (!chosen) chosen = generateDefaultSkinName();
+    if (!chosen) chosen = currentSkinName || generateDefaultSkinName();
     currentSkinName = chosen;
+    hasConfirmedSkinName = true;
+    updateSkinNameDisplays(chosen);
+
     var cb = pendingDownloadAction;
     closeSkinNameModal();
     if (cb) cb(chosen);
@@ -110,6 +138,25 @@ document.addEventListener("DOMContentLoaded", function() {
       } else if (e.key === "Escape") {
         closeSkinNameModal();
       }
+    });
+  }
+
+  var btnConverterRename = document.getElementById("btnConverterRename");
+  if (btnConverterRename) {
+    btnConverterRename.addEventListener("click", function() {
+      promptSkinName(currentSkinName, null, true);
+    });
+  }
+  var btnEditSkinName = document.getElementById("btnEditSkinName");
+  if (btnEditSkinName) {
+    btnEditSkinName.addEventListener("click", function() {
+      promptSkinName(currentSkinName, null, true);
+    });
+  }
+  var btnRenameSkin = document.getElementById("btnRenameSkin");
+  if (btnRenameSkin) {
+    btnRenameSkin.addEventListener("click", function() {
+      promptSkinName(currentSkinName, null, true);
     });
   }
 
@@ -387,6 +434,10 @@ document.addEventListener("DOMContentLoaded", function() {
         loadedImage = img;
         fileNameDisplay.textContent = file.name;
         fileDimsDisplay.textContent = w + " x " + h + " pixels (" + (h === 32 ? "Clássica Antiga" : "Moderna HD") + ")";
+        var rawBase = file.name.replace(/\.[^/.]+$/, "");
+        currentSkinName = sanitizeName(rawBase);
+        hasConfirmedSkinName = false;
+        updateSkinNameDisplays(currentSkinName);
 
         // Renderiza personagem no canvas
         renderSkinCharacter(img, getSelectedModel());
@@ -405,7 +456,7 @@ document.addEventListener("DOMContentLoaded", function() {
   btnConvert.addEventListener("click", function() {
     if (!selectedFile) return;
 
-    var initialSuggestion = selectedFile.name.replace(/\.[^/.]+$/, "");
+    var initialSuggestion = currentSkinName || selectedFile.name.replace(/\.[^/.]+$/, "");
     promptSkinName(initialSuggestion, function(confirmedName) {
       btnConvert.disabled = true;
       btnConvert.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>";
@@ -1411,7 +1462,18 @@ document.addEventListener("DOMContentLoaded", function() {
       });
     }
 
-    // 13. Abrir Skin (Upload PNG)
+    // 13. Nova Skin e Abrir Skin (Upload PNG)
+    var btnNewSkin = document.getElementById("btnNewSkin");
+    if (btnNewSkin) {
+      btnNewSkin.addEventListener("click", function() {
+        currentSkinName = "";
+        hasConfirmedSkinName = false;
+        updateSkinNameDisplays("");
+        loadTemplate("blank");
+        playSound("click");
+      });
+    }
+
     var btnUploadSkin = document.getElementById("btnUploadSkin");
     var editorFileInput = document.getElementById("editorFileInput");
     if (btnUploadSkin && editorFileInput) {
@@ -1424,6 +1486,8 @@ document.addEventListener("DOMContentLoaded", function() {
           if (file.name) {
             var rawName = file.name.replace(/\.[^/.]+$/, "");
             currentSkinName = sanitizeName(rawName);
+            hasConfirmedSkinName = true;
+            updateSkinNameDisplays(currentSkinName);
           }
           var reader = new FileReader();
           reader.onload = function(e) {

@@ -322,12 +322,13 @@ func TestEditorStaticAssets_HTMLStructure(t *testing.T) {
 		t.Errorf("index.html must not contain deprecated horizontal slider id=\"zoom3DSlider\"")
 	}
 
-	// 4. Skin naming modal elements
+	// 4. Skin naming modal elements & name display
 	namingModalElements := []string{
 		"id=\"skinNameModal\"",
 		"id=\"skinNameInput\"",
 		"id=\"btnConfirmSkinName\"",
 		"id=\"btnCancelSkinName\"",
+		"id=\"editorSkinNameDisplay\"",
 	}
 	for _, elem := range namingModalElements {
 		if !strings.Contains(html, elem) {
@@ -403,6 +404,7 @@ func TestEditorStaticAssets_JavaScriptLogic(t *testing.T) {
 		"skinNameInput",
 		"btnConfirmSkinName",
 		"skin_",
+		"hasConfirmedSkinName",
 	}
 	for _, n := range expectedNamingLogic {
 		if !strings.Contains(appJS, n) {
