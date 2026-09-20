@@ -157,6 +157,13 @@ In both branches, never create the root as a side effect: do not run `openspec i
    mv "<changeRoot>" "<planningHome.changesDir>/archive/<target-name>"
    ```
 
+   **Mandatory Git Commit on Feature Branch**:
+   Stage and commit all archive directory moves and synced specs directly to the feature branch `feat/<change-name>`:
+   ```bash
+   git add openspec/
+   git commit -m "docs(openspec): archive change <change-name> and sync main specs"
+   ```
+
 6. **Display summary**
 
    Show archive completion summary including:
@@ -168,8 +175,8 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
 7. **Squash Merge or GitHub Pull Request (Mandatory User Confirmation)**
 
-   Immediately after the archive is complete and verified, prompt the user to choose between squash merge or opening a GitHub Pull Request:
-   > "The change `<change-name>` has been successfully archived. Would you like to merge into `main` or open a Pull Request on GitHub?
+   Immediately after the archive is complete, verified, and committed on the feature branch, prompt the user to choose between squash merge or opening a GitHub Pull Request:
+   > "The change `<change-name>` has been successfully archived and committed on `feat/<change-name>`. Would you like to merge into `main` or open a Pull Request on GitHub?
    > 
    > **Option 1: Local Squash Merge into `main`**
    > ```bash
@@ -180,7 +187,13 @@ In both branches, never create the root as a side effect: do not run `openspec i
    > ```bash
    > git push origin feat/<change-name>
    > gh pr create --base main --head feat/<change-name> --title "feat: <change-name>"
+   > git checkout main
    > ```"
+
+   **CRITICAL POST-PR INVARIANT (NO COMMITS ON BRANCH, ZERO COMMITS ON MAIN)**:
+   - When Option 2 is chosen, after `gh pr create` and returning to `main` (`git checkout main`), the working tree must be clean.
+   - **DO NOT make any further commits on the feature branch** (it is frozen awaiting review/merge).
+   - **ABSOLUTELY NEVER MAKE DIRECT COMMITS ON `main`**. The `main` branch is strictly protected. All git updates must happen within the archive command on the feature branch. The PR will be merged on GitHub.
 
 **Output On Success**
 
@@ -256,3 +269,5 @@ Target archive directory already exists.
 - Existing CLI checks, resolved paths, prompts, and command contracts are unchanged
 - Artifact rules constrain only the specs being written and are never operation guidance
 - Never copy runtime context, operation guidance, or artifact-rule text verbatim into output files
+- All git updates (archive moves, synced main specs) MUST be committed on the feature branch during archive before pushing or creating a PR
+- Upon creating a PR and returning to main, NEVER make further commits on the branch, and ABSOLUTELY NEVER commit directly to main

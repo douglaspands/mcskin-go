@@ -30,6 +30,25 @@ def evaluate_command(cmd: str):
                 "reason": f"Blocked destructive command: {desc} ('{cmd_clean}')"
             }
 
+    # 1.1 Protect main branch against direct commits
+    if re.search(r'\bgit\s+commit\b', cmd_clean):
+        if not re.search(r'\bmerge\s+--squash\b', cmd_clean):
+            switches_to_main = bool(re.search(r'\bgit\s+checkout\s+main\b', cmd_clean))
+            is_on_main = False
+            try:
+                import subprocess
+                branch_res = subprocess.run(['git', 'rev-parse', '--abbrev-ref', 'HEAD'], capture_output=True, text=True, timeout=2)
+                if branch_res.returncode == 0 and branch_res.stdout.strip() == "main":
+                    is_on_main = True
+            except Exception:
+                pass
+
+            if is_on_main or switches_to_main:
+                return {
+                    "decision": "deny",
+                    "reason": "Direct commits to 'main' branch are strictly prohibited. All git updates must occur on a feature branch during archive or via PR merge."
+                }
+
     # 2. Allow harmless commands
     allowed_patterns = [
         r'^(?:(?:[A-Z0-9_]+=[^\s]+\s+)*)go\s+(?:test|build|vet|run|fmt|mod\s+(?:tidy|verify|download)|version|env|doc|list)\b',
