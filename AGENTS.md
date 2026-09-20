@@ -47,9 +47,11 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
      3. **Scope Boundary Guard**: Halt and request spec revision if remediation requires out-of-scope architectural changes.
      4. **Targeted Verification**: Re-run targeted unit tests before re-evaluating with QA.
    - Proceed to archive only after receiving a formal `APROVADO` verdict.
+   - **DO NOT Auto-Archive or Prompt PR During Apply**: Upon receiving `APROVADO` in `/opsx-apply`, commit the code, display the approval report, and instruct the user to execute `/opsx-archive`. Do NOT run `archive` automatically and do NOT prompt for PR/merge during the apply phase.
 5. **Archive (`/opsx-archive`)**:
+   - Triggered explicitly when the user runs `/opsx-archive` (or `openspec archive`).
    - Once all tasks are complete, verified, and approved by PO/QA, archive the change to sync specs.
-   - **MANDATORY SQUASH MERGE OR PULL REQUEST PROMPT**: Immediately after archiving and synchronization are finished, request user confirmation to choose between:
+   - **MANDATORY SQUASH MERGE OR PULL REQUEST PROMPT (ONLY AFTER ARCHIVE)**: Immediately after archiving and synchronization are finished within the archive workflow, request user confirmation to choose between:
      1. **Local Squash Merge into `main`**:
         ```bash
         git checkout main && git merge --squash feat/<nome_spec>

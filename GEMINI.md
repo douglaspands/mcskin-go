@@ -57,8 +57,8 @@ The following commands are hard-blocked by project policy. You must NEVER propos
       2. 2-Strike Halting: Halt execution immediately if the identical error or rejection recurs across 2 attempts without progress.
       3. Scope Boundary: Halt if fix requires expanding requirements beyond the spec (trigger `/openspec-update-change`).
       4. Targeted Verification: Re-run tests before re-evaluating with QA.
-    - Proceed to archive only upon formal approval (`APROVADO`).
-  - **Final Step on `/opsx-archive`**: After all tasks and spec synchronization are completed, explicitly request user confirmation to choose between:
+    - **Apply Phase Boundary**: Upon receiving formal approval (`APROVADO`), commit the implementation and inform the user to run `/opsx-archive`. **NEVER automatically archive or solicit PR/merge during the apply phase.**
+  - **Final Step ONLY on `/opsx-archive`**: After the user executes `/opsx-archive` and all spec synchronization and archiving steps are completed, explicitly request user confirmation to choose between:
     1. Merge the feature branch into `main` using the squash method:
        ```bash
        git checkout main && git merge --squash feat/<nome_spec>
