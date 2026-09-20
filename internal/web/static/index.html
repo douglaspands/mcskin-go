@@ -258,11 +258,30 @@
           <div class="editor-stage">
             <!-- Visão 3D -->
             <div class="viewport-3d-box" id="wrapper3D">
-              <canvas id="editor3DCanvas" width="480" height="640"></canvas>
-              <div class="zoom-controls" id="zoom3DControls">
-                <button type="button" class="btn-zoom" id="btnZoom3DOut" title="Diminuir zoom">🔍➖</button>
-                <input type="range" id="zoom3DSlider" class="zoom-slider" min="15" max="90" step="1" value="50">
-                <button type="button" class="btn-zoom" id="btnZoom3DIn" title="Aumentar zoom">🔍➕</button>
+              <div class="viewport-3d-canvas-wrap">
+                <canvas id="editor3DCanvas" width="480" height="640"></canvas>
+                <!-- Bonequinho 2D Flutuante para Focar Partes do Corpo -->
+                <div class="mannequin-widget" id="mannequinWidget" title="Toque nas partes para focar a câmera">
+                  <div class="mannequin-label">Focar</div>
+                  <div class="mannequin-doll">
+                    <div class="mannequin-part mannequin-head" data-mannequin-part="head" title="Focar Cabeça"></div>
+                    <div class="mannequin-row">
+                      <div class="mannequin-part mannequin-arm-d" data-mannequin-part="rightArm" title="Focar Braço Direito"></div>
+                      <div class="mannequin-part mannequin-torso" data-mannequin-part="torso" title="Focar Tronco"></div>
+                      <div class="mannequin-part mannequin-arm-e" data-mannequin-part="leftArm" title="Focar Braço Esquerdo"></div>
+                    </div>
+                    <div class="mannequin-row">
+                      <div class="mannequin-part mannequin-leg-d" data-mannequin-part="rightLeg" title="Focar Perna Direita"></div>
+                      <div class="mannequin-part mannequin-leg-e" data-mannequin-part="leftLeg" title="Focar Perna Esquerda"></div>
+                    </div>
+                  </div>
+                </div>
+                <!-- Controles Verticais Flutuantes de Zoom (🔍+, ⟲, 🔍−) -->
+                <div class="zoom-vertical-controls" id="zoom3DVerticalControls">
+                  <button type="button" class="btn-zoom-vert" id="btnZoom3DIn" title="Aumentar zoom">🔍+</button>
+                  <button type="button" class="btn-zoom-vert btn-zoom-reset" id="btnZoom3DReset" title="Recentrar visão de corpo inteiro">⟲</button>
+                  <button type="button" class="btn-zoom-vert" id="btnZoom3DOut" title="Diminuir zoom">🔍−</button>
+                </div>
               </div>
               <div class="snap-views-bar">
                 <button type="button" class="btn-snap" data-dir="front">👤 Frente</button>
@@ -323,6 +342,26 @@
       <button type="button" class="btn-close-modal" id="btnCloseQrModal">
         ✖ Fechar Tela
       </button>
+    </div>
+  </div>
+
+  <!-- Modal para Nome da Skin antes do Download -->
+  <div class="skin-modal-backdrop" id="skinNameModal" style="display: none;">
+    <div class="skin-modal-content">
+      <h3 class="modal-title">🏷️ Nome da sua Skin</h3>
+      <p class="modal-hint">Escolha um nome fácil para encontrar seu arquivo no aparelho:</p>
+      <div class="skin-name-field-wrap">
+        <input type="text" id="skinNameInput" class="skin-name-input" maxlength="32" placeholder="skin_custom">
+      </div>
+      <p class="modal-hint-sub">Dica: Letras, números e traços (ex: skin_dragao, steve_gamer).</p>
+      <div class="skin-modal-actions">
+        <button type="button" class="btn-minecraft btn-modal-confirm" id="btnConfirmSkinName">
+          <span>✔️ Confirmar e Baixar</span>
+        </button>
+        <button type="button" class="btn-modal-cancel" id="btnCancelSkinName">
+          Cancelar
+        </button>
+      </div>
     </div>
   </div>
 

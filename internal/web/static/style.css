@@ -1176,6 +1176,14 @@ footer p {
 /* Proporção 3:4 (retrato) em vez de quadrado: o boneco humanoide é bem mais
    alto que largo, então essa proporção aproveita mais a tela sem cortar a
    cabeça ou os pés e sem sobrar tanto fundo vazio nas laterais. */
+.viewport-3d-canvas-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  justify-content: center;
+}
+
 #editor3DCanvas {
   width: 100%;
   max-width: 560px;
@@ -1186,6 +1194,131 @@ footer p {
   cursor: crosshair;
   background: radial-gradient(circle, #2c343b 0%, #171a1d 100%);
   border: 2px solid #283038;
+}
+
+/* Bonequinho 2D Flutuante (NovaSkin Mannequin Doll) */
+.mannequin-widget {
+  position: absolute;
+  bottom: 14px;
+  left: 14px;
+  background: rgba(20, 24, 28, 0.90);
+  border: 2px solid #38424d;
+  border-radius: 6px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  user-select: none;
+  pointer-events: auto;
+}
+
+.mannequin-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #a0b0c0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mannequin-doll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.mannequin-part {
+  background: #3b4854;
+  border: 1px solid #5a6e82;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mannequin-part:hover, .mannequin-part:active {
+  background: var(--mc-gold, #fecb00);
+  border-color: #ffffff;
+  transform: scale(1.08);
+}
+
+.mannequin-head {
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+}
+
+.mannequin-row {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+}
+
+.mannequin-torso {
+  width: 20px;
+  height: 28px;
+}
+
+.mannequin-arm-d, .mannequin-arm-e {
+  width: 10px;
+  height: 28px;
+}
+
+.mannequin-leg-d, .mannequin-leg-e {
+  width: 9px;
+  height: 28px;
+}
+
+/* Controles Verticais Flutuantes de Zoom (🔍+, ⟲, 🔍−) */
+.zoom-vertical-controls {
+  position: absolute;
+  bottom: 14px;
+  right: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  z-index: 10;
+  background: rgba(20, 24, 28, 0.90);
+  border: 2px solid #38424d;
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  pointer-events: auto;
+}
+
+.btn-zoom-vert {
+  background: #2b3540;
+  border: 2px solid #445466;
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 700;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-zoom-vert:hover {
+  background: #3d4c5c;
+  border-color: var(--mc-gold, #fecb00);
+  transform: scale(1.06);
+}
+
+.btn-zoom-vert:active {
+  transform: scale(0.94);
+}
+
+.btn-zoom-reset {
+  font-size: 1.25rem;
+  color: var(--mc-gold, #fecb00);
 }
 
 .snap-views-bar {
@@ -1340,4 +1473,87 @@ footer p {
 .btn-editor-convert:hover {
   background: linear-gradient(180deg, #f5b041 0%, #ba4a00 100%);
 }
+
+/* Modal de Confirmação do Nome da Skin */
+.skin-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 16px;
+}
+
+.skin-modal-content {
+  background: var(--mc-panel-bg, #2d2d2d);
+  border: 4px solid var(--mc-black, #0a0a0a);
+  box-shadow: inset 4px 4px 0 var(--mc-panel-bevel-light, #525252),
+              inset -4px -4px 0 var(--mc-panel-bevel-dark, #1b1b1b),
+              var(--pixel-shadow);
+  border-radius: 8px;
+  padding: 24px;
+  max-width: 440px;
+  width: 100%;
+  text-align: center;
+}
+
+.skin-name-field-wrap {
+  margin: 16px 0 10px;
+}
+
+.skin-name-input {
+  width: 100%;
+  background: #141619;
+  border: 3px solid #38424d;
+  color: #fff;
+  font-size: 1.15rem;
+  font-family: var(--font-pixel, monospace);
+  padding: 12px 14px;
+  border-radius: 6px;
+  outline: none;
+  text-align: center;
+  transition: border-color 0.2s;
+}
+
+.skin-name-input:focus {
+  border-color: var(--mc-gold, #fecb00);
+}
+
+.modal-hint-sub {
+  font-size: 0.8rem;
+  color: #9aa0a6;
+  margin-bottom: 20px;
+}
+
+.skin-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-modal-confirm {
+  width: 100%;
+  padding: 12px;
+  font-size: 1rem;
+}
+
+.btn-modal-cancel {
+  background: transparent;
+  border: 2px solid #555;
+  color: #aaa;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-modal-cancel:hover {
+  background: #3a3a3a;
+  color: #fff;
+}
+
 

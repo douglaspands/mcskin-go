@@ -7,10 +7,12 @@ import (
 	"image"
 	"image/color"
 	"image/png"
+	"io/fs"
 	"mime/multipart"
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 	"testing/fstest"
 
@@ -272,4 +274,141 @@ func TestServeStatic(t *testing.T) {
 		}
 	}
 }
+
+func TestEditorStaticAssets_HTMLStructure(t *testing.T) {
+	staticFS, err := web.GetStaticFS()
+	if err != nil {
+		t.Fatalf("failed to get static FS: %v", err)
+	}
+
+	indexBytes, err := fs.ReadFile(staticFS, "index.html")
+	if err != nil {
+		t.Fatalf("failed to read index.html: %v", err)
+	}
+	html := string(indexBytes)
+
+	// 1. Mannequin widget elements
+	expectedElements := []string{
+		"id=\"mannequinWidget\"",
+		"data-mannequin-part=\"head\"",
+		"data-mannequin-part=\"torso\"",
+		"data-mannequin-part=\"rightArm\"",
+		"data-mannequin-part=\"leftArm\"",
+		"data-mannequin-part=\"rightLeg\"",
+		"data-mannequin-part=\"leftLeg\"",
+	}
+	for _, elem := range expectedElements {
+		if !strings.Contains(html, elem) {
+			t.Errorf("index.html missing mannequin element: %s", elem)
+		}
+	}
+
+	// 2. Floating vertical zoom controls with Zoom In, Reset, Zoom Out
+	zoomControls := []string{
+		"class=\"zoom-vertical-controls\"",
+		"id=\"btnZoom3DIn\"",
+		"id=\"btnZoom3DReset\"",
+		"id=\"btnZoom3DOut\"",
+		"⟲",
+	}
+	for _, ctrl := range zoomControls {
+		if !strings.Contains(html, ctrl) {
+			t.Errorf("index.html missing vertical zoom control: %s", ctrl)
+		}
+	}
+
+	// 3. Deprecated horizontal slider MUST NOT be rendered
+	if strings.Contains(html, "id=\"zoom3DSlider\"") {
+		t.Errorf("index.html must not contain deprecated horizontal slider id=\"zoom3DSlider\"")
+	}
+
+	// 4. Skin naming modal elements
+	namingModalElements := []string{
+		"id=\"skinNameModal\"",
+		"id=\"skinNameInput\"",
+		"id=\"btnConfirmSkinName\"",
+		"id=\"btnCancelSkinName\"",
+	}
+	for _, elem := range namingModalElements {
+		if !strings.Contains(html, elem) {
+			t.Errorf("index.html missing skin naming modal element: %s", elem)
+		}
+	}
+}
+
+func TestEditorStaticAssets_JavaScriptLogic(t *testing.T) {
+	staticFS, err := web.GetStaticFS()
+	if err != nil {
+		t.Fatalf("failed to get static FS: %v", err)
+	}
+
+	threeBytes, err := fs.ReadFile(staticFS, "three.min.js")
+	if err != nil {
+		t.Fatalf("failed to read three.min.js: %v", err)
+	}
+	threeJS := string(threeBytes)
+
+	// 1. three.min.js camera target focusing, reset, axis-based raycasting, reticle highlight
+	expectedThreeFeatures := []string{
+		"focusPart",
+		"resetCamera",
+		"this.target",
+		"tNearX",
+		"tNearY",
+		"tNearZ",
+		"hoverPixel",
+	}
+	for _, feat := range expectedThreeFeatures {
+		if !strings.Contains(threeJS, feat) {
+			t.Errorf("three.min.js missing expected feature: %s", feat)
+		}
+	}
+
+	appBytes, err := fs.ReadFile(staticFS, "app.js")
+	if err != nil {
+		t.Fatalf("failed to read app.js: %v", err)
+	}
+	appJS := string(appBytes)
+
+	// 2. app.js complete UV template coverage (neck bottom, shoulder tops, palm bottoms, shoe sides, shoe soles)
+	expectedTemplateCoverage := []string{
+		"16, 0, 8, 8",     // Neck bottom
+		"44, 16, armW, 4", // Right shoulder top
+		"4, 16, 4, 4",     // Right leg top
+		"8, 16, 4, 4",     // Right leg bottom / sole
+		"0, 30, 4, 2",     // Right leg shoe side
+		"8, 30, 4, 2",     // Right leg shoe side
+	}
+	for _, cov := range expectedTemplateCoverage {
+		if !strings.Contains(appJS, cov) {
+			t.Errorf("app.js missing template UV coverage: %s", cov)
+		}
+	}
+
+	// 3. app.js photography-style grid & coordinate normalization with getBoundingClientRect
+	expectedGridLogic := []string{
+		"rgba(255, 255, 255, 0.12)", // subtle photography grid
+		"rect.width",
+		"rect.height",
+	}
+	for _, grid := range expectedGridLogic {
+		if !strings.Contains(appJS, grid) {
+			t.Errorf("app.js missing grid logic: %s", grid)
+		}
+	}
+
+	// 4. app.js skin naming modal logic & upload filename retention
+	expectedNamingLogic := []string{
+		"skinNameModal",
+		"skinNameInput",
+		"btnConfirmSkinName",
+		"skin_",
+	}
+	for _, n := range expectedNamingLogic {
+		if !strings.Contains(appJS, n) {
+			t.Errorf("app.js missing naming modal logic: %s", n)
+		}
+	}
+}
+
 
