@@ -13,9 +13,9 @@
 *.out
 coverage.html
 
-# Generated mcpack files
+# Generated mcpack files and user files
 *.mcpack
-files/*.mcpack
+/files/
 
 # IDE and Editor files
 .idea/
