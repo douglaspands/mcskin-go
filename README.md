@@ -1,6 +1,6 @@
 # mcskin
 
-> Ferramenta em Go de alta performance, leve e sem dependências externas para **criação, atualização e instalação** de skins no Minecraft Bedrock (`.mcpack`), com **foco primordial em smartphones e tablets** (iPads, celulares Android e tablets).
+> **Crie skins do Minecraft Bedrock direto no navegador — sem propaganda, sem cadastro, sem instalar nada.** Um editor 3D/2D completo que roda localmente no seu computador e abre em qualquer celular ou tablet da mesma rede Wi-Fi via QR Code.
 
 [![Go Version](https://img.shields.io/badge/go-1.25%2B-blue.svg)](https://golang.org)
 [![Platform](https://img.shields.io/badge/plataformas-linux%20%7C%20windows-lightgrey.svg)]()
@@ -9,33 +9,68 @@
 
 ---
 
-## ✨ Novidades
+## 💡 Por que o `mcskin` existe
 
-O `mcskin` ganhou um modo web completo com um **editor de skins 3D e 2D embutido no navegador**, sem precisar instalar nada além do próprio binário:
+A maioria dos "criadores de skin" na internet são sites cheios de anúncios piscando, pop-ups, botões de download falsos e pedidos de cadastro — uma armadilha para uma criança de 6 anos que só quer pintar a própria skin. O `mcskin` nasceu para resolver isso:
 
-- 🎨 **Criador de Skins 3D e 2D**: edite skins diretamente no navegador, num boneco 3D interativo ou numa folha 2D desenrolada, com sincronização em tempo real entre as duas visões.
-- 🖥️ **Tela Cheia**: expanda o editor para ocupar a tela inteira e ganhar mais espaço de desenho em qualquer aparelho.
-- 🔍 **Zoom de Precisão**: controles de zoom (botões, roda do mouse e pinça no toque) tanto no boneco 3D quanto na folha 2D, para enxergar e pintar pixel por pixel.
-- 🔲 **Grade de Pixels**: um botão liga/desliga linhas finas nas fronteiras de cada pixel nas duas visões, facilitando encontrar o pixel certo antes de pintar.
-- 🧵 **Suporte a Skins Clássicas 64x32**: o conversor e o editor agora aceitam nativamente o formato legado do Minecraft pré-1.8, com espelhamento automático dos membros.
-- 📦 **Editor com Exportação Direta**: baixe a skin editada como PNG ou gere o `.mcpack` pronto para instalar com um único clique, sem sair do navegador.
+- 🚫 **Zero propaganda, zero rastreamento, zero cadastro**: o servidor roda no computador de casa, dentro da sua própria rede Wi-Fi. Nada é enviado para a internet, não existe conta para criar nem anúncio para clicar.
+- 🧒 **Feito para mãos pequenas**: botões grandes (64px+), linguagem simples em português, efeitos sonoros de "level up" e uma estética autêntica de blocos — pensado desde o início para crianças de 6 anos ou mais.
+- 📴 **100% offline e auto-contido**: um único binário Go, sem Node/NPM, sem CDN externo, sem dependências. Funciona até sem internet, contanto que o computador e o celular estejam na mesma rede local.
+- 📱 **Sem instalar app nenhum**: a criança aponta a câmera do tablet ou celular para o QR Code na tela do computador, abre no navegador e já está editando — e ao terminar, baixa o `.mcpack` e instala no Minecraft com 1 toque.
+
+---
+
+## 🌐 Modo Web — Editor de Skins 3D e 2D no Navegador
+
+Este é o coração do projeto: um servidor web local ("CRIE SKINS LEGAIS") com um **editor de skins 3D e 2D completo**, redesenhado para caber inteiro na tela sem precisar rolar, com um menu lateral discreto e um "Nova Skin" que já sugere um ponto de partida.
+
+```bash
+# Inicia o servidor web na porta padrão (8080) e abre o navegador automaticamente
+./bin/mcskin --web
+```
+
+> No Windows, basta dar duplo clique em `mcskin.exe` sem nenhum argumento — o modo web já inicia sozinho.
+
+<p align="center">
+  <img src="docs/screenshots/editor-3d-redesign-desktop.jpg" alt="Editor 3D redesenhado, com menu lateral e submenu de ações da skin" width="760"><br>
+  <sub>Editor 3D com o novo layout sem rolagem: menu lateral à direita, submenu com Nova Skin / Abrir / Salvar / Baixar .mcpack.</sub>
+</p>
+
+<p align="center">
+  <img src="docs/screenshots/editor-nova-skin-modal.jpg" alt="Modal Nova Skin com opções Steve, Alex e Tela em Branco" width="420">
+  &nbsp;&nbsp;
+  <img src="docs/screenshots/editor-mobile-drawer.jpg" alt="Menu de navegação em gaveta no celular" width="240">
+</p>
+<p align="center"><sub>Esquerda: modal "Nova Skin" para começar do Steve, do Alex ou de uma tela em branco. Direita: a mesma navegação em uma gaveta deslizante no celular.</sub></p>
+
+- 🎨 **Criador de Skins 3D e 2D**: pinte diretamente sobre um boneco 3D interativo ou numa folha 2D desenrolada, sincronizados em tempo real.
+- 🧭 **Navegação sem rolagem**: tudo cabe na tela — menu lateral no desktop, gaveta deslizante no celular, e uma dica contextual que explica cada ferramenta ao passar o mouse ou tocar.
+- 🆕 **"Nova Skin" com presets**: comece do Steve (4px), do Alex (3px) ou de uma tela em branco, sem precisar caçar botões escondidos.
+- 📂 **Abrir uma skin existente**: carregue um PNG do próprio aparelho — o editor detecta automaticamente se é um modelo clássico ou fino pela transparência dos braços.
+- 🖥️ **Tela Cheia e Zoom de Precisão**: controles de zoom (botões, roda do mouse, pinça no toque) e um botão de tela cheia para aproveitar todo o espaço do aparelho.
+- 🔲 **Grade de Pixels**: liga/desliga linhas finas nas fronteiras de cada pixel, facilitando encontrar o pixel certo antes de pintar.
+- 📦 **Exportação Direta**: baixe a skin editada como PNG ou gere o `.mcpack` pronto para instalar, sem sair do navegador.
+
+### 📦 Conversor Rápido (sem editar)
+
+Já tem uma skin pronta em PNG? A tela de Conversor gera o `.mcpack` na hora e mostra um QR Code para abrir a mesma tela direto no celular ou tablet, sem cabos.
+
+<img src="docs/screenshots/conversor-skin.png" alt="Tela do Conversor de Skin" width="420">
 
 ---
 
 ## 🎯 Proposta & Missão
 
-O `mcskin` nasceu para eliminar as barreiras na customização de skins no Minecraft Bedrock:
-- 📱 **Foco Mobile (Tablets e Celulares)**: Conexão sem fios instantânea via QR Code local (Wi-Fi). A criança aponta a câmera do tablet para a tela do computador, abre a interface e baixa o `.mcpack` direto no aparelho, instalando no jogo com 1 toque (*"Abrir com o Minecraft"*).
-- ⛏️ **Criação Descomplicada ("CRIE SKINS LEGAIS")**: Interface lúdica com estética autêntica de blocos, botões grandes táteis (64px+) para dedos pequenos (6+ anos) e áudio feedback de level up.
-- 🔄 **Atualização Ágil**: Reempacotamento rápido de texturas sem perder compatibilidade com o vestiário do jogo.
-- 👥 **Dual-Model por Padrão**: Gera ambos os modelos (Steve 4px e Alex 3px) compartilhando uma única textura. Zero desperdício de espaço!
+- 📱 **Foco Mobile (Tablets e Celulares)**: conexão sem fios instantânea via QR Code local (Wi-Fi) — a criança abre a interface e baixa o `.mcpack` direto no aparelho, instalando no jogo com 1 toque (*"Abrir com o Minecraft"*).
+- 🔄 **Atualização Ágil**: reempacotamento rápido de texturas sem perder compatibilidade com o vestiário do jogo.
+- 👥 **Dual-Model por Padrão**: gera ambos os modelos (Steve 4px e Alex 3px) compartilhando uma única textura. Zero desperdício de espaço!
 - ⚡ **Zero Dependências & Air-Gapped**: 100% Go standard library, sem Node/NPM, sem CDNs externos, funcionando totalmente offline.
 
 ---
 
-## 🚀 Como Usar
+## 🚀 Uso via Linha de Comando (CLI)
 
-O `mcskin` foi desenvolvido para ser direto e simples: basta passar o caminho da imagem da sua skin PNG e o pacote `.mcpack` será gerado automaticamente no mesmo diretório.
+Além do modo web acima, o `mcskin` também funciona como uma ferramenta de linha de comando direta: basta passar o caminho da imagem da sua skin PNG e o pacote `.mcpack` será gerado automaticamente no mesmo diretório.
 
 ### Sintaxe Básica
 
@@ -53,7 +88,7 @@ mcskin [opções] <caminho/para/skin.png>
 | `--slim` | Restringe a geração apenas ao modelo fino (braços de 3px / Alex). |
 | `--force` | Sobrescreve o arquivo `.mcpack` de saída se ele já existir (padrão: `true`). |
 | `-i`, `--input` | Informa o caminho do arquivo PNG de entrada via parâmetro nomeado. |
-| `-w`, `--web` | Inicia o servidor web local com o Conversor e o Criador de Skins 3D/2D (ver seção "Modo Web & Editor de Skins" abaixo). |
+| `-w`, `--web` | Inicia o servidor web local com o Conversor e o Criador de Skins 3D/2D (ver seção "Modo Web" no início deste documento). |
 | `-p`, `--port` | Define a porta do servidor web (padrão: `8080`). Usado apenas com `--web`. |
 | `--no-browser` | No modo web, não abre o navegador padrão automaticamente. |
 | `-v`, `--version` | Exibe a versão, commit e data de compilação do binário. |
@@ -104,46 +139,6 @@ Successfully converted "guerreiro" to Bedrock skin pack [both (classic & slim)]:
 ```cmd
 bin\mcskin.exe C:\Users\SeuUsuario\Imagens\skin_personalizada.png
 ```
-
----
-
-## 🎨 Modo Web & Editor de Skins (3D e 2D)
-
-Além da conversão via linha de comando, o `mcskin` inclui um **servidor web local** ("CRIE SKINS LEGAIS") com um conversor de PNG e um editor de skins completo, pensado para crianças (6+) e para uso rápido em qualquer tablet, celular ou PC da mesma rede Wi-Fi.
-
-```bash
-# Inicia o servidor web na porta padrão (8080) e abre o navegador automaticamente
-./bin/mcskin --web
-
-# Escolhe outra porta e não abre o navegador sozinho
-./bin/mcskin --web --port 8090 --no-browser
-```
-
-> No Windows, executar `mcskin.exe` sem nenhum argumento já inicia o modo web automaticamente.
-
-### 📦 Tela 1 — Conversor de Skin
-
-Arraste um PNG existente (64x64, 64x32 clássico ou 128x128) e gere o `.mcpack` na hora. Um QR Code local permite abrir a mesma tela direto no celular ou tablet, sem cabos.
-
-<img src="docs/screenshots/conversor-skin.png" alt="Tela do Conversor de Skin" width="420">
-
-### 🧊 Tela 2 — Criador de Skins 3D
-
-Pinte diretamente sobre um boneco 3D interativo, com raycasting pixel-a-pixel, paletas rápidas do Minecraft, ferramentas de Lápis/Balde/Borracha/Pipeta, Desfazer/Refazer, isolamento de partes do corpo e camadas (Corpo Base vs. Camada 3D/Jaqueta). A câmera é centralizada automaticamente para mostrar o boneco inteiro, com controles de **zoom** e um botão de **Tela Cheia** para aproveitar toda a tela do aparelho.
-
-<img src="docs/screenshots/editor-3d-boneco.jpg" alt="Editor 3D do boneco no navegador" width="640">
-
-### 📜 Tela 3 — Folha 2D Desenrolada (com Grade de Pixels)
-
-Para precisão máxima, a folha 2D desenrolada mostra cada seção do corpo (Cabeça, Tronco, Braços, Pernas) já rotulada, sincronizada em tempo real com o boneco 3D. Ative a **Grade de Pixels** para ver exatamente onde cada pixel começa e termina antes de pintar.
-
-<img src="docs/screenshots/editor-2d-folha-grade.jpg" alt="Folha 2D desenrolada com grade de pixels ativada" width="640">
-
-### 🖥️ Tela Cheia + Zoom em Ação
-
-Com um clique, o editor expande para tela cheia e a câmera do boneco 3D é redimensionada automaticamente para ocupar o máximo de espaço disponível, mantendo o personagem inteiro e centralizado.
-
-<img src="docs/screenshots/editor-tela-cheia.jpg" alt="Editor em modo tela cheia" width="640">
 
 ---
 

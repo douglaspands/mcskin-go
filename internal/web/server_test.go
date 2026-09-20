@@ -441,3 +441,73 @@ func TestEditorStaticAssets_JavaScriptLogic(t *testing.T) {
 }
 
 
+// TestFavicon_StatusOK verifies GET /favicon.ico returns HTTP 200.
+func TestFavicon_StatusOK(t *testing.T) {
+	faviconData := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A} // PNG magic bytes
+
+	staticFS := fstest.MapFS{
+		"index.html":         {Data: []byte("<h1>test</h1>")},
+		"favicon.ico":        {Data: faviconData},
+	}
+
+	handler := web.NewHandler(web.Config{
+		Port:     8080,
+		StaticFS: staticFS,
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("GET /favicon.ico: expected status 200, got %d", rec.Code)
+	}
+}
+
+// TestFavicon_ContentTypePNG verifies GET /favicon.ico returns Content-Type image/png.
+func TestFavicon_ContentTypePNG(t *testing.T) {
+	faviconData := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A} // PNG magic bytes
+
+	staticFS := fstest.MapFS{
+		"index.html":  {Data: []byte("<h1>test</h1>")},
+		"favicon.ico": {Data: faviconData},
+	}
+
+	handler := web.NewHandler(web.Config{
+		Port:     8080,
+		StaticFS: staticFS,
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	ct := rec.Header().Get("Content-Type")
+	if !strings.HasPrefix(ct, "image/png") {
+		t.Errorf("GET /favicon.ico: expected Content-Type image/png, got %q", ct)
+	}
+}
+
+// TestFavicon_NonEmptyBody verifies GET /favicon.ico returns a non-empty response body.
+func TestFavicon_NonEmptyBody(t *testing.T) {
+	faviconData := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A} // PNG magic bytes
+
+	staticFS := fstest.MapFS{
+		"index.html":  {Data: []byte("<h1>test</h1>")},
+		"favicon.ico": {Data: faviconData},
+	}
+
+	handler := web.NewHandler(web.Config{
+		Port:     8080,
+		StaticFS: staticFS,
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Body.Len() == 0 {
+		t.Error("GET /favicon.ico: expected non-empty response body")
+	}
+}
+

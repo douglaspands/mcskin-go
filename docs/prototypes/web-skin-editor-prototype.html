@@ -1,0 +1,3282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>PROTÓTIPO DE UX - CRIE SKINS LEGAIS</title>
+  <link rel="icon" type="image/x-icon" href="../../assets/mcskin.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="../../assets/mcskin.png">
+  <link rel="apple-touch-icon" href="../../assets/mcskin.png">
+  <style>
+    /* ==========================================================================
+       Variáveis e Tema Minecraft
+       ========================================================================== */
+    :root {
+      --mc-green: #5da632;
+      --mc-green-light: #7cd332;
+      --mc-green-dark: #3c6e1e;
+      --mc-dirt: #866043;
+      --mc-dirt-dark: #573d26;
+      --mc-gray: #4a4a4a;
+      --mc-gray-dark: #2a2a2a;
+      --mc-gray-light: #8c8c8c;
+      --mc-black: #141414;
+      --mc-text-white: #ffffff;
+      --mc-gold: #f5c518;
+      --mc-gold-shadow: #855b00;
+      --mc-diamond: #55ffff;
+      --mc-redstone: #ff4757;
+      --mc-panel-bg: #2a2a2a;
+      --mc-panel-border: #141414;
+      --mc-panel-bevel-light: #3e3e3e;
+      --mc-panel-bevel-dark: #1c1c1c;
+      --pixel-shadow: 3px 3px 0px rgba(0, 0, 0, 0.75);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+      background-color: #1a1a1a;
+      background-image: 
+        radial-gradient(circle at 50% 50%, rgba(30, 45, 20, 0.4) 0%, rgba(10, 10, 10, 0.8) 100%),
+        repeating-linear-gradient(45deg, #161616 0, #161616 16px, #1c1c1c 16px, #1c1c1c 32px);
+      color: var(--mc-text-white);
+      font-family: var(--font-family);
+      height: 100vh;
+      height: 100dvh;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden; /* Elimina rolagem global da janela */
+      box-sizing: border-box;
+    }
+
+    /* Barra Superior de Teste de Resoluções */
+    .prototype-control-bar {
+      width: 100%;
+      background: #111417;
+      border-bottom: 2px solid var(--mc-gold);
+      padding: 4px 10px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      font-size: 0.82rem;
+      z-index: 1000;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .proto-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 900;
+      color: var(--mc-gold);
+    }
+
+    .proto-groups {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .proto-btn {
+      background: #2a2e33;
+      border: 1px solid #444c56;
+      color: #e6edf3;
+      padding: 4px 10px;
+      border-radius: 4px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .proto-btn.active {
+      background: var(--mc-green);
+      color: #fff;
+      border-color: var(--mc-green-light);
+    }
+
+    /* Layout Geral Responsivo */
+    .viewport-container {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      justify-content: center;
+      transition: max-width 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+      padding: 0 6px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .viewport-container.mode-desktop {
+      max-width: 1200px;
+    }
+
+    .viewport-container.mode-tablet {
+      max-width: 768px;
+      border-left: 2px dashed #444;
+      border-right: 2px dashed #444;
+      background: rgba(0,0,0,0.3);
+    }
+
+    .viewport-container.mode-mobile {
+      max-width: 390px;
+      border-left: 2px dashed var(--mc-diamond);
+      border-right: 2px dashed var(--mc-diamond);
+      background: rgba(0,0,0,0.45);
+      box-shadow: 0 0 25px rgba(0,0,0,0.8);
+      padding: 0 4px;
+    }
+
+    .app-root {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* ==========================================================================
+       Cabeçalho Compacto (~44px)
+       Com botão TELA CHEIA no mobile e tablet para economizar espaço abaixo!
+       ========================================================================== */
+    .compact-header {
+      width: 100%;
+      background: linear-gradient(180deg, #447a22 0%, #315817 100%);
+      border: 2px solid var(--mc-black);
+      box-shadow: 
+        inset 2px 2px 0px var(--mc-green-light),
+        inset -2px -2px 0px #1f3b0c,
+        0 3px 8px rgba(0,0,0,0.5);
+      border-radius: 6px;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 4px 0 6px 0;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      z-index: 500;
+    }
+
+    .brand-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .brand-app-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      image-rendering: pixelated;
+      filter: drop-shadow(2px 2px 0px #000);
+      flex-shrink: 0;
+    }
+
+    .brand-icon {
+      font-size: 1.4rem;
+      filter: drop-shadow(2px 2px 0px #000);
+    }
+
+    .brand-title {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: var(--mc-gold);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      text-shadow: 2px 2px 0px var(--mc-black);
+      line-height: 1;
+    }
+
+    .brand-sub {
+      font-size: 0.62rem;
+      color: var(--mc-diamond);
+      font-weight: 700;
+      text-shadow: 1px 1px 0px #000;
+    }
+
+    .header-tabs {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .header-tab-btn {
+      background: #2e2e2e;
+      border: 2px solid #141414;
+      color: #ddd;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+
+    .header-tab-btn.active {
+      background: linear-gradient(180deg, #5da632 0%, #3e7220 100%);
+      color: #fff;
+      box-shadow: inset 2px 2px 0px #7cd332, inset -2px -2px 0px #213f0f;
+    }
+
+    .header-right-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Botão de Tela Cheia no Header (Mobile & Tablet) */
+    .btn-header-fullscreen {
+      background: #3c3c3c;
+      border: 2px solid #141414;
+      box-shadow: inset 1px 1px 0px #5c5c5c, var(--pixel-shadow);
+      color: var(--mc-diamond);
+      font-size: 1.15rem;
+      font-weight: 900;
+      width: 36px;
+      height: 32px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      line-height: 1;
+      transition: all 0.1s ease;
+    }
+
+    .btn-header-fullscreen:active {
+      transform: translateY(2px);
+    }
+
+    .btn-hamburger {
+      background: #3c3c3c;
+      border: 2px solid #141414;
+      box-shadow: inset 1px 1px 0px #5c5c5c, var(--pixel-shadow);
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 900;
+      padding: 6px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      user-select: none;
+    }
+
+    /* ==========================================================================
+       ESTRUTURA DESKTOP (Menu Lateral com Opção de Tirar ou Manter)
+       ========================================================================== */
+    .desktop-layout-split {
+      width: 100%;
+      flex: 1;
+      min-height: 0;
+      display: flex;
+      gap: 10px;
+      align-items: stretch;
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .desktop-sidebar-menu {
+      width: 280px;
+      max-height: 100%;
+      overflow-y: auto;
+      flex-shrink: 0;
+      background: #242424;
+      border: 3px solid #141414;
+      box-shadow: var(--pixel-shadow);
+      border-radius: 6px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      transition: all 0.25s ease;
+      box-sizing: border-box;
+    }
+
+    .desktop-sidebar-menu.hidden {
+      display: none !important;
+    }
+
+    .main-workspace-content {
+      flex: 1;
+      width: 100%;
+      height: 100%;
+      min-width: 0;
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    /* ==========================================================================
+       GAVETA LATERAL MOBILE (Drawer)
+       ========================================================================== */
+    .drawer-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.75);
+      backdrop-filter: blur(2px);
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.25s ease;
+    }
+
+    .drawer-backdrop.open {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .drawer-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      width: 320px;
+      max-width: 85vw;
+      height: 100%;
+      background: #242424;
+      border-left: 4px solid #141414;
+      box-shadow: -8px 0 28px rgba(0, 0, 0, 0.9);
+      z-index: 2001;
+      transform: translateX(100%);
+      transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .drawer-panel.open {
+      transform: translateX(0);
+    }
+
+    .drawer-header {
+      background: linear-gradient(180deg, #447a22 0%, #315817 100%);
+      border-bottom: 3px solid #141414;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .drawer-title {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: var(--mc-gold);
+      text-shadow: 2px 2px 0px #000;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-close-drawer {
+      background: #222;
+      border: 2px solid #141414;
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    .drawer-body {
+      padding: 14px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      flex: 1;
+    }
+
+    .drawer-section-title {
+      font-size: 0.78rem;
+      font-weight: 900;
+      color: var(--mc-diamond);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .drawer-nav-item {
+      background: #333;
+      border: 2px solid #141414;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 800;
+      padding: 10px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      margin-bottom: 6px;
+      width: 100%;
+    }
+
+    .drawer-nav-item.active {
+      background: linear-gradient(180deg, #5da632 0%, #3e7220 100%);
+      border-color: #0e0e0e;
+    }
+
+    /* ==========================================================================
+       SUBMENU EXPANDIDO DO CRIADOR DE SKINS (AMIGÁVEL & CONECTADO)
+       ========================================================================== */
+    .nav-submenu-container {
+      margin-left: 10px;
+      margin-top: -2px;
+      margin-bottom: 12px;
+      padding: 6px;
+      background: #182016;
+      border: 2px solid #283a20;
+      border-left: 4px solid #5da632; /* Conexão visual com o item pai */
+      border-radius: 0 6px 6px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.05), 0 3px 8px rgba(0,0,0,0.5);
+      transition: all 0.2s ease;
+    }
+
+    .nav-submenu-container.collapsed {
+      display: none;
+    }
+
+    .nav-arrow {
+      font-size: 0.85rem;
+      color: #bbf09d;
+      margin-left: auto;
+      transition: transform 0.2s ease;
+    }
+
+    .submenu-item-btn {
+      background: #232c20;
+      border: 1px solid #141a12;
+      color: #fff;
+      padding: 7px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-align: left;
+      width: 100%;
+      user-select: none;
+      transition: all 0.12s ease;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.08);
+    }
+
+    .submenu-item-btn:hover {
+      background: #313d2c;
+      border-color: #5da632;
+      transform: translateX(2px);
+    }
+
+    .submenu-item-btn:active {
+      transform: translateY(1px);
+    }
+
+    .submenu-item-btn .sub-icon {
+      font-size: 1.15rem;
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
+      flex-shrink: 0;
+    }
+
+    .submenu-item-btn .sub-text {
+      flex: 1;
+      line-height: 1.25;
+    }
+
+    .submenu-item-btn .sub-title {
+      font-size: 0.82rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .submenu-item-btn .sub-desc {
+      font-size: 0.67rem;
+      color: #9bb58f;
+    }
+
+    .submenu-item-btn.btn-mcpack-highlight {
+      background: linear-gradient(180deg, #325e1a 0%, #1f3d10 100%);
+      border-color: #4a8c25;
+    }
+
+    .submenu-item-btn.btn-mcpack-highlight:hover {
+      background: linear-gradient(180deg, #417523 0%, #294e15 100%);
+      border-color: #7cd332;
+    }
+
+    .submenu-item-btn.btn-mcpack-highlight .sub-desc {
+      color: #c4f7a1;
+      font-weight: 700;
+    }
+
+    /* ==========================================================================
+       CARD WI-FI / QR CODE / IP (Uniforme e Perfeito em Mobile e Desktop)
+       ========================================================================== */
+    .drawer-wifi-card {
+      background: #181c16;
+      border: 2px solid #2e4424;
+      border-radius: 6px;
+      padding: 12px 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      box-shadow: inset 1px 1px 0 #3a5c2d, 0 3px 8px rgba(0,0,0,0.5);
+      width: 100%;
+    }
+
+    .drawer-wifi-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      font-size: 0.78rem;
+      font-weight: 800;
+      color: var(--mc-diamond);
+    }
+
+    .wifi-status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #102410;
+      border: 1px solid #2e6624;
+      color: #7cd332;
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 0.7rem;
+    }
+
+    .drawer-qr-preview {
+      width: 110px;
+      height: 110px;
+      background: #fff;
+      padding: 6px;
+      border-radius: 6px;
+      border: 2px solid #000;
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .drawer-qr-preview:hover {
+      transform: scale(1.04);
+    }
+
+    .qr-pixels-mini {
+      width: 100%;
+      height: 100%;
+      background: repeating-conic-gradient(#000 0% 25%, #fff 0% 50%) 50% / 14px 14px;
+      border: 1px solid #000;
+    }
+
+    /* Container Uniforme do IP e Botão de Copiar */
+    .wifi-ip-container {
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .wifi-ip-box {
+      width: 100%;
+      background: #0d0d0d;
+      border: 2px solid #2a2a2a;
+      border-radius: 4px;
+      padding: 6px 8px;
+      color: #7cd332;
+      font-family: monospace;
+      font-size: 0.82rem;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.5px;
+      user-select: all;
+    }
+
+    .btn-wifi-copy {
+      width: 100%;
+      background: linear-gradient(180deg, #447a22 0%, #2f5417 100%);
+      border: 2px solid #141414;
+      box-shadow: inset 1px 1px 0 #6eb838, inset -1px -1px 0 #182e0a;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 7px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .btn-wifi-copy:hover {
+      background: linear-gradient(180deg, #518f29 0%, #3a681d 100%);
+    }
+
+    .btn-wifi-copy:active {
+      transform: translateY(1px);
+      box-shadow: inset -1px -1px 0 #6eb838, inset 1px 1px 0 #182e0a;
+    }
+
+    .btn-wifi-copy.copied {
+      background: #185a2c;
+      color: #aaffaa;
+      border-color: #2ecc71;
+    }
+
+    .drawer-btn-qr {
+      width: 100%;
+      background: #2b4670;
+      border: 2px solid #141414;
+      color: #fff;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-shadow: inset 1px 1px 0 #4c72a8, inset -1px -1px 0 #15253d;
+    }
+
+    .drawer-btn-qr:hover {
+      background: #34578c;
+    }
+
+    .drawer-footer {
+      border-top: 2px solid #1c1c1c;
+      padding: 12px 14px;
+    }
+
+    .btn-drawer-shutdown {
+      width: 100%;
+      background: linear-gradient(180deg, #e74c3c 0%, #c0392b 100%);
+      border: 2px solid #781e14;
+      color: #fff;
+      font-size: 0.9rem;
+      font-weight: 800;
+      padding: 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* ==========================================================================
+       TELA 1: Conversor
+       ========================================================================== */
+    /* ==========================================================================
+       TELA 1: Conversor Responsivo Multi-Tela (Mobile, Tablet, Desktop)
+       ========================================================================== */
+    .converter-view-wrap {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      max-height: 100%;
+      padding-bottom: 24px;
+      box-sizing: border-box;
+    }
+
+    .converter-responsive-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+      width: 100%;
+    }
+
+    /* Tablet e Desktop: 2 Colunas equilibradas */
+    .viewport-container.mode-desktop .converter-responsive-grid,
+    .viewport-container.mode-tablet .converter-responsive-grid {
+      grid-template-columns: 1.05fr 1fr;
+      align-items: start;
+    }
+
+    .viewport-container.mode-mobile .converter-responsive-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .converter-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      width: 100%;
+    }
+
+    .mc-card {
+      background: var(--mc-panel-bg);
+      border: 3px solid var(--mc-panel-border);
+      box-shadow: inset 2px 2px 0px var(--mc-panel-bevel-light), var(--pixel-shadow);
+      padding: 14px;
+      border-radius: 6px;
+      width: 100%;
+    }
+
+    .card-header-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .card-title {
+      font-size: 1.05rem;
+      font-weight: 900;
+      color: var(--mc-diamond);
+      text-shadow: 2px 2px 0px #000;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card-badge {
+      background: #141414;
+      border: 1px solid #383838;
+      color: #aaa;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .dropzone {
+      border: 2px dashed #555;
+      background: #181818;
+      border-radius: 6px;
+      padding: 22px 12px;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .dropzone:hover {
+      border-color: var(--mc-green-light);
+      background: #1f281b;
+    }
+
+    .dropzone-icon {
+      font-size: 2.2rem;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5));
+    }
+
+    .dropzone-text {
+      font-size: 0.95rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .dropzone-hint {
+      font-size: 0.76rem;
+      color: #aaa;
+    }
+
+    .dropzone-specs {
+      font-size: 0.68rem;
+      color: var(--mc-gold);
+      background: rgba(0,0,0,0.4);
+      padding: 2px 8px;
+      border-radius: 10px;
+      border: 1px solid #333;
+      margin-top: 4px;
+    }
+
+    /* Preview da Skin no Conversor */
+    .converter-preview-box {
+      background: #141414;
+      border: 2px solid #282828;
+      border-radius: 6px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .preview-avatar-wrap {
+      width: 56px;
+      height: 56px;
+      background: radial-gradient(circle, #3a5c2d 0%, #152410 100%);
+      border: 2px solid #5da632;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.5);
+      flex-shrink: 0;
+    }
+
+    .preview-mini-skin {
+      width: 28px;
+      height: 28px;
+      background: #d89668;
+      border: 2px solid #000;
+      position: relative;
+      box-shadow: inset 0 6px 0 #4a2c16;
+    }
+
+    .preview-meta {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .preview-filename {
+      font-size: 0.85rem;
+      font-weight: 900;
+      color: #fff;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .preview-dimensions {
+      font-size: 0.72rem;
+      color: #aaffaa;
+      font-family: monospace;
+    }
+
+    .btn-secondary-sm {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #ddd;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 4px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-top: 4px;
+      align-self: flex-start;
+      transition: all 0.15s ease;
+    }
+
+    .btn-secondary-sm:hover {
+      background: #383838;
+      border-color: #666;
+      color: #fff;
+    }
+
+    /* Formulário do Pacote */
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .form-label {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #ccc;
+    }
+
+    .mc-input-field {
+      width: 100%;
+      background: #0d0d0d;
+      border: 2px solid #333;
+      box-shadow: inset 1px 1px 0 #000;
+      border-radius: 4px;
+      padding: 8px 10px;
+      color: #fff;
+      font-size: 0.85rem;
+      font-weight: 700;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .mc-input-field:focus {
+      border-color: var(--mc-diamond);
+    }
+
+    /* Model Cards Selector */
+    .model-choice-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+    }
+
+    .model-card-item {
+      background: #1e1e1e;
+      border: 2px solid #333;
+      border-radius: 5px;
+      padding: 8px 4px;
+      text-align: center;
+      cursor: pointer;
+      position: relative;
+      user-select: none;
+      transition: all 0.15s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .model-card-item:hover {
+      border-color: #555;
+      background: #252525;
+    }
+
+    .model-card-item.active {
+      border-color: var(--mc-green);
+      background: #1a2a16;
+      box-shadow: inset 1px 1px 0 #5da632, 0 2px 6px rgba(0,0,0,0.4);
+    }
+
+    .model-card-badge {
+      position: absolute;
+      top: -6px;
+      right: 4px;
+      background: var(--mc-gold);
+      color: #000;
+      font-size: 0.58rem;
+      font-weight: 900;
+      padding: 1px 4px;
+      border-radius: 3px;
+      line-height: 1;
+    }
+
+    .model-card-title {
+      font-size: 0.78rem;
+      font-weight: 900;
+      color: #fff;
+    }
+
+    .model-card-desc {
+      font-size: 0.62rem;
+      color: #888;
+      line-height: 1.2;
+    }
+
+    .model-card-item.active .model-card-desc {
+      color: #aaffaa;
+    }
+
+    .btn-minecraft-giant {
+      width: 100%;
+      background: linear-gradient(180deg, #5da632 0%, #3c6e1e 100%);
+      border: 3px solid var(--mc-black);
+      box-shadow: inset 3px 3px 0px var(--mc-green-light), var(--pixel-shadow);
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 900;
+      padding: 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: center;
+      text-shadow: 2px 2px 0px #000;
+      margin-top: 6px;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .btn-minecraft-giant:hover {
+      background: linear-gradient(180deg, #6eb838 0%, #447a22 100%);
+    }
+
+    .btn-minecraft-giant:active {
+      transform: translateY(2px);
+      box-shadow: inset -2px -2px 0px var(--mc-green-light);
+    }
+
+    /* Card de Sucesso do Conversor */
+    .converter-success-card {
+      background: linear-gradient(180deg, #1d3814 0%, #13240e 100%);
+      border: 2px solid #3c6e1e;
+      box-shadow: inset 1px 1px 0 #5da632, 0 4px 12px rgba(0,0,0,0.5);
+      border-radius: 6px;
+      padding: 12px;
+      margin-top: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .success-header {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      font-weight: 900;
+      color: #7cd332;
+    }
+
+    .success-details {
+      font-size: 0.78rem;
+      color: #eee;
+    }
+
+    .success-details code {
+      background: #0d0d0d;
+      color: var(--mc-gold);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: monospace;
+      border: 1px solid #333;
+    }
+
+    .success-instructions {
+      font-size: 0.72rem;
+      color: #bbb;
+      border-top: 1px solid #254415;
+      padding-top: 6px;
+      margin-top: 4px;
+    }
+
+    /* Guia Rápido de 3 Passos */
+    .converter-quick-guide {
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      background: rgba(0, 0, 0, 0.4);
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      padding: 8px;
+      font-size: 0.72rem;
+      color: #aaa;
+    }
+
+    .guide-item {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-weight: 700;
+    }
+
+    .guide-num {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--mc-green);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 900;
+    }
+
+    .guide-arrow {
+      color: #555;
+      font-weight: 900;
+    }
+
+    /* ==========================================================================
+       TELA 2: Editor 3D
+       BARRA SUPERIOR EM LINHA ÚNICA (Sem Quebrar Linhas!)
+       ========================================================================== */
+    .editor-container {
+      display: none;
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      min-height: 0;
+      flex-direction: column;
+      gap: 3px;
+      position: relative;
+      overflow: hidden;
+      box-sizing: border-box;
+      padding-bottom: 2px;
+    }
+
+    .editor-container.active {
+      display: flex;
+    }
+
+    /* Barra Superior: Estritamente 1 Linha (Single Row, sem botão de minimizar) */
+    .editor-top-options-bar {
+      width: 100%;
+      background: #1e1e1e;
+      border: 2px solid #141414;
+      border-radius: 6px;
+      padding: 3px 6px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 6px;
+      z-index: 10;
+      flex-wrap: nowrap; /* NUNCA QUEBRA LINHA */
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .top-history-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .btn-action-icon {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #fff;
+      font-size: 0.95rem;
+      font-weight: 900;
+      width: 32px;
+      height: 30px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      flex-shrink: 0;
+      transition: all 0.1s ease;
+    }
+
+    .btn-action-icon:hover {
+      background: #3a3a3a;
+      border-color: var(--mc-diamond);
+    }
+
+    /* Controle Segmentado Steve / Alex (Super Compacto) */
+    .model-toggle-pill {
+      display: inline-flex;
+      background: #141414;
+      border: 1px solid #333;
+      border-radius: 4px;
+      padding: 2px;
+      gap: 2px;
+    }
+
+    .model-pill-item {
+      background: transparent;
+      border: none;
+      color: #bbb;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 3px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+
+    .model-pill-item.active {
+      background: var(--mc-green);
+      color: #fff;
+      box-shadow: inset 1px 1px 0 #7cd332;
+    }
+
+    .btn-toggle-grid {
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: #eee;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 4px 10px;
+      height: 30px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      user-select: none;
+      flex-shrink: 0;
+      transition: all 0.15s ease;
+    }
+
+    .btn-toggle-grid:hover {
+      background: #353535;
+      border-color: var(--mc-diamond);
+    }
+
+    /* Faixa de Dica Contextual Diretamente Acima dos Botões Inferiores */
+    .dock-hint-strip {
+      width: 100%;
+      background: #192017;
+      border: 2px solid #2e4424;
+      border-bottom: none;
+      border-radius: 6px 6px 0 0;
+      padding: 4px 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: inset 1px 1px 0 #3a5c2d, 0 -2px 6px rgba(0,0,0,0.4);
+      margin-bottom: -2px; /* Encaixa diretamente no dock */
+      z-index: 99;
+      user-select: none;
+      flex-shrink: 0;
+      box-sizing: border-box;
+      transition: background 0.2s ease, border-color 0.2s ease;
+    }
+
+    .dock-hint-strip.highlight {
+      animation: dockHintGlow 0.4s ease-out;
+    }
+
+    @keyframes dockHintGlow {
+      0% { background: #263820; border-color: #5da632; }
+      100% { background: #192017; border-color: #2e4424; }
+    }
+
+    .dock-hint-strip .hint-icon {
+      font-size: 1.1rem;
+      filter: drop-shadow(0 2px 3px rgba(0,0,0,0.6));
+      flex-shrink: 0;
+    }
+
+    .dock-hint-strip .hint-text {
+      flex: 1;
+      font-size: 0.75rem;
+      font-weight: 800;
+      color: #e0f8d0;
+      line-height: 1.25;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .dock-hint-strip .hint-badge {
+      background: var(--mc-green);
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 900;
+      padding: 2px 6px;
+      border-radius: 3px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+      box-shadow: inset 1px 1px 0 #7cd332;
+    }
+
+    /* Animação de Troca Global de Cores */
+    @keyframes recolorPulse {
+      0% { filter: brightness(2) drop-shadow(0 0 10px #5da632); transform: scale(1.05); }
+      50% { filter: brightness(1.4) drop-shadow(0 0 6px #7cd332); }
+      100% { filter: none; transform: scale(1); }
+    }
+
+    .flash-recolor {
+      animation: recolorPulse 0.45s ease-out;
+    }
+
+    /* Pixel Pintado no Mockup 3D */
+    .painted-pixel {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), inset -1px -1px 0 rgba(0,0,0,0.35);
+      pointer-events: none;
+      z-index: 12;
+      border-radius: 1px;
+    }
+
+    /* PALCO 3D (LOUSA DO BONECO) */
+    .immersive-3d-stage {
+      position: relative;
+      width: 100%;
+      flex: 1;
+      min-height: 200px;
+      height: 100%;
+      background: radial-gradient(circle at center, #243346 0%, #11151e 100%);
+      border: 2px solid var(--mc-black);
+      border-radius: 8px;
+      box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.9), var(--pixel-shadow);
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      touch-action: none;
+      box-sizing: border-box;
+    }
+
+    .immersive-3d-stage.mode-rotate {
+      cursor: grab;
+    }
+
+    .immersive-3d-stage.mode-rotate:active {
+      cursor: grabbing;
+    }
+
+    .immersive-3d-stage.mode-paint {
+      cursor: crosshair;
+    }
+
+    /* O Personagem 3D */
+    .character-viewport-world {
+      position: absolute;
+      transform-style: preserve-3d;
+      transition: transform 0.05s linear;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      pointer-events: none;
+    }
+
+    .character-steve-model {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      filter: drop-shadow(0 16px 20px rgba(0, 0, 0, 0.85));
+      pointer-events: auto;
+    }
+
+    .steve-head {
+      width: 68px;
+      height: 68px;
+      background: #d89668;
+      border: 3px solid #000;
+      position: relative;
+      box-shadow: inset 0 16px 0 #4a2c16;
+    }
+
+    .steve-face-eyes {
+      position: absolute;
+      top: 32px;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      padding: 0 8px;
+    }
+
+    .steve-eye {
+      width: 12px;
+      height: 8px;
+      background: #fff;
+      position: relative;
+      box-shadow: inset -5px 0 0 #28448f;
+    }
+
+    .steve-nose-mouth {
+      position: absolute;
+      bottom: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 6px;
+      background: #703c20;
+    }
+
+    .steve-body-row {
+      display: flex;
+      align-items: flex-start;
+      margin-top: 2px;
+    }
+
+    .steve-arm {
+      width: 34px;
+      height: 102px;
+      background: #2ecc71;
+      border: 3px solid #000;
+      position: relative;
+      box-shadow: inset 0 -44px 0 #d89668;
+      transition: background 0.2s ease;
+    }
+
+    .steve-torso {
+      width: 68px;
+      height: 102px;
+      background: #2ecc71;
+      border: 3px solid #000;
+      position: relative;
+      box-shadow: inset 0 -16px 0 #253342;
+      transition: background 0.2s ease;
+    }
+
+    .steve-legs-row {
+      display: flex;
+      margin-top: 2px;
+    }
+
+    .steve-leg {
+      width: 34px;
+      height: 102px;
+      background: #2980b9;
+      border: 3px solid #000;
+      box-shadow: inset 0 -20px 0 #555;
+    }
+
+    .steve-overlay-jacket {
+      position: absolute;
+      inset: -4px;
+      border: 2px dashed rgba(255, 255, 255, 0.4);
+      pointer-events: none;
+      display: none;
+    }
+
+    .steve-overlay-jacket.active {
+      display: block;
+    }
+
+    /* Pílula Flutuante Central (Mover/Girar vs Pintar) */
+    .floating-mode-pill {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(14, 14, 14, 0.88);
+      border: 2px solid #000;
+      box-shadow: inset 1px 1px 0 #333, var(--pixel-shadow);
+      border-radius: 20px;
+      padding: 3px;
+      display: flex;
+      gap: 3px;
+      z-index: 20;
+    }
+
+    .mode-pill-btn {
+      background: transparent;
+      border: none;
+      color: #bbb;
+      font-size: 0.78rem;
+      font-weight: 800;
+      padding: 5px 12px;
+      border-radius: 16px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    .mode-pill-btn.active {
+      background: var(--mc-green);
+      color: #fff;
+    }
+
+    /* ==========================================================================
+       BONEQUINHO 2D FLUTUANTE (MANNEQUIN DE FOCO)
+       ========================================================================== */
+    .mannequin-widget {
+      position: absolute;
+      bottom: 10px;
+      left: 10px;
+      background: rgba(16, 20, 24, 0.88);
+      border: 2px solid #38424d;
+      border-radius: 6px;
+      padding: 6px 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      z-index: 25;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(4px);
+      user-select: none;
+    }
+
+    .mannequin-label {
+      font-size: 0.62rem;
+      font-weight: 800;
+      color: var(--mc-diamond);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .mannequin-doll {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+
+    .mannequin-part {
+      background: #3b4854;
+      border: 1px solid #5a6e82;
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .mannequin-part:hover, .mannequin-part.active {
+      background: var(--mc-gold);
+      border-color: #ffffff;
+      transform: scale(1.1);
+    }
+
+    .mannequin-head {
+      width: 18px;
+      height: 18px;
+      border-radius: 2px;
+    }
+
+    .mannequin-row {
+      display: flex;
+      gap: 2px;
+      justify-content: center;
+    }
+
+    .mannequin-torso {
+      width: 18px;
+      height: 24px;
+    }
+
+    .mannequin-arm-d, .mannequin-arm-e {
+      width: 8px;
+      height: 24px;
+    }
+
+    .mannequin-leg-d, .mannequin-leg-e {
+      width: 8px;
+      height: 24px;
+    }
+
+    /* ==========================================================================
+       CONTROLES DISCRETOS NA LOUSA (SUBIR, DESCER E ZOOM JUNTOS)
+       ========================================================================== */
+    .canvas-hud-controls {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(16, 20, 24, 0.85);
+      border: 2px solid #2e3b48;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      border-radius: 6px;
+      padding: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      z-index: 25;
+      backdrop-filter: blur(4px);
+    }
+
+    .btn-hud-discreet {
+      background: #252e38;
+      border: 1px solid #3c4c5c;
+      color: #eee;
+      font-size: 0.88rem;
+      font-weight: 900;
+      width: 32px;
+      height: 30px;
+      border-radius: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      user-select: none;
+      transition: all 0.1s ease;
+    }
+
+    .btn-hud-discreet:hover {
+      background: #364453;
+      border-color: var(--mc-diamond);
+      color: #fff;
+    }
+
+    .btn-hud-discreet:active {
+      transform: scale(0.95);
+    }
+
+    .hud-divider {
+      width: 24px;
+      height: 1px;
+      background: #3a4755;
+      margin: 2px auto;
+    }
+
+    /* ==========================================================================
+       BARRA INFERIOR DE FERRAMENTAS (Bottom Dock Touch-Friendly)
+       Botões 100% Proporcionais e Uniformes (Trocar agora tem tamanho padrão!)
+       ========================================================================== */
+    .editor-bottom-dock {
+      width: 100%;
+      background: #202020;
+      border: 2px solid #141414;
+      box-shadow: 0 -3px 12px rgba(0, 0, 0, 0.7), inset 1px 1px 0 #3a3a3a;
+      border-radius: 0 0 6px 6px;
+      padding: 3px 4px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      gap: 4px;
+      z-index: 100;
+      flex-shrink: 0;
+      box-sizing: border-box;
+    }
+
+    .dock-tool-item {
+      background: #2c2c2c;
+      border: 2px solid #141414;
+      color: #ddd;
+      font-size: 0.7rem;
+      font-weight: 800;
+      padding: 4px 2px;
+      border-radius: 5px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1px;
+      cursor: pointer;
+      flex: 1; /* Largura exatamente igual para todos os 6 botões! */
+      min-width: 0;
+      min-height: 42px;
+      user-select: none;
+      transition: all 0.1s ease;
+      text-align: center;
+      box-sizing: border-box;
+    }
+
+    .dock-tool-item.active {
+      background: linear-gradient(180deg, #5da632 0%, #3e7220 100%);
+      border-color: #0e0e0e;
+      color: #fff;
+      box-shadow: inset 1px 1px 0 #7cd332;
+    }
+
+    .dock-tool-item .tool-icon {
+      font-size: 1.15rem;
+      line-height: 1;
+    }
+
+    .active-color-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      border: 2px solid #fff;
+      background: #e74c3c;
+    }
+
+    /* Gaveta de Cores */
+    .color-bottom-sheet {
+      position: absolute;
+      bottom: 95px;
+      left: 6px;
+      right: 6px;
+      max-width: 440px;
+      margin: 0 auto;
+      background: #242424;
+      border: 2px solid #141414;
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9);
+      border-radius: 8px;
+      padding: 10px;
+      z-index: 250;
+      display: none;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .color-bottom-sheet.open {
+      display: flex;
+    }
+
+    .palette-grid-sheet {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+    }
+
+    .swatch-btn {
+      width: 100%;
+      height: 36px;
+      border: 2px solid #000;
+      border-radius: 4px;
+      cursor: pointer;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3);
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+
+    .swatch-btn:hover {
+      transform: scale(1.08);
+      border-color: #fff;
+    }
+
+    .swatch-btn:active {
+      transform: scale(0.95);
+    }
+
+    /* Grade de Ações de Arquivo (Novo, Abrir, Salvar, Baixar) */
+    .editor-file-actions-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      width: 100%;
+      margin-top: 4px;
+    }
+
+    .viewport-container.mode-desktop .editor-file-actions-grid,
+    .viewport-container.mode-tablet .editor-file-actions-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+
+    .viewport-container.mode-mobile .editor-file-actions-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .btn-file-action {
+      border: 2px solid #000;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 0.78rem;
+      font-weight: 900;
+      padding: 8px 6px;
+      cursor: pointer;
+      text-align: center;
+      user-select: none;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.1s ease;
+      box-shadow: inset 1px 1px 0 rgba(255,255,255,0.25), var(--pixel-shadow);
+    }
+
+    .btn-file-action:active {
+      transform: translateY(2px);
+    }
+
+    .btn-file-new {
+      background: linear-gradient(180deg, #444444 0%, #2a2a2a 100%);
+      border-color: #141414;
+    }
+    .btn-file-new:hover {
+      background: linear-gradient(180deg, #555555 0%, #3a3a3a 100%);
+    }
+
+    .btn-file-open {
+      background: linear-gradient(180deg, #d35400 0%, #a04000 100%);
+      border-color: #6e2d00;
+    }
+    .btn-file-open:hover {
+      background: linear-gradient(180deg, #e67e22 0%, #b84a00 100%);
+    }
+
+    .btn-file-save {
+      background: linear-gradient(180deg, #3498db 0%, #2471a3 100%);
+      border-color: #1a4f73;
+    }
+    .btn-file-save:hover {
+      background: linear-gradient(180deg, #5dade2 0%, #2980b9 100%);
+    }
+
+    .btn-file-mcpack {
+      background: linear-gradient(180deg, #5da632 0%, #3e7220 100%);
+      border-color: #1f3b0c;
+    }
+    .btn-file-mcpack:hover {
+      background: linear-gradient(180deg, #7cd332 0%, #4c8c28 100%);
+    }
+
+    /* Toast */
+    .toast-msg {
+      position: fixed;
+      bottom: 18px;
+      background: var(--mc-green);
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 800;
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 2px solid #141414;
+      box-shadow: var(--pixel-shadow);
+      z-index: 4000;
+      opacity: 0;
+      transform: translateY(15px);
+      transition: all 0.2s ease;
+      pointer-events: none;
+    }
+
+    .toast-msg.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Modais */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 3000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .modal-card {
+      background: #222;
+      border: 3px solid var(--mc-black);
+      border-radius: 8px;
+      padding: 20px;
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- BARRA DE CONTROLE DO PROTÓTIPO -->
+  <aside class="prototype-control-bar">
+    <div class="proto-badge">
+      <span>🎮</span> AVALIAÇÃO DE UX
+    </div>
+
+    <div class="proto-groups">
+      <button type="button" class="proto-btn active" id="btnSimMobile">📲 Celular (390px)</button>
+      <button type="button" class="proto-btn" id="btnSimTablet">📱 Tablet (768px)</button>
+      <button type="button" class="proto-btn" id="btnSimDesktop">💻 Desktop (Menu Lateral)</button>
+    </div>
+  </aside>
+
+  <div class="viewport-container mode-mobile" id="viewportWrap">
+    <div class="app-root">
+
+      <!-- CABEÇALHO COMPACTO (~48px)
+           Com Botão TELA CHEIA no mobile/tablet ao lado do MENU -->
+      <header class="compact-header">
+        <div class="brand-section" id="btnHomeBrand" title="Crie Skins Legais">
+          <img src="../../assets/mcskin.png" class="brand-app-icon" alt="mcskin icon" onerror="this.style.display='none'; document.getElementById('fallbackBrandIcon').style.display='inline';">
+          <span class="brand-icon" id="fallbackBrandIcon" style="display: none;">⛏️</span>
+          <div>
+            <span class="brand-title">CRIE SKINS</span>
+            <span class="brand-sub">Bedrock</span>
+          </div>
+        </div>
+
+        <nav class="header-tabs" id="headerTabsDesktop" style="display: none;">
+          <button type="button" class="header-tab-btn" id="tabBtnConverter">📦 Conversor</button>
+          <button type="button" class="header-tab-btn active" id="tabBtnEditor">🎨 Criador 3D</button>
+        </nav>
+
+        <div class="header-right-actions">
+          <!-- BOTÃO TELA CHEIA NO HEADER PRINCIPAL (no mobile ou tablet) -->
+          <button type="button" class="btn-header-fullscreen" id="btnHeaderFullscreen" title="Tela Cheia">
+            ⛶
+          </button>
+          <button type="button" class="btn-hamburger" id="btnHamburger">
+            <span>☰</span> <span id="btnMenuText">MENU</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ESTRUTURA DESKTOP SPLIT: Workspace + Menu Lateral à Direita (Uniforme com Mobile) -->
+      <div class="desktop-layout-split">
+
+        <!-- ÁREA PRINCIPAL (À Esquerda no Desktop) -->
+        <div class="main-workspace-content">
+
+          <!-- TELA 1: CONVERSOR RESPONSIVO MULTI-TELA -->
+          <main class="converter-view-wrap" id="viewConverter" style="display: none;">
+            <div class="converter-responsive-grid">
+
+              <!-- COLUNA 1: Upload e Preview da Imagem -->
+              <div class="converter-col">
+                <section class="mc-card">
+                  <div class="card-header-row">
+                    <h2 class="card-title">🎨 1. Imagem da Skin</h2>
+                    <span class="card-badge">PNG</span>
+                  </div>
+
+                  <!-- Dropzone Interativa -->
+                  <div class="dropzone" id="demoDropzone" title="Toque ou arraste uma skin PNG">
+                    <div class="dropzone-icon">✨</div>
+                    <div class="dropzone-text">Toque para escolher imagem PNG</div>
+                    <div class="dropzone-hint">ou arraste o arquivo da skin aqui</div>
+                    <div class="dropzone-specs">Dimensões: 64x64, 64x32 ou 128x128</div>
+                    <input type="file" id="demoFileInput" accept="image/png" style="display: none;">
+                  </div>
+
+                  <!-- Preview da Skin Carregada -->
+                  <div class="converter-preview-box" id="demoPreviewBox" style="display: none;">
+                    <div class="preview-avatar-wrap">
+                      <div class="preview-mini-skin" id="demoSkinAvatar"></div>
+                    </div>
+                    <div class="preview-meta">
+                      <div class="preview-filename" id="demoFileName">skin_personalizada.png</div>
+                      <div class="preview-dimensions">64 × 64 pixels • RGBA Válido</div>
+                      <button type="button" class="btn-secondary-sm" id="btnChangeSkinDemo">🔄 Escolher Outra Imagem</button>
+                    </div>
+                  </div>
+                </section>
+              </div>
+
+              <!-- COLUNA 2: Opções do Pacote e Download -->
+              <div class="converter-col">
+                <section class="mc-card">
+                  <div class="card-header-row">
+                    <h2 class="card-title">⚙️ 2. Pacote .mcpack</h2>
+                    <span class="card-badge">Bedrock</span>
+                  </div>
+
+                  <!-- Nome da Skin no Jogo -->
+                  <div class="form-group">
+                    <label class="form-label" for="demoSkinNameInput">🏷️ Nome da Skin no Jogo:</label>
+                    <input type="text" class="mc-input-field" id="demoSkinNameInput" value="Minha Skin Bedrock" placeholder="Digite o nome da skin">
+                  </div>
+
+                  <!-- Seletor de Modelo -->
+                  <div class="form-group">
+                    <label class="form-label">👤 Tipo do Modelo:</label>
+                    <div class="model-choice-cards">
+                      <div class="model-card-item active" id="demoModelBoth" data-model="both">
+                        <span class="model-card-badge">⭐ TOP</span>
+                        <div class="model-card-title">Ambos</div>
+                        <div class="model-card-desc">Steve & Alex juntos</div>
+                      </div>
+                      <div class="model-card-item" id="demoModelSteve" data-model="classic">
+                        <div class="model-card-title">Steve</div>
+                        <div class="model-card-desc">Braços 4px</div>
+                      </div>
+                      <div class="model-card-item" id="demoModelAlex" data-model="slim">
+                        <div class="model-card-title">Alex</div>
+                        <div class="model-card-desc">Braços 3px</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Botão Gigante de Download -->
+                  <button type="button" class="btn-minecraft-giant" id="btnDemoDownload">
+                    ⚡ CRIAR PACOTE .MCPACK ⚡
+                  </button>
+
+                  <!-- Card de Sucesso -->
+                  <div class="converter-success-card" id="demoSuccessCard" style="display: none;">
+                    <div class="success-header">
+                      <span>🎉</span> <span>Pacote Criado com Sucesso!</span>
+                    </div>
+                    <div class="success-details">
+                      Arquivo: <code id="demoSuccessFileName">Minha_Skin_Bedrock.mcpack</code>
+                    </div>
+                    <div class="success-instructions">
+                      Dê 2 cliques no arquivo baixado e o Minecraft vai abrir instalando sua skin automaticamente!
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Guia Rápido de Instalação -->
+                <div class="converter-quick-guide">
+                  <div class="guide-item">
+                    <span class="guide-num">1</span>
+                    <span>Envie o PNG</span>
+                  </div>
+                  <div class="guide-arrow">➜</div>
+                  <div class="guide-item">
+                    <span class="guide-num">2</span>
+                    <span>Gere o .mcpack</span>
+                  </div>
+                  <div class="guide-arrow">➜</div>
+                  <div class="guide-item">
+                    <span class="guide-num">3</span>
+                    <span>Abra no Jogo</span>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+          </main>
+
+          <!-- TELA 2: CRIADOR / EDITOR 3D -->
+          <section class="editor-container active" id="viewEditor">
+
+            <!-- BARRA SUPERIOR EM LINHA ÚNICA (SEM BOTÃO DE MINIMIZAR) -->
+            <div class="editor-top-options-bar" id="editorTopBar">
+              <!-- Desfazer / Refazer -->
+              <div class="top-history-group">
+                <button type="button" class="btn-action-icon" id="btnUndoIcon" title="Desfazer">↩</button>
+                <button type="button" class="btn-action-icon" id="btnRedoIcon" title="Refazer">↪</button>
+              </div>
+
+              <!-- Conteúdo: Steve / Alex / Grade em 1 Linha Estrita -->
+              <div class="model-toggle-pill">
+                <button type="button" class="model-pill-item active" id="btnTplSteve" title="Modelo Steve (Braços 4px)">👤 Steve</button>
+                <button type="button" class="model-pill-item" id="btnTplAlex" title="Modelo Alex (Braços 3px)">👱 Alex</button>
+              </div>
+
+              <button type="button" class="btn-toggle-grid" id="btnToggleGrid" title="Alternar grade de pixels">▦ Grade</button>
+            </div>
+
+            <!-- PALCO 3D (LOUSA DO BONECO) -->
+            <div class="immersive-3d-stage mode-rotate" id="stage3D">
+
+              <!-- Pílula Central Flutuante: Modo Girar vs Pintar -->
+              <div class="floating-mode-pill">
+                <button type="button" class="mode-pill-btn active" id="btnModeRotate">
+                  <span>🖐️</span> <span>Girar</span>
+                </button>
+                <button type="button" class="mode-pill-btn" id="btnModePaint">
+                  <span>🖌️</span> <span>Pintar</span>
+                </button>
+              </div>
+
+              <!-- 1. BONEQUINHO 2D FLUTUANTE (MANNEQUIN DE FOCO) -->
+              <div class="mannequin-widget" id="mannequinWidget" title="Toque nas partes para focar a câmera no boneco 3D">
+                <div class="mannequin-label">Focar</div>
+                <div class="mannequin-doll">
+                  <div class="mannequin-part mannequin-head" id="mqHead" title="Focar Cabeça"></div>
+                  <div class="mannequin-row">
+                    <div class="mannequin-part mannequin-arm-d" id="mqArmD" title="Focar Braço Direito"></div>
+                    <div class="mannequin-part mannequin-torso" id="mqTorso" title="Focar Tronco"></div>
+                    <div class="mannequin-part mannequin-arm-e" id="mqArmE" title="Focar Braço Esquerdo"></div>
+                  </div>
+                  <div class="mannequin-row">
+                    <div class="mannequin-part mannequin-leg-d" id="mqLegD" title="Focar Perna Direita"></div>
+                    <div class="mannequin-part mannequin-leg-e" id="mqLegE" title="Focar Perna Esquerda"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. CONTROLES DISCRETOS NA LOUSA (SUBIR, DESCER E ZOOM JUNTOS) -->
+              <div class="canvas-hud-controls">
+                <button type="button" class="btn-hud-discreet" id="btnZoomIn" title="Aumentar Zoom">🔍+</button>
+                <button type="button" class="btn-hud-discreet" id="btnZoomOut" title="Diminuir Zoom">🔍−</button>
+                <div class="hud-divider"></div>
+                <button type="button" class="btn-hud-discreet" id="btnPanUp" title="Subir o boneco (ver pernas/pés)">▲</button>
+                <button type="button" class="btn-hud-discreet" id="btnPanDown" title="Descer o boneco (ver cabeça)">▼</button>
+                <div class="hud-divider"></div>
+                <button type="button" class="btn-hud-discreet" id="btnResetView" title="Recentrar posição e zoom">⟲</button>
+              </div>
+
+
+              <!-- O PERSONAGEM 3D INTERATIVO (Girar livremente por movimento) -->
+              <div class="character-viewport-world" id="characterWorld" style="transform: translate(0px, 0px) scale(1) rotateX(0deg) rotateY(0deg);">
+                <div class="character-steve-model" id="steveModel">
+                  <div class="steve-head" id="steveHead" data-part="Cabeça" data-default-color="#d89668">
+                    <div class="steve-face-eyes">
+                      <div class="steve-eye"></div>
+                      <div class="steve-eye"></div>
+                    </div>
+                    <div class="steve-nose-mouth"></div>
+                  </div>
+
+                  <div class="steve-body-row">
+                    <div class="steve-arm" id="steveArmLeft" data-part="Braço Esquerdo" data-default-color="#2ecc71"></div>
+                    <div class="steve-torso" id="steveTorso" data-part="Tronco" data-default-color="#2ecc71">
+                      <div class="steve-overlay-jacket" id="jacketOverlay"></div>
+                    </div>
+                    <div class="steve-arm" id="steveArmRight" data-part="Braço Direito" data-default-color="#2ecc71"></div>
+                  </div>
+
+                  <div class="steve-legs-row">
+                    <div class="steve-leg" id="steveLegLeft" data-part="Perna Esquerda" data-default-color="#2980b9"></div>
+                    <div class="steve-leg" id="steveLegRight" data-part="Perna Direita" data-default-color="#2980b9"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Gaveta de Cores -->
+              <div class="color-bottom-sheet" id="colorBottomSheet">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.82rem; font-weight: 800; color: var(--mc-diamond);">🌈 Escolher Cor:</span>
+                  <button type="button" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 1rem;" id="btnCloseColors">✖</button>
+                </div>
+
+                <!-- Seletor Livre de Cor (HTML5 Color Picker) -->
+                <div style="display: flex; align-items: center; justify-content: space-between; background: #1a1a1a; border: 1px solid #333; padding: 6px 10px; border-radius: 4px;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.75rem; font-weight: 800; color: #eee;">Personalizada:</span>
+                    <span id="labelHexCode" style="font-family: monospace; font-size: 0.75rem; color: var(--mc-diamond);">#e74c3c</span>
+                  </div>
+                  <input type="color" id="customColorPicker" value="#e74c3c" style="border: none; width: 34px; height: 26px; border-radius: 4px; cursor: pointer; background: transparent;">
+                </div>
+
+                <div style="font-size: 0.72rem; color: #888; font-weight: 700; text-transform: uppercase;">Paleta Minecraft:</div>
+                <div class="palette-grid-sheet" id="paletteGrid">
+                  <div class="swatch-btn" style="background: #e74c3c;" data-color="#e74c3c" title="Redstone"></div>
+                  <div class="swatch-btn" style="background: #3498db;" data-color="#3498db" title="Diamante"></div>
+                  <div class="swatch-btn" style="background: #2ecc71;" data-color="#2ecc71" title="Esmeralda"></div>
+                  <div class="swatch-btn" style="background: #f1c40f;" data-color="#f1c40f" title="Ouro"></div>
+                  <div class="swatch-btn" style="background: #9b59b6;" data-color="#9b59b6" title="Ametista"></div>
+                  <div class="swatch-btn" style="background: #ffffff;" data-color="#ffffff" title="Neve"></div>
+                  <div class="swatch-btn" style="background: #1b1b1b;" data-color="#1b1b1b" title="Obsidiana"></div>
+                  <div class="swatch-btn" style="background: #795548;" data-color="#795548" title="Terra"></div>
+                  <div class="swatch-btn" style="background: #e67e22;" data-color="#e67e22" title="Cobre"></div>
+                  <div class="swatch-btn" style="background: #1abc9c;" data-color="#1abc9c" title="Prismarinho"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- DICA CONTEXTUAL DIRETAMENTE ACIMA DOS BOTÕES -->
+            <div class="dock-hint-strip" id="dockHintStrip">
+              <span class="hint-icon" id="dockHintIcon">✏️</span>
+              <span class="hint-text" id="dockHintText">Pincel: Toque no boneco para pintar pixels individuais com a cor ativa.</span>
+              <span class="hint-badge" id="dockHintBadge">Ativo</span>
+            </div>
+
+            <!-- BARRA INFERIOR DE FERRAMENTAS
+                 BOTÕES 100% UNIFORMES E EQUILIBRADOS -->
+            <div class="editor-bottom-dock">
+              <div class="dock-tool-item active" id="toolPencil" title="Pintar pixel por pixel">
+                <span class="tool-icon">✏️</span>
+                <span>Pincel</span>
+              </div>
+
+              <div class="dock-tool-item" id="toolBucket" title="Preencher face inteira">
+                <span class="tool-icon">🪣</span>
+                <span>Balde</span>
+              </div>
+
+              <!-- BOTÃO DE TROCAR COM TAMANHO UNIFORME -->
+              <div class="dock-tool-item" id="toolRecolor" title="Substituir todas as cores iguais">
+                <span class="tool-icon">🔄</span>
+                <span>Trocar</span>
+              </div>
+
+              <div class="dock-tool-item" id="toolEraser" title="Apagar pixels">
+                <span class="tool-icon">🧹</span>
+                <span>Apagar</span>
+              </div>
+
+              <div class="dock-tool-item" id="toolColorPicker" title="Escolher cor">
+                <div class="active-color-swatch" id="activeColorSwatch"></div>
+                <span>Cores</span>
+              </div>
+
+              <div class="dock-tool-item" id="toolLayerToggle" title="Alternar camada Base / 3D">
+                <span class="tool-icon" id="layerIconGlyph">👕</span>
+                <span id="layerNameText">Base</span>
+              </div>
+            </div>
+
+            <!-- INPUT OCULTO PARA ABRIR PNG -->
+            <input type="file" id="editorFileInput" accept="image/png" style="display: none;">
+
+          </section>
+
+        </div><!-- .main-workspace-content -->
+
+        <!-- MENU LATERAL DESKTOP (À Direita, uniforme com gaveta Mobile!) -->
+        <aside class="desktop-sidebar-menu hidden" id="desktopSidebarMenu">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 900; color: var(--mc-gold); font-size: 0.95rem;">⛏️ PAINEL RÁPIDO</span>
+            <button type="button" class="btn-action-icon" id="btnCollapseDesktopSidebar" title="Ocultar Painel Lateral">▶</button>
+          </div>
+
+          <div>
+            <div class="drawer-section-title">Navegação:</div>
+            <button type="button" class="drawer-nav-item" id="sideBtnConv">📦 Conversor de Skin</button>
+            <button type="button" class="drawer-nav-item active" id="sideBtnEdit" style="justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 8px;">🎨 Criador de Skins 3D</span>
+              <span class="nav-arrow" id="sideNavArrow">▾</span>
+            </button>
+
+            <!-- SUBMENU EXPANDIDO DO CRIADOR DE SKINS -->
+            <div class="nav-submenu-container" id="sideSubmenu">
+              <button type="button" class="submenu-item-btn" id="sideBtnNewSkin" title="Começar uma nova skin do zero">
+                <span class="sub-icon">📄</span>
+                <div class="sub-text">
+                  <div class="sub-title">Nova Skin</div>
+                  <div class="sub-desc">Steve, Alex ou em branco</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn" id="sideBtnOpenSkin" title="Abrir arquivo PNG do computador ou celular">
+                <span class="sub-icon">📂</span>
+                <div class="sub-text">
+                  <div class="sub-title">Abrir / Upload PNG</div>
+                  <div class="sub-desc">Continuar editando skin</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn" id="sideBtnSavePng" title="Exportar imagem PNG da skin">
+                <span class="sub-icon">💾</span>
+                <div class="sub-text">
+                  <div class="sub-title">Salvar Imagem PNG</div>
+                  <div class="sub-desc">Textura 64x64 transparente</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn btn-mcpack-highlight" id="sideBtnDownloadMcpack" title="Gerar pacote Bedrock pronto para o jogo">
+                <span class="sub-icon">⚡</span>
+                <div class="sub-text">
+                  <div class="sub-title">Baixar .mcpack</div>
+                  <div class="sub-desc">Instalar direto no Bedrock</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="drawer-section-title">📱 Conectar no Celular:</div>
+            <div class="drawer-wifi-card">
+              <div class="drawer-wifi-header">
+                <span>📶 Celular / Wi-Fi</span>
+                <span class="wifi-status-badge">🟢 Online</span>
+              </div>
+              <div class="drawer-qr-preview" id="sideQrPreview" title="Clique para ampliar o QR Code">
+                <div class="qr-pixels-mini"></div>
+              </div>
+              <div class="wifi-ip-container">
+                <div class="wifi-ip-box">http://192.168.1.15:8080</div>
+                <button type="button" class="btn-wifi-copy" id="btnCopyIpSide" title="Copiar endereço IP">
+                  <span class="copy-icon-glyph">📋</span> <span class="copy-text-label">Copiar Endereço IP</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: auto;">
+            <button type="button" class="btn-drawer-shutdown" id="btnSideShutdown">🛑 Desligar Servidor</button>
+          </div>
+        </aside>
+
+      </div><!-- .desktop-layout-split -->
+
+      <!-- GAVETA LATERAL MOBILE (Drawer) -->
+      <div class="drawer-backdrop" id="drawerBackdrop"></div>
+      <div class="drawer-panel" id="drawerPanel">
+        <div class="drawer-header">
+          <div class="drawer-title"><span>⛏️</span> MENU</div>
+          <button type="button" class="btn-close-drawer" id="btnCloseDrawer">✖ Fechar</button>
+        </div>
+
+        <div class="drawer-body">
+          <div>
+            <div class="drawer-section-title">Navegação:</div>
+            <button type="button" class="drawer-nav-item" id="drawerItemConv">📦 Conversor de Skin</button>
+            <button type="button" class="drawer-nav-item active" id="drawerItemEdit" style="justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 8px;">🎨 Criador 3D</span>
+              <span class="nav-arrow" id="drawerNavArrow">▾</span>
+            </button>
+
+            <!-- SUBMENU EXPANDIDO DO CRIADOR 3D -->
+            <div class="nav-submenu-container" id="drawerSubmenu">
+              <button type="button" class="submenu-item-btn" id="drawerBtnNewSkin" title="Começar uma nova skin do zero">
+                <span class="sub-icon">📄</span>
+                <div class="sub-text">
+                  <div class="sub-title">Nova Skin</div>
+                  <div class="sub-desc">Steve, Alex ou em branco</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn" id="drawerBtnOpenSkin" title="Abrir arquivo PNG do seu aparelho">
+                <span class="sub-icon">📂</span>
+                <div class="sub-text">
+                  <div class="sub-title">Abrir / Upload PNG</div>
+                  <div class="sub-desc">Carregar imagem para editar</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn" id="drawerBtnSavePng" title="Exportar imagem PNG da skin">
+                <span class="sub-icon">💾</span>
+                <div class="sub-text">
+                  <div class="sub-title">Salvar Imagem PNG</div>
+                  <div class="sub-desc">Download 64x64 RGBA</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn btn-mcpack-highlight" id="drawerBtnDownloadMcpack" title="Gerar pacote Bedrock pronto para o jogo">
+                <span class="sub-icon">⚡</span>
+                <div class="sub-text">
+                  <div class="sub-title">Baixar .mcpack</div>
+                  <div class="sub-desc">Instalar no Bedrock</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="drawer-section-title">📱 Conectar outro aparelho:</div>
+            <div class="drawer-wifi-card">
+              <div class="drawer-wifi-header">
+                <span>📶 Celular / Wi-Fi</span>
+                <span class="wifi-status-badge">🟢 Online</span>
+              </div>
+              <div class="drawer-qr-preview" id="drawerQrPreview" title="Toque para ampliar o QR Code">
+                <div class="qr-pixels-mini"></div>
+              </div>
+              <div class="wifi-ip-container">
+                <div class="wifi-ip-box">http://192.168.1.15:8080</div>
+                <button type="button" class="btn-wifi-copy" id="btnCopyIpDrawer" title="Copiar endereço IP">
+                  <span class="copy-icon-glyph">📋</span> <span class="copy-text-label">Copiar Endereço IP</span>
+                </button>
+              </div>
+              <button type="button" class="drawer-btn-qr" id="drawerBtnQrModal">🔍 Ampliar QR Code</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="drawer-footer">
+          <button type="button" class="btn-drawer-shutdown" id="drawerBtnShutdown">🛑 Desligar Servidor</button>
+        </div>
+      </div>
+
+    </div><!-- .app-root -->
+  </div><!-- .viewport-container -->
+
+  <!-- MODAL QR CODE GIGANTE -->
+  <div class="modal-backdrop" id="qrModal">
+    <div class="modal-card">
+      <h3 style="color: var(--mc-gold);">📱 QR Code para Celular</h3>
+      <div class="drawer-qr-preview" style="width: 180px; height: 180px;">
+        <div class="qr-pixels-mini" style="background-size: 18px 18px;"></div>
+      </div>
+      <div class="wifi-ip-box" style="width: 100%;">http://192.168.1.15:8080</div>
+      <button type="button" class="proto-btn" id="btnCloseQrModal">✖ Fechar</button>
+    </div>
+  </div>
+
+  <!-- MODAL DESLIGAMENTO -->
+  <div class="modal-backdrop" id="shutdownModal">
+    <div class="modal-card" style="border-color: var(--mc-redstone);">
+      <h3 style="color: var(--mc-redstone);">🛑 Desligar Servidor</h3>
+      <p style="color: #ccc; font-size: 0.85rem;">Deseja realmente encerrar o servidor?</p>
+      <div style="display: flex; gap: 8px; width: 100%;">
+        <button type="button" class="btn-action-download btn-dl-png" style="background: #e74c3c; flex: 1;" id="btnConfirmShutdown">Sim, Desligar</button>
+        <button type="button" class="proto-btn" style="flex: 1;" id="btnCancelShutdown">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INICIAR NOVA SKIN -->
+  <div class="modal-backdrop" id="modalNewSkin">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <h3 style="color: var(--mc-gold); margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 6px;">
+          <span>📄</span> Iniciar Nova Skin
+        </h3>
+        <button type="button" class="btn-action-icon" id="btnCloseNewModal">✖</button>
+      </div>
+
+      <p style="color: #ccc; font-size: 0.8rem; margin: 4px 0 10px 0; text-align: center;">
+        Escolha o ponto de partida para a sua nova criação:
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+        <button type="button" class="drawer-nav-item" id="btnNewSteve">
+          <span style="font-size: 1.3rem;">👤</span>
+          <div style="text-align: left;">
+            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;">Steve Clássico</div>
+            <div style="font-size: 0.7rem; color: #aaa;">Braços padrão de 4 pixels</div>
+          </div>
+        </button>
+
+        <button type="button" class="drawer-nav-item" id="btnNewAlex">
+          <span style="font-size: 1.3rem;">👱</span>
+          <div style="text-align: left;">
+            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;">Alex Slim</div>
+            <div style="font-size: 0.7rem; color: #aaa;">Braços finos de 3 pixels</div>
+          </div>
+        </button>
+
+        <button type="button" class="drawer-nav-item" id="btnNewBlank">
+          <span style="font-size: 1.3rem;">⬜</span>
+          <div style="text-align: left;">
+            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;">Skin em Branco (Limpa)</div>
+            <div style="font-size: 0.7rem; color: #aaa;">Comece a pintar do zero absoluto</div>
+          </div>
+        </button>
+      </div>
+
+      <button type="button" class="proto-btn" id="btnCancelNewModal" style="width: 100%; margin-top: 4px;">Cancelar</button>
+    </div>
+  </div>
+
+  <div class="toast-msg" id="toastMsg">Mensagem Toast</div>
+
+  <script>
+    // Estado
+    let activeTool = "pencil";
+    let activeMode = "rotate";
+    let currentColor = "#e74c3c";
+    let activeLayer = "base";
+    let isDesktopMode = false;
+
+    let charScale = 1.0;
+    let posX = 0;
+    let posY = 0;
+    let rotX = 0;
+    let rotY = 0;
+
+    const stage3D = document.getElementById("stage3D");
+    const characterWorld = document.getElementById("characterWorld");
+    const steveTorso = document.getElementById("steveTorso");
+    const steveArmLeft = document.getElementById("steveArmLeft");
+    const steveArmRight = document.getElementById("steveArmRight");
+    const activeColorSwatch = document.getElementById("activeColorSwatch");
+    const toastMsg = document.getElementById("toastMsg");
+
+    function showToast(text) {
+      toastMsg.textContent = text;
+      toastMsg.classList.add("show");
+      setTimeout(() => toastMsg.classList.remove("show"), 1800);
+    }
+
+    function updateTransform() {
+      characterWorld.style.transform = `translate(${posX}px, ${posY}px) scale(${charScale}) rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+    }
+
+    // Modo Girar (Mãozinha) vs Pintar
+    const btnModeRotate = document.getElementById("btnModeRotate");
+    const btnModePaint = document.getElementById("btnModePaint");
+
+    function setMode(mode) {
+      activeMode = mode;
+      if (mode === "rotate") {
+        btnModeRotate.classList.add("active");
+        btnModePaint.classList.remove("active");
+        stage3D.className = "immersive-3d-stage mode-rotate";
+        showToast("🖐️ Modo Girar ativo");
+      } else {
+        btnModePaint.classList.add("active");
+        btnModeRotate.classList.remove("active");
+        stage3D.className = "immersive-3d-stage mode-paint";
+        showToast("🖌️ Modo Pintar ativo");
+      }
+    }
+
+    btnModeRotate.addEventListener("click", () => setMode("rotate"));
+    btnModePaint.addEventListener("click", () => setMode("paint"));
+
+    // Rotação Livre por Movimento
+    let isDragging = false;
+    let startX = 0;
+    let startY = 0;
+    let initialPinchDist = 0;
+    let initialScale = 1.0;
+
+    stage3D.addEventListener("mousedown", (e) => {
+      if (e.target.closest("button") || e.target.closest(".mannequin-widget") || e.target.closest(".canvas-hud-controls") || e.target.closest(".color-bottom-sheet")) return;
+      if (activeMode === "rotate") {
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+      }
+    });
+
+    window.addEventListener("mousemove", (e) => {
+      if (!isDragging) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      if (e.buttons === 2 || e.shiftKey) {
+        posX += dx;
+        posY += dy;
+      } else {
+        rotY += dx * 0.7;
+        rotX -= dy * 0.6;
+        rotX = Math.max(-85, Math.min(85, rotX));
+      }
+
+      startX = e.clientX;
+      startY = e.clientY;
+      updateTransform();
+    });
+
+    window.addEventListener("mouseup", () => { isDragging = false; });
+
+    stage3D.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const factor = e.deltaY < 0 ? 1.1 : 0.9;
+      charScale = Math.max(0.4, Math.min(3.5, charScale * factor));
+      updateTransform();
+    }, { passive: false });
+
+    // Touch Mobile
+    stage3D.addEventListener("touchstart", (e) => {
+      if (e.target.closest("button") || e.target.closest(".mannequin-widget") || e.target.closest(".canvas-hud-controls") || e.target.closest(".color-bottom-sheet")) return;
+
+      if (e.touches.length === 1 && activeMode === "rotate") {
+        isDragging = true;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+      } else if (e.touches.length === 2) {
+        isDragging = false;
+        initialPinchDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        initialScale = charScale;
+        startX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        startY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      }
+    }, { passive: true });
+
+    stage3D.addEventListener("touchmove", (e) => {
+      if (e.touches.length === 1 && isDragging && activeMode === "rotate") {
+        const dx = e.touches[0].clientX - startX;
+        const dy = e.touches[0].clientY - startY;
+        rotY += dx * 0.8;
+        rotX -= dy * 0.7;
+        rotX = Math.max(-85, Math.min(85, rotX));
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        updateTransform();
+      } else if (e.touches.length === 2) {
+        const currentDist = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        if (initialPinchDist > 0) {
+          charScale = Math.max(0.4, Math.min(3.5, initialScale * (currentDist / initialPinchDist)));
+        }
+
+        const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+        const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+        posX += (midX - startX) * 0.8;
+        posY += (midY - startY) * 0.8;
+        startX = midX;
+        startY = midY;
+
+        updateTransform();
+      }
+    }, { passive: true });
+
+    stage3D.addEventListener("touchend", () => { isDragging = false; initialPinchDist = 0; });
+
+    // Controles Discretos na Lousa
+    document.getElementById("btnZoomIn").addEventListener("click", () => {
+      charScale = Math.min(3.5, charScale * 1.25);
+      updateTransform();
+    });
+
+    document.getElementById("btnZoomOut").addEventListener("click", () => {
+      charScale = Math.max(0.4, charScale * 0.8);
+      updateTransform();
+    });
+
+    document.getElementById("btnPanUp").addEventListener("click", () => {
+      posY -= 50;
+      updateTransform();
+      showToast("▲ Subir boneco");
+    });
+
+    document.getElementById("btnPanDown").addEventListener("click", () => {
+      posY += 50;
+      updateTransform();
+      showToast("▼ Descer boneco");
+    });
+
+    document.getElementById("btnResetView").addEventListener("click", () => {
+      charScale = 1.0; posX = 0; posY = 0; rotX = 0; rotY = 0;
+      updateTransform();
+      document.querySelectorAll(".mannequin-part").forEach(p => p.classList.remove("active"));
+      showToast("⟲ Visão centralizada");
+    });
+
+    // Bonequinho 2D (Mannequin de Foco)
+    function focusBodyPart(partName, elem) {
+      document.querySelectorAll(".mannequin-part").forEach(p => p.classList.remove("active"));
+      elem.classList.add("active");
+
+      if (partName === "head") {
+        posY = 110;
+        charScale = 1.6;
+        rotX = 0;
+        showToast("🎯 Foco: Cabeça");
+      } else if (partName === "torso") {
+        posY = 0;
+        charScale = 1.35;
+        rotX = 0;
+        showToast("🎯 Foco: Tronco");
+      } else if (partName === "arms") {
+        posY = 0;
+        charScale = 1.45;
+        showToast("🎯 Foco: Braços");
+      } else if (partName === "legs") {
+        posY = -110;
+        charScale = 1.6;
+        rotX = 0;
+        showToast("🎯 Foco: Pernas e Pés");
+      }
+      updateTransform();
+    }
+
+    const mqHead = document.getElementById("mqHead");
+    const mqTorso = document.getElementById("mqTorso");
+    const mqArmD = document.getElementById("mqArmD");
+    const mqArmE = document.getElementById("mqArmE");
+    const mqLegD = document.getElementById("mqLegD");
+    const mqLegE = document.getElementById("mqLegE");
+
+    mqHead.addEventListener("click", () => focusBodyPart("head", mqHead));
+    mqTorso.addEventListener("click", () => focusBodyPart("torso", mqTorso));
+    mqArmD.addEventListener("click", () => focusBodyPart("arms", mqArmD));
+    mqArmE.addEventListener("click", () => focusBodyPart("arms", mqArmE));
+    mqLegD.addEventListener("click", () => focusBodyPart("legs", mqLegD));
+    mqLegE.addEventListener("click", () => focusBodyPart("legs", mqLegE));
+
+    document.getElementById("btnUndoIcon").addEventListener("click", () => showToast("Desfazer ↩"));
+    document.getElementById("btnRedoIcon").addEventListener("click", () => showToast("Refazer ↪"));
+
+    // Seleção de Modelo Steve vs Alex
+    const btnTplSteve = document.getElementById("btnTplSteve");
+    const btnTplAlex = document.getElementById("btnTplAlex");
+
+    btnTplSteve.addEventListener("click", () => {
+      btnTplSteve.classList.add("active");
+      btnTplAlex.classList.remove("active");
+      document.getElementById("steveArmLeft").style.width = "34px";
+      document.getElementById("steveArmRight").style.width = "34px";
+      showToast("Modelo: Steve (Braços 4px)");
+    });
+
+    btnTplAlex.addEventListener("click", () => {
+      btnTplAlex.classList.add("active");
+      btnTplSteve.classList.remove("active");
+      document.getElementById("steveArmLeft").style.width = "26px";
+      document.getElementById("steveArmRight").style.width = "26px";
+      showToast("Modelo: Alex (Braços 3px)");
+    });
+
+    document.getElementById("btnToggleGrid").addEventListener("click", () => {
+      showToast("▦ Grade de pixels alternada");
+    });
+
+    // Tela Cheia no Header Principal
+    const btnHeaderFullscreen = document.getElementById("btnHeaderFullscreen");
+    btnHeaderFullscreen.addEventListener("click", () => {
+      if (!document.fullscreenElement) {
+        document.documentElement.requestFullscreen().catch(() => {});
+        showToast("⛶ Modo Tela Cheia Ativado!");
+      } else {
+        document.exitFullscreen().catch(() => {});
+        showToast("Tela Cheia desativada");
+      }
+    });
+
+    // ==========================================================================
+    // FERRAMENTAS INFERIORES: EXPERIÊNCIA E EXEMPLO INTERATIVO DE FUNCIONAMENTO
+    // ==========================================================================
+    const toolPencil = document.getElementById("toolPencil");
+    const toolBucket = document.getElementById("toolBucket");
+    const toolRecolor = document.getElementById("toolRecolor");
+    const toolEraser = document.getElementById("toolEraser");
+    const toolColorPicker = document.getElementById("toolColorPicker");
+    const toolLayerToggle = document.getElementById("toolLayerToggle");
+    const colorBottomSheet = document.getElementById("colorBottomSheet");
+    const btnCloseColors = document.getElementById("btnCloseColors");
+    const jacketOverlay = document.getElementById("jacketOverlay");
+    const layerNameText = document.getElementById("layerNameText");
+    const layerIconGlyph = document.getElementById("layerIconGlyph");
+    const dockHintStrip = document.getElementById("dockHintStrip");
+    const dockHintIcon = document.getElementById("dockHintIcon");
+    const dockHintText = document.getElementById("dockHintText");
+    const dockHintBadge = document.getElementById("dockHintBadge");
+    const customColorPicker = document.getElementById("customColorPicker");
+    const labelHexCode = document.getElementById("labelHexCode");
+
+    function updateDockHint(icon, text, badge) {
+      if (dockHintIcon && icon) dockHintIcon.textContent = icon;
+      if (dockHintText && text) dockHintText.textContent = text;
+      if (dockHintBadge && badge) dockHintBadge.textContent = badge;
+      if (dockHintStrip) {
+        dockHintStrip.classList.remove("highlight");
+        void dockHintStrip.offsetWidth;
+        dockHintStrip.classList.add("highlight");
+      }
+    }
+
+    function updateToolStatus(tool) {
+      if (tool === "pencil") {
+        updateDockHint("✏️", "Pincel: Toque no boneco para pintar pixels individuais com a cor ativa.", "Pintar");
+      } else if (tool === "bucket") {
+        updateDockHint("🪣", "Balde: Toque em qualquer membro para preenchê-lo 100% com a cor ativa.", "Preencher");
+      } else if (tool === "recolor") {
+        updateDockHint("🔄", "Trocar Cor: Toque em uma cor no boneco para substituí-la em todas as partes!", "Substituir");
+      } else if (tool === "eraser") {
+        const desc = activeLayer === "overlay"
+          ? "Borracha: Toque para limpar os detalhes da camada 3D (sobreposição)."
+          : "Borracha: Toque para restaurar a cor original ou limpar pixels do membro.";
+        updateDockHint("🧹", desc, "Limpar");
+      }
+    }
+
+    function selectTool(name, elem) {
+      activeTool = name;
+      document.querySelectorAll(".dock-tool-item").forEach(i => i.classList.remove("active"));
+      elem.classList.add("active");
+      setMode("paint");
+      updateToolStatus(name);
+    }
+
+    toolPencil.addEventListener("click", () => {
+      selectTool("pencil", toolPencil);
+      showToast("✏️ Pincel ativo (toque para pintar pixels)");
+    });
+
+    toolBucket.addEventListener("click", () => {
+      selectTool("bucket", toolBucket);
+      showToast("🪣 Balde ativo (toque para preencher membros)");
+    });
+
+    toolRecolor.addEventListener("click", () => {
+      selectTool("recolor", toolRecolor);
+      showToast("🔄 Trocar Cor: toque em qualquer cor no boneco para substituí-la!");
+    });
+
+    toolEraser.addEventListener("click", () => {
+      selectTool("eraser", toolEraser);
+      showToast("🧹 Borracha ativa (toque para apagar ou restaurar)");
+    });
+
+    // 🎨 Cores: Seletor com Paleta + Cor Personalizada
+    toolColorPicker.addEventListener("click", () => {
+      colorBottomSheet.classList.toggle("open");
+      if (colorBottomSheet.classList.contains("open")) {
+        updateDockHint("🎨", "Cores: Selecione uma cor da paleta rápida ou use a cor personalizada.", "Cores");
+      } else {
+        updateToolStatus(activeTool);
+      }
+    });
+
+    btnCloseColors.addEventListener("click", () => colorBottomSheet.classList.remove("open"));
+
+    function applyNewColor(newHex) {
+      currentColor = newHex;
+      activeColorSwatch.style.background = currentColor;
+      if (labelHexCode) labelHexCode.textContent = currentColor;
+      if (customColorPicker) customColorPicker.value = currentColor;
+      colorBottomSheet.classList.remove("open");
+      showToast("🎨 Cor ativa: " + currentColor);
+      updateToolStatus(activeTool);
+    }
+
+    document.querySelectorAll(".swatch-btn").forEach(swatch => {
+      swatch.addEventListener("click", () => {
+        applyNewColor(swatch.dataset.color);
+      });
+    });
+
+    customColorPicker?.addEventListener("input", (e) => {
+      currentColor = e.target.value;
+      activeColorSwatch.style.background = currentColor;
+      if (labelHexCode) labelHexCode.textContent = currentColor;
+      updateToolStatus(activeTool);
+    });
+
+    customColorPicker?.addEventListener("change", (e) => {
+      applyNewColor(e.target.value);
+    });
+
+    // 👕 Camada: Alternar Base e 3D
+    toolLayerToggle.addEventListener("click", () => {
+      if (activeLayer === "base") {
+        activeLayer = "overlay";
+        layerNameText.textContent = "3D";
+        if (layerIconGlyph) layerIconGlyph.textContent = "🧥";
+        jacketOverlay.classList.add("active");
+        jacketOverlay.style.background = "rgba(231, 76, 60, 0.4)";
+        jacketOverlay.style.border = "2px dashed #fff";
+        showToast("🧥 Editando Camada 3D (Sobreposição / Jaqueta)");
+        updateDockHint("🧥", "Camada 3D ativa: Crie relevos, jaquetas e detalhes sobre a skin.", "Camada 3D");
+      } else {
+        activeLayer = "base";
+        layerNameText.textContent = "Base";
+        if (layerIconGlyph) layerIconGlyph.textContent = "👕";
+        jacketOverlay.classList.remove("active");
+        jacketOverlay.style.background = "";
+        jacketOverlay.style.border = "";
+        showToast("👕 Editando Camada Base (Pele e Roupas Principais)");
+        updateDockHint("👕", "Camada Base ativa: Pele e roupas principais do seu personagem.", "Camada Base");
+      }
+    });
+
+    // INTERAÇÃO COMPLETA NO BONECO (EXEMPLOS VIVOS DE CADA FERRAMENTA)
+    document.getElementById("steveModel").addEventListener("click", (e) => {
+      if (activeMode !== "paint") return;
+
+      const targetPart = e.target.closest(".steve-head, .steve-torso, .steve-arm, .steve-leg");
+      if (!targetPart) return;
+
+      const partName = targetPart.dataset.part || "Parte";
+
+      // 1. PINCEL: Pinta pixel por pixel no ponto exato do toque/clique
+      if (activeTool === "pencil") {
+        const rect = targetPart.getBoundingClientRect();
+        const clickX = e.clientX - rect.left;
+        const clickY = e.clientY - rect.top;
+        const px = Math.max(2, Math.min(rect.width - 14, Math.floor(clickX / 10) * 10));
+        const py = Math.max(2, Math.min(rect.height - 14, Math.floor(clickY / 10) * 10));
+
+        const pixel = document.createElement("div");
+        pixel.className = "painted-pixel";
+        pixel.style.left = px + "px";
+        pixel.style.top = py + "px";
+        pixel.style.background = currentColor;
+        targetPart.appendChild(pixel);
+
+        showToast("✏️ Pixel pintado no " + partName + "!");
+      }
+
+      // 2. BALDE: Preenche o membro inteiro e limpa pixels individuais
+      else if (activeTool === "bucket") {
+        targetPart.querySelectorAll(".painted-pixel").forEach(p => p.remove());
+        targetPart.style.background = currentColor;
+        showToast("🪣 " + partName + " preenchido com a cor ativa!");
+      }
+
+      // 3. TROCAR (Substituir Cores Globalmente):
+      // Detecta a cor clicada e substitui todas as partes e pixels dessa mesma cor!
+      else if (activeTool === "recolor") {
+        const targetColor = window.getComputedStyle(targetPart).backgroundColor;
+        const allParts = document.querySelectorAll("#steveModel .steve-head, #steveModel .steve-torso, #steveModel .steve-arm, #steveModel .steve-leg");
+        let count = 0;
+
+        allParts.forEach(part => {
+          if (window.getComputedStyle(part).backgroundColor === targetColor) {
+            part.querySelectorAll(".painted-pixel").forEach(p => p.remove());
+            part.style.background = currentColor;
+            part.classList.add("flash-recolor");
+            setTimeout(() => part.classList.remove("flash-recolor"), 450);
+            count++;
+          }
+        });
+
+        document.querySelectorAll(".painted-pixel").forEach(pix => {
+          if (window.getComputedStyle(pix).backgroundColor === targetColor) {
+            pix.style.background = currentColor;
+          }
+        });
+
+        showToast(`✨ Trocou a cor em ${count} membro(s) do boneco!`);
+      }
+
+      // 4. APAGAR (Borracha):
+      // Restaura a cor original de fábrica ou apaga a camada 3D
+      else if (activeTool === "eraser") {
+        if (activeLayer === "overlay") {
+          jacketOverlay.classList.remove("active");
+          jacketOverlay.style.background = "";
+          jacketOverlay.style.border = "";
+          showToast("🧹 Detalhe da Camada 3D apagado!");
+        } else {
+          targetPart.querySelectorAll(".painted-pixel").forEach(p => p.remove());
+          const defaultColor = targetPart.dataset.defaultColor || "#2ecc71";
+          targetPart.style.background = defaultColor;
+          showToast("🧹 " + partName + " restaurado para cor padrão!");
+        }
+      }
+    });
+
+    // ==========================================================================
+    // AÇÕES DE ARQUIVO NO MENU: NOVO, ABRIR PNG, SALVAR PNG E BAIXAR MCPACK
+    // ==========================================================================
+    const modalNewSkin = document.getElementById("modalNewSkin");
+    const btnCloseNewModal = document.getElementById("btnCloseNewModal");
+    const btnCancelNewModal = document.getElementById("btnCancelNewModal");
+    const btnNewSteve = document.getElementById("btnNewSteve");
+    const btnNewAlex = document.getElementById("btnNewAlex");
+    const btnNewBlank = document.getElementById("btnNewBlank");
+    const editorFileInput = document.getElementById("editorFileInput");
+
+    const sideSubmenu = document.getElementById("sideSubmenu");
+    const sideBtnNewSkin = document.getElementById("sideBtnNewSkin");
+    const sideBtnOpenSkin = document.getElementById("sideBtnOpenSkin");
+    const sideBtnSavePng = document.getElementById("sideBtnSavePng");
+    const sideBtnDownloadMcpack = document.getElementById("sideBtnDownloadMcpack");
+    const sideNavArrow = document.getElementById("sideNavArrow");
+
+    const drawerSubmenu = document.getElementById("drawerSubmenu");
+    const drawerBtnNewSkin = document.getElementById("drawerBtnNewSkin");
+    const drawerBtnOpenSkin = document.getElementById("drawerBtnOpenSkin");
+    const drawerBtnSavePng = document.getElementById("drawerBtnSavePng");
+    const drawerBtnDownloadMcpack = document.getElementById("drawerBtnDownloadMcpack");
+    const drawerNavArrow = document.getElementById("drawerNavArrow");
+
+    function openNewSkinModal() {
+      closeDrawer();
+      modalNewSkin?.classList.add("open");
+    }
+
+    function openFilePicker() {
+      closeDrawer();
+      editorFileInput?.click();
+    }
+
+    function saveSkinPng() {
+      closeDrawer();
+      showToast("💾 Skin salva como 'minha_skin.png'! (64x64 RGBA)");
+      updateDockHint("💾", "Arquivo 'minha_skin.png' exportado com sucesso no seu dispositivo!", "Salvo");
+    }
+
+    function downloadSkinMcpack() {
+      closeDrawer();
+      showToast("⚡ Pacote Bedrock 'minha_skin.mcpack' baixado com sucesso!");
+      updateDockHint("⚡", "Pacote Bedrock 'minha_skin.mcpack' pronto para importação direta no Minecraft!", "Bedrock");
+    }
+
+    // Eventos Desktop Sidebar
+    sideBtnNewSkin?.addEventListener("click", openNewSkinModal);
+    sideBtnOpenSkin?.addEventListener("click", openFilePicker);
+    sideBtnSavePng?.addEventListener("click", saveSkinPng);
+    sideBtnDownloadMcpack?.addEventListener("click", downloadSkinMcpack);
+
+    // Eventos Mobile Drawer
+    drawerBtnNewSkin?.addEventListener("click", openNewSkinModal);
+    drawerBtnOpenSkin?.addEventListener("click", openFilePicker);
+    drawerBtnSavePng?.addEventListener("click", saveSkinPng);
+    drawerBtnDownloadMcpack?.addEventListener("click", downloadSkinMcpack);
+
+    function closeNewModal() {
+      modalNewSkin?.classList.remove("open");
+    }
+
+    btnCloseNewModal?.addEventListener("click", closeNewModal);
+    btnCancelNewModal?.addEventListener("click", closeNewModal);
+    modalNewSkin?.addEventListener("click", (e) => {
+      if (e.target === modalNewSkin) closeNewModal();
+    });
+
+    function resetCharacterPixels() {
+      document.querySelectorAll(".painted-pixel").forEach(p => p.remove());
+      jacketOverlay.classList.remove("active");
+      jacketOverlay.style.background = "";
+      jacketOverlay.style.border = "";
+      if (activeLayer === "overlay") {
+        activeLayer = "base";
+        layerNameText.textContent = "Base";
+        if (layerIconGlyph) layerIconGlyph.textContent = "👕";
+      }
+    }
+
+    // 1. Nova Skin: Steve
+    btnNewSteve?.addEventListener("click", () => {
+      resetCharacterPixels();
+      document.getElementById("steveHead").style.background = "#2ecc71";
+      document.getElementById("steveHead").dataset.defaultColor = "#2ecc71";
+      document.getElementById("steveTorso").style.background = "#3498db";
+      document.getElementById("steveTorso").dataset.defaultColor = "#3498db";
+      document.getElementById("steveArmLeft").style.background = "#2ecc71";
+      document.getElementById("steveArmLeft").dataset.defaultColor = "#2ecc71";
+      document.getElementById("steveArmLeft").style.width = "34px";
+      document.getElementById("steveArmRight").style.background = "#2ecc71";
+      document.getElementById("steveArmRight").dataset.defaultColor = "#2ecc71";
+      document.getElementById("steveArmRight").style.width = "34px";
+      document.getElementById("steveLegLeft").style.background = "#2c3e50";
+      document.getElementById("steveLegLeft").dataset.defaultColor = "#2c3e50";
+      document.getElementById("steveLegRight").style.background = "#2c3e50";
+      document.getElementById("steveLegRight").dataset.defaultColor = "#2c3e50";
+
+      btnTplSteve.classList.add("active");
+      btnTplAlex.classList.remove("active");
+
+      closeNewModal();
+      showToast("👤 Nova skin Steve Clássico (4px) iniciada!");
+      updateDockHint("👤", "Nova Skin Steve (4px) pronta. Toque nos membros para pintar ou preencher!", "Steve 4px");
+    });
+
+    // 2. Nova Skin: Alex
+    btnNewAlex?.addEventListener("click", () => {
+      resetCharacterPixels();
+      document.getElementById("steveHead").style.background = "#e5b083";
+      document.getElementById("steveHead").dataset.defaultColor = "#e5b083";
+      document.getElementById("steveTorso").style.background = "#527a3c";
+      document.getElementById("steveTorso").dataset.defaultColor = "#527a3c";
+      document.getElementById("steveArmLeft").style.background = "#e5b083";
+      document.getElementById("steveArmLeft").dataset.defaultColor = "#e5b083";
+      document.getElementById("steveArmLeft").style.width = "26px";
+      document.getElementById("steveArmRight").style.background = "#e5b083";
+      document.getElementById("steveArmRight").dataset.defaultColor = "#e5b083";
+      document.getElementById("steveArmRight").style.width = "26px";
+      document.getElementById("steveLegLeft").style.background = "#443a2c";
+      document.getElementById("steveLegLeft").dataset.defaultColor = "#443a2c";
+      document.getElementById("steveLegRight").style.background = "#443a2c";
+      document.getElementById("steveLegRight").dataset.defaultColor = "#443a2c";
+
+      btnTplAlex.classList.add("active");
+      btnTplSteve.classList.remove("active");
+
+      closeNewModal();
+      showToast("👱 Nova skin Alex Slim (3px) iniciada!");
+      updateDockHint("👱", "Nova Skin Alex (3px) iniciada com braços finos. Personalize agora!", "Alex 3px");
+    });
+
+    // 3. Nova Skin: Em Branco
+    btnNewBlank?.addEventListener("click", () => {
+      resetCharacterPixels();
+      const parts = ["steveHead", "steveTorso", "steveArmLeft", "steveArmRight", "steveLegLeft", "steveLegRight"];
+      parts.forEach(id => {
+        const elem = document.getElementById(id);
+        if (elem) {
+          elem.style.background = "#ffffff";
+          elem.dataset.defaultColor = "#ffffff";
+        }
+      });
+      closeNewModal();
+      showToast("⬜ Skin em Branco limpa iniciada!");
+      updateDockHint("⬜", "Lousa em branco limpa! Use o pincel ou balde para criar do zero.", "Em Branco");
+    });
+
+    // 4. Abrir Arquivo PNG (Upload)
+    editorFileInput?.addEventListener("change", (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      if (!file.type.includes("png") && !file.name.toLowerCase().endsWith(".png")) {
+        showToast("⚠️ Por favor, selecione um arquivo de imagem PNG!");
+        editorFileInput.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (loadEvt) => {
+        const img = new Image();
+        img.onload = () => {
+          resetCharacterPixels();
+
+          const dimLabel = `${img.width}x${img.height}px`;
+
+          const torso = document.getElementById("steveTorso");
+          if (torso) {
+            torso.classList.add("flash-recolor");
+            setTimeout(() => torso.classList.remove("flash-recolor"), 500);
+          }
+
+          showToast(`📂 Skin "${file.name}" (${dimLabel}) carregada!`);
+          updateDockHint("📂", `Skin "${file.name}" (${dimLabel}) aberta com sucesso. Pronta para continuar editando!`, "Editando");
+        };
+        img.src = loadEvt.target.result;
+      };
+      reader.readAsDataURL(file);
+      editorFileInput.value = "";
+    });
+
+    // Navegação Geral
+    const viewConverter = document.getElementById("viewConverter");
+    const viewEditor = document.getElementById("viewEditor");
+    const tabBtnConverter = document.getElementById("tabBtnConverter");
+    const tabBtnEditor = document.getElementById("tabBtnEditor");
+    const sideBtnConv = document.getElementById("sideBtnConv");
+    const sideBtnEdit = document.getElementById("sideBtnEdit");
+    const desktopSidebarMenu = document.getElementById("desktopSidebarMenu");
+    const btnCollapseDesktopSidebar = document.getElementById("btnCollapseDesktopSidebar");
+    const btnHamburger = document.getElementById("btnHamburger");
+
+    const drawerBackdrop = document.getElementById("drawerBackdrop");
+    const drawerPanel = document.getElementById("drawerPanel");
+    const btnCloseDrawer = document.getElementById("btnCloseDrawer");
+
+    function setEditorSubmenuExpanded(expanded) {
+      if (sideSubmenu) sideSubmenu.classList.toggle("collapsed", !expanded);
+      if (drawerSubmenu) drawerSubmenu.classList.toggle("collapsed", !expanded);
+      if (sideNavArrow) sideNavArrow.textContent = expanded ? "▾" : "▸";
+      if (drawerNavArrow) drawerNavArrow.textContent = expanded ? "▾" : "▸";
+    }
+
+    function toggleEditorSubmenu() {
+      if (viewEditor.classList.contains("active")) {
+        const isCollapsed = sideSubmenu ? sideSubmenu.classList.contains("collapsed") : false;
+        setEditorSubmenuExpanded(isCollapsed);
+      } else {
+        switchView("editor");
+      }
+    }
+
+    function switchView(target) {
+      if (target === "converter") {
+        viewConverter.style.display = "flex";
+        viewEditor.classList.remove("active");
+        tabBtnConverter.classList.add("active");
+        tabBtnEditor.classList.remove("active");
+        sideBtnConv?.classList.add("active");
+        sideBtnEdit?.classList.remove("active");
+        document.getElementById("drawerItemConv")?.classList.add("active");
+        document.getElementById("drawerItemEdit")?.classList.remove("active");
+
+        // Recolhe o submenu do Criador quando estiver no conversor
+        setEditorSubmenuExpanded(false);
+      } else {
+        viewConverter.style.display = "none";
+        viewEditor.classList.add("active");
+        tabBtnEditor.classList.add("active");
+        tabBtnConverter.classList.remove("active");
+        sideBtnEdit?.classList.add("active");
+        sideBtnConv?.classList.remove("active");
+        document.getElementById("drawerItemEdit")?.classList.add("active");
+        document.getElementById("drawerItemConv")?.classList.remove("active");
+
+        // Mantém o submenu expandido e amigável no criador
+        setEditorSubmenuExpanded(true);
+      }
+      closeDrawer();
+    }
+
+    tabBtnConverter.addEventListener("click", () => switchView("converter"));
+    tabBtnEditor.addEventListener("click", () => switchView("editor"));
+    sideBtnConv?.addEventListener("click", () => switchView("converter"));
+    sideBtnEdit?.addEventListener("click", toggleEditorSubmenu);
+    document.getElementById("drawerItemConv")?.addEventListener("click", () => switchView("converter"));
+    document.getElementById("drawerItemEdit")?.addEventListener("click", toggleEditorSubmenu);
+
+    // ==========================================================================
+    // CONVERSOR RESPONSIVO: LÓGICA E INTERAÇÃO
+    // ==========================================================================
+    const demoDropzone = document.getElementById("demoDropzone");
+    const demoFileInput = document.getElementById("demoFileInput");
+    const demoPreviewBox = document.getElementById("demoPreviewBox");
+    const demoFileName = document.getElementById("demoFileName");
+    const btnChangeSkinDemo = document.getElementById("btnChangeSkinDemo");
+    const demoSkinNameInput = document.getElementById("demoSkinNameInput");
+    const btnDemoDownload = document.getElementById("btnDemoDownload");
+    const demoSuccessCard = document.getElementById("demoSuccessCard");
+    const demoSuccessFileName = document.getElementById("demoSuccessFileName");
+    let selectedConverterModel = "both";
+
+    demoDropzone?.addEventListener("click", () => {
+      demoDropzone.style.display = "none";
+      demoPreviewBox.style.display = "flex";
+      demoFileName.textContent = "minha_skin_bedrock.png";
+      showToast("✨ Imagem da skin carregada no conversor!");
+    });
+
+    btnChangeSkinDemo?.addEventListener("click", (e) => {
+      e.stopPropagation();
+      demoPreviewBox.style.display = "none";
+      demoDropzone.style.display = "flex";
+      demoSuccessCard.style.display = "none";
+      showToast("Escolha outra skin PNG");
+    });
+
+    document.querySelectorAll(".model-card-item").forEach(card => {
+      card.addEventListener("click", () => {
+        document.querySelectorAll(".model-card-item").forEach(c => c.classList.remove("active"));
+        card.classList.add("active");
+        selectedConverterModel = card.dataset.model;
+        const modelLabel = card.querySelector(".model-card-title")?.textContent || "";
+        showToast(`Modelo escolhido: ${modelLabel}`);
+      });
+    });
+
+    btnDemoDownload?.addEventListener("click", () => {
+      const rawName = demoSkinNameInput.value.trim() || "Minha_Skin";
+      const cleanName = rawName.replace(/[^a-zA-Z0-9_-]/g, "_");
+      showToast("⚡ Gerando pacote .mcpack para Bedrock...");
+      setTimeout(() => {
+        demoSuccessFileName.textContent = `${cleanName}.mcpack`;
+        demoSuccessCard.style.display = "flex";
+        showToast("🎉 Pacote .mcpack gerado com sucesso!");
+      }, 300);
+    });
+
+    btnHamburger.addEventListener("click", () => {
+      if (isDesktopMode) {
+        const isHidden = desktopSidebarMenu.classList.toggle("hidden");
+        showToast(isHidden ? "Menu lateral recolhido" : "Menu lateral visível");
+      } else {
+        openDrawer();
+      }
+    });
+
+    btnCollapseDesktopSidebar?.addEventListener("click", () => {
+      desktopSidebarMenu.classList.add("hidden");
+      showToast("Menu lateral recolhido");
+    });
+
+    function openDrawer() { drawerBackdrop.classList.add("open"); drawerPanel.classList.add("open"); }
+    function closeDrawer() { drawerBackdrop.classList.remove("open"); drawerPanel.classList.remove("open"); }
+
+    drawerBackdrop.addEventListener("click", closeDrawer);
+    btnCloseDrawer.addEventListener("click", closeDrawer);
+
+    // Modais
+    const qrModal = document.getElementById("qrModal");
+    const shutdownModal = document.getElementById("shutdownModal");
+    function openQr() { closeDrawer(); qrModal.classList.add("open"); }
+    function openShutdown() { closeDrawer(); shutdownModal.classList.add("open"); }
+
+    document.getElementById("sideQrPreview")?.addEventListener("click", openQr);
+    document.getElementById("drawerQrPreview")?.addEventListener("click", openQr);
+    document.getElementById("drawerBtnQrModal")?.addEventListener("click", openQr);
+    document.getElementById("btnSideShutdown")?.addEventListener("click", openShutdown);
+    document.getElementById("drawerBtnShutdown")?.addEventListener("click", openShutdown);
+
+    document.getElementById("btnCloseQrModal").addEventListener("click", () => qrModal.classList.remove("open"));
+    document.getElementById("btnCancelShutdown").addEventListener("click", () => shutdownModal.classList.remove("open"));
+    document.getElementById("btnConfirmShutdown").addEventListener("click", () => { alert("Servidor desligado!"); shutdownModal.classList.remove("open"); });
+
+    function copyIp(buttonElem) {
+      navigator.clipboard?.writeText("http://192.168.1.15:8080");
+      if (buttonElem) {
+        const label = buttonElem.querySelector(".copy-text-label");
+        const icon = buttonElem.querySelector(".copy-icon-glyph");
+        const origText = label ? label.textContent : "";
+        const origIcon = icon ? icon.textContent : "";
+        buttonElem.classList.add("copied");
+        if (label) label.textContent = "Endereço Copiado!";
+        if (icon) icon.textContent = "✓";
+        setTimeout(() => {
+          buttonElem.classList.remove("copied");
+          if (label) label.textContent = origText;
+          if (icon) icon.textContent = origIcon;
+        }, 2000);
+      }
+      showToast("📋 IP copiado para a área de transferência!");
+    }
+    document.getElementById("btnCopyIpSide")?.addEventListener("click", function() { copyIp(this); });
+    document.getElementById("btnCopyIpDrawer")?.addEventListener("click", function() { copyIp(this); });
+
+    // Simulador de Resoluções
+    const viewportWrap = document.getElementById("viewportWrap");
+    const btnSimDesktop = document.getElementById("btnSimDesktop");
+    const btnSimTablet = document.getElementById("btnSimTablet");
+    const btnSimMobile = document.getElementById("btnSimMobile");
+    const headerTabsDesktop = document.getElementById("headerTabsDesktop");
+
+    function applyScreenSimulation(mode) {
+      viewportWrap.className = "viewport-container mode-" + mode;
+      btnSimDesktop.classList.toggle("active", mode === "desktop");
+      btnSimTablet.classList.toggle("active", mode === "tablet");
+      btnSimMobile.classList.toggle("active", mode === "mobile");
+
+      isDesktopMode = (mode === "desktop");
+
+      if (mode === "desktop") {
+        desktopSidebarMenu.classList.remove("hidden");
+        headerTabsDesktop.style.display = "flex";
+      } else if (mode === "tablet") {
+        desktopSidebarMenu.classList.add("hidden");
+        headerTabsDesktop.style.display = "flex";
+      } else {
+        desktopSidebarMenu.classList.add("hidden");
+        headerTabsDesktop.style.display = "none";
+      }
+    }
+
+    btnSimDesktop.addEventListener("click", () => applyScreenSimulation("desktop"));
+    btnSimTablet.addEventListener("click", () => applyScreenSimulation("tablet"));
+    btnSimMobile.addEventListener("click", () => applyScreenSimulation("mobile"));
+
+    applyScreenSimulation("mobile");
+  </script>
+</body>
+</html>

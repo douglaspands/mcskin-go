@@ -28,17 +28,17 @@ Welcome, AI Agent / Harness. This repository enforces strict architectural patte
 Every new feature, modification, or refactor must follow the OpenSpec specification-driven workflow:
 
 1. **Explore / Propose**:
-   - For brainstorming or exploring ideas: run `/opsx-explore`.
-   - **MANDATORY FIRST STEP (Branch Isolation)**: The very first command executed upon triggering `/opsx-propose` MUST be creating and checking out a dedicated feature branch:
+   - For brainstorming or exploring ideas: run the explore workflow (`/opsx:explore` on Claude Code, `/openspec-explore` on Antigravity).
+   - **MANDATORY FIRST STEP (Branch Isolation)**: The very first command executed upon triggering the propose workflow (`/opsx:propose` on Claude Code, `/openspec-propose` on Antigravity) MUST be creating and checking out a dedicated feature branch:
      ```bash
      git checkout -b feat/<nome_spec>
      ```
      This ensures complete sandbox isolation so that if anything deviates or fails, changes can be rolled back without impacting `main`.
 2. **Review Planning Artifacts**:
    - Ensure `proposal.md`, `specs/`, `design.md`, and `tasks.md` are coherent and validated (`openspec validate <change-name>`).
-3. **Implementation (`/opsx-apply` / `/openspec-apply-change`)**:
+3. **Implementation (`/opsx:apply` on Claude Code, `/openspec-apply-change` on Antigravity)**:
    - Work through tasks sequentially. Update tasks in `tasks.md` as they are completed (`- [ ]` -> `- [x]`).
-   - **AUTOMATIC QA TRIGGER**: Immediately upon completing all implementation tasks, the harness MUST automatically invoke `/feature-qa-reviewer` to validate deliverables before moving forward.
+   - **AUTOMATIC QA TRIGGER**: Immediately upon completing all implementation tasks, the harness MUST automatically run the `feature-qa-reviewer` protocol (`.agents/skills/feature-qa-reviewer/SKILL.md`) to validate deliverables before moving forward. On Claude Code this isn't a slash command — read the skill file directly, or dispatch it via the `Agent` tool per its own Claude Code dispatch note.
 4. **PO/QA Review & Bounded Loop Remediation (`feature-qa-reviewer`)**:
    - The persona validates functional user requirements, child usability (6+), Minecraft aesthetic fidelity, cross-platform build artifacts, and Bedrock `.mcpack` compliance.
    - **Loop Engineering Remediation**: If defects or rejections occur, trigger remediation using harness Loop Engineering guardrails with anti-infinite-loop best practices:
@@ -47,9 +47,9 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
      3. **Scope Boundary Guard**: Halt and request spec revision if remediation requires out-of-scope architectural changes.
      4. **Targeted Verification**: Re-run targeted unit tests before re-evaluating with QA.
    - Proceed to archive only after receiving a formal `APROVADO` verdict.
-   - **DO NOT Auto-Archive or Prompt PR During Apply**: Upon receiving `APROVADO` in `/opsx-apply`, commit the code, display the approval report, and instruct the user to execute `/opsx-archive`. Do NOT run `archive` automatically and do NOT prompt for PR/merge during the apply phase.
-5. **Archive (`/opsx-archive`)**:
-   - Triggered explicitly when the user runs `/opsx-archive` (or `openspec archive`).
+   - **DO NOT Auto-Archive or Prompt PR During Apply**: Upon receiving `APROVADO` during apply, commit the code, display the approval report, and instruct the user to run the archive workflow (`/opsx:archive` on Claude Code, `/openspec-archive-change` on Antigravity). Do NOT run archive automatically and do NOT prompt for PR/merge during the apply phase.
+5. **Archive (`/opsx:archive` on Claude Code, `/openspec-archive-change` on Antigravity)**:
+   - Triggered explicitly when the user runs that archive workflow (or `openspec archive`).
    - Once all tasks are complete, verified, and approved by PO/QA, archive the change to sync specs.
    - **MANDATORY ARCHIVE COMMIT ON FEATURE BRANCH**: All git updates (moving change to `archive/` and syncing `openspec/specs/`) MUST be staged and committed directly on the feature branch `feat/<nome_spec>` BEFORE pushing or opening the PR:
      ```bash

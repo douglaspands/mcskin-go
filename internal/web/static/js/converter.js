@@ -5,7 +5,12 @@
 
 import { playSound, launchConfetti } from "./fx.js";
 
-let selectedFile = null, loadedImage = null, currentSkinName = "", hasConfirmedSkinName = false, pendingDownloadAction = null;
+let selectedFile = null;
+let loadedImage = null;
+let currentSkinName = "";
+let hasConfirmedSkinName = false;
+let pendingDownloadAction = null;
+let selectedModel = "both";
 
 export function updateSkinNameDisplays(name) {
   const display = name || "Sem nome";
@@ -13,9 +18,8 @@ export function updateSkinNameDisplays(name) {
     const el = document.getElementById(id);
     if (el) el.textContent = display;
   });
-  const convBadge = document.getElementById("converterSkinNameBadge"), edPill = document.getElementById("editorNamePill");
-  if (convBadge) convBadge.style.display = name ? "inline-flex" : "none";
-  if (edPill) edPill.style.display = name ? "flex" : "none";
+  const input = document.getElementById("converterSkinNameInput");
+  if (input && name) input.value = name;
 }
 
 export function generateDefaultSkinName() {
@@ -40,10 +44,12 @@ export function promptSkinName(suggestedName, actionCallback, forceModal) {
   }
   pendingDownloadAction = actionCallback;
   const nameToUse = sanitizeName(suggestedName || currentSkinName || generateDefaultSkinName());
-  const modal = document.getElementById("skinNameModal"), input = document.getElementById("skinNameInput");
+  const modal = document.getElementById("skinNameModal");
+  const input = document.getElementById("skinNameInput");
   if (input) input.value = nameToUse;
   if (modal) {
     modal.style.display = "flex";
+    modal.classList.add("open");
     if (input) setTimeout(() => { input.focus(); input.select(); }, 50);
   }
 }
@@ -55,17 +61,21 @@ export function renderSkinCharacter(img, model) {
   ctx.imageSmoothingEnabled = false;
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const isSlim = model === "slim", armWidth = isSlim ? 3 : 4, scale = img.width / 64, px = 3.5;
-  const originX = 48 - (isSlim ? 7.5 : 8) * px, originY = 10;
+  const isSlim = model === "slim";
+  const armWidth = isSlim ? 3 : 4;
+  const scale = img.width / 64;
+  const px = 3.5;
+  const originX = 48 - (isSlim ? 7.5 : 8) * px;
+  const originY = 10;
   const drawPart = (sx, sy, sw, sh, dx, dy, dw, dh) => {
     ctx.drawImage(img, sx * scale, sy * scale, sw * scale, sh * scale, originX + dx * px, originY + dy * px, dw * px, dh * px);
   };
 
-  drawPart(8, 8, 8, 8, isSlim ? 3.5 : 4, 0, 8, 8); // Head base
-  drawPart(40, 8, 8, 8, isSlim ? 3.5 : 4, 0, 8, 8); // Head helmet
-  drawPart(20, 20, 8, 12, isSlim ? 3.5 : 4, 8, 8, 12); // Torso base
+  drawPart(8, 8, 8, 8, isSlim ? 3.5 : 4, 0, 8, 8); // Head
+  drawPart(40, 8, 8, 8, isSlim ? 3.5 : 4, 0, 8, 8); // Helmet
+  drawPart(20, 20, 8, 12, isSlim ? 3.5 : 4, 8, 8, 12); // Torso
   if (img.height >= 64) drawPart(20, 36, 8, 12, isSlim ? 3.5 : 4, 8, 8, 12);
-  drawPart(44, 20, armWidth, 12, isSlim ? 0.5 : 0, 8, armWidth, 12); // Right arm base
+  drawPart(44, 20, armWidth, 12, isSlim ? 0.5 : 0, 8, armWidth, 12); // Right arm
   if (img.height >= 64) drawPart(44, 36, armWidth, 12, isSlim ? 0.5 : 0, 8, armWidth, 12);
   const armLeftX = isSlim ? 11.5 : 12;
   if (img.height >= 64) {
@@ -74,7 +84,7 @@ export function renderSkinCharacter(img, model) {
   } else {
     drawPart(44, 20, armWidth, 12, armLeftX, 8, armWidth, 12);
   }
-  drawPart(4, 20, 4, 12, isSlim ? 3.5 : 4, 20, 4, 12); // Right leg base
+  drawPart(4, 20, 4, 12, isSlim ? 3.5 : 4, 20, 4, 12); // Right leg
   if (img.height >= 64) drawPart(4, 36, 4, 12, isSlim ? 3.5 : 4, 20, 4, 12);
   const legLeftX = isSlim ? 7.5 : 8;
   if (img.height >= 64) {
@@ -87,16 +97,33 @@ export function renderSkinCharacter(img, model) {
 
 export function initConverter() {
   const getEl = (id) => document.getElementById(id);
-  const dropzone = getEl("dropzone"), skinInput = getEl("skinInput");
-  const getSelectedModel = () => document.querySelector("input[name=model]:checked")?.value || "both";
+  const dropzone = getEl("dropzone");
+  const skinInput = getEl("skinInput");
+  const previewBox = getEl("previewBox");
+  const btnConvert = getEl("btnConvert");
+  const nameField = getEl("converterSkinNameInput");
+
+  const getActiveModel = () => selectedModel || "both";
+
   const showError = (msg) => {
     if (getEl("errorMessageText")) getEl("errorMessageText").innerHTML = msg;
-    getEl("errorBanner")?.classList.add("active");
-    getEl("successBanner")?.classList.remove("active");
+    const err = getEl("errorBanner");
+    if (err) { err.style.display = "block"; err.classList.add("active"); }
+    const suc = getEl("successBanner");
+    if (suc) { suc.style.display = "none"; suc.classList.remove("active"); }
   };
-  const hideErrors = () => getEl("errorBanner")?.classList.remove("active");
 
-  const closeSkinModal = () => { if (getEl("skinNameModal")) getEl("skinNameModal").style.display = "none"; pendingDownloadAction = null; };
+  const hideErrors = () => {
+    const err = getEl("errorBanner");
+    if (err) { err.style.display = "none"; err.classList.remove("active"); }
+  };
+
+  const closeSkinModal = () => {
+    const modal = getEl("skinNameModal");
+    if (modal) { modal.style.display = "none"; modal.classList.remove("open"); }
+    pendingDownloadAction = null;
+  };
+
   const confirmDownload = () => {
     const input = getEl("skinNameInput");
     let chosen = sanitizeName(input ? input.value : "");
@@ -117,18 +144,18 @@ export function initConverter() {
     else if (e.key === "Escape") closeSkinModal();
   });
 
-  ["btnConverterRename", "btnEditSkinName", "btnRenameSkin"].forEach((id) => {
-    getEl(id)?.addEventListener("click", () => promptSkinName(currentSkinName, null, true));
+  nameField?.addEventListener("input", (e) => {
+    currentSkinName = sanitizeName(e.target.value);
+    hasConfirmedSkinName = true;
   });
 
-  document.querySelectorAll(".model-card").forEach((card) => {
+  document.querySelectorAll(".model-card-item").forEach((card) => {
     card.addEventListener("click", () => {
-      document.querySelectorAll(".model-card").forEach((c) => c.classList.remove("selected"));
-      card.classList.add("selected");
-      const radio = card.querySelector("input[type=radio]");
-      if (radio) radio.checked = true;
+      document.querySelectorAll(".model-card-item").forEach((c) => c.classList.remove("active"));
+      card.classList.add("active");
+      selectedModel = card.dataset.model || "both";
       playSound("click");
-      if (loadedImage) renderSkinCharacter(loadedImage, getSelectedModel());
+      if (loadedImage) renderSkinCharacter(loadedImage, selectedModel);
     });
   });
 
@@ -147,15 +174,17 @@ export function initConverter() {
           showError(`Tamanho inválido (<strong>${w}x${h} pixels</strong>). Skins precisam ter <strong>64x64</strong>, <strong>64x32</strong> ou <strong>128x128</strong> pixels!`);
           return;
         }
-        selectedFile = file; loadedImage = img;
+        selectedFile = file;
+        loadedImage = img;
         if (getEl("fileNameDisplay")) getEl("fileNameDisplay").textContent = file.name;
-        if (getEl("fileDimsDisplay")) getEl("fileDimsDisplay").textContent = `${w} x ${h} pixels (${h === 32 ? "Clássica Antiga" : "Moderna HD"})`;
+        if (getEl("fileDimsDisplay")) getEl("fileDimsDisplay").textContent = `${w} x ${h} pixels (${h === 32 ? "Clássica Antiga" : "RGBA Válido"})`;
         currentSkinName = sanitizeName(file.name.replace(/\.[^/.]+$/, ""));
         hasConfirmedSkinName = false;
         updateSkinNameDisplays(currentSkinName);
-        renderSkinCharacter(img, getSelectedModel());
-        getEl("previewBox")?.classList.add("active");
-        if (getEl("btnConvert")) getEl("btnConvert").disabled = false;
+        renderSkinCharacter(img, getActiveModel());
+        if (dropzone) dropzone.style.display = "none";
+        if (previewBox) { previewBox.style.display = "flex"; previewBox.classList.add("active"); }
+        if (btnConvert) btnConvert.disabled = false;
         playSound("click");
       };
       img.src = e.target.result;
@@ -164,48 +193,71 @@ export function initConverter() {
   };
 
   dropzone?.addEventListener("click", () => skinInput?.click());
-  getEl("btnChangeSkin")?.addEventListener("click", () => skinInput?.click());
+  getEl("btnChangeSkin")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    if (previewBox) { previewBox.style.display = "none"; previewBox.classList.remove("active"); }
+    if (dropzone) dropzone.style.display = "flex";
+    if (skinInput) skinInput.value = "";
+    selectedFile = null;
+    loadedImage = null;
+    if (btnConvert) btnConvert.disabled = true;
+    hideErrors();
+    const suc = getEl("successBanner");
+    if (suc) { suc.style.display = "none"; suc.classList.remove("active"); }
+    playSound("click");
+  });
+
   dropzone?.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
   dropzone?.addEventListener("dragleave", (e) => { e.preventDefault(); dropzone.classList.remove("dragover"); });
   dropzone?.addEventListener("drop", (e) => {
-    e.preventDefault(); dropzone.classList.remove("dragover");
+    e.preventDefault();
+    dropzone.classList.remove("dragover");
     if (e.dataTransfer?.files.length) handleFile(e.dataTransfer.files[0]);
   });
   skinInput?.addEventListener("change", () => { if (skinInput.files.length) handleFile(skinInput.files[0]); });
 
-  getEl("btnConvert")?.addEventListener("click", () => {
+  btnConvert?.addEventListener("click", () => {
     if (!selectedFile) return;
-    promptSkinName(currentSkinName || selectedFile.name.replace(/\.[^/.]+$/, ""), (confirmedName) => {
-      const btn = getEl("btnConvert");
-      if (btn) { btn.disabled = true; btn.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>"; }
-      hideErrors(); getEl("successBanner")?.classList.remove("active");
+    const finalName = sanitizeName(nameField?.value || currentSkinName || selectedFile.name.replace(/\.[^/.]+$/, ""));
+    btnConvert.disabled = true;
+    btnConvert.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>";
+    hideErrors();
+    const suc = getEl("successBanner");
+    if (suc) { suc.style.display = "none"; suc.classList.remove("active"); }
 
-      const formData = new FormData();
-      formData.append("skin", selectedFile, confirmedName + ".png");
-      formData.append("name", confirmedName);
-      formData.append("model", getSelectedModel());
+    const formData = new FormData();
+    formData.append("skin", selectedFile, finalName + ".png");
+    formData.append("name", finalName);
+    formData.append("model", getActiveModel());
 
-      fetch("/api/convert", { method: "POST", body: formData })
-        .then((res) => {
-          if (!res.ok) return res.json().then((d) => { throw new Error(d.error || "Erro ao gerar arquivo"); });
-          return res.blob();
-        })
-        .then((blob) => {
-          playSound("success"); launchConfetti();
-          const cleanName = confirmedName + ".mcpack", blobUrl = URL.createObjectURL(blob);
-          const a = document.createElement("a");
-          a.href = blobUrl; a.download = cleanName;
-          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    fetch("/api/convert", { method: "POST", body: formData })
+      .then((res) => {
+        if (!res.ok) return res.json().then((d) => { throw new Error(d.error || "Erro ao gerar arquivo"); });
+        return res.blob();
+      })
+      .then((blob) => {
+        playSound("success");
+        launchConfetti();
+        const cleanName = finalName + ".mcpack";
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = blobUrl;
+        a.download = cleanName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
 
-          const fallback = getEl("downloadFallbackBtn");
-          if (fallback) { fallback.href = blobUrl; fallback.download = cleanName; }
-          getEl("successBanner")?.classList.add("active");
-          if (btn) { btn.disabled = false; btn.innerHTML = "<span>⚡ BAIXAR PACOTE .MCPACK! ⚡</span>"; }
-        })
-        .catch((err) => {
-          showError(err.message);
-          if (btn) { btn.disabled = false; btn.innerHTML = "<span>⚡ BAIXAR PACOTE .MCPACK! ⚡</span>"; }
-        });
-    });
+        if (getEl("demoSuccessFileName")) getEl("demoSuccessFileName").textContent = cleanName;
+        const fallback = getEl("downloadFallbackBtn");
+        if (fallback) { fallback.href = blobUrl; fallback.download = cleanName; }
+        if (suc) { suc.style.display = "flex"; suc.classList.add("active"); }
+        btnConvert.disabled = false;
+        btnConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK ⚡</span>";
+      })
+      .catch((err) => {
+        showError(err.message);
+        btnConvert.disabled = false;
+        btnConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK ⚡</span>";
+      });
   });
 }

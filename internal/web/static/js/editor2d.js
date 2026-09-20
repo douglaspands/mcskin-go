@@ -39,7 +39,7 @@ export const redo = () => {
 };
 
 export function syncTexture() {
-  update3DTexture(gridEnabled ? buildGridOverlayCanvas(textureCanvas, texW, texH) : textureCanvas);
+  update3DTexture(gridEnabled ? buildGridOverlayCanvas(textureCanvas, texW, texH) : textureCanvas, texW, texH);
   render2DSheet();
 }
 /**
@@ -97,6 +97,10 @@ export function paintPixel(px, py, { currentTool, currentColor, isGlassMode, onP
     floodFill(px, py, currentColor, isGlassMode ? 128 : 255);
     syncTexture(); playSound("click"); return;
   }
+  if (currentTool === "recolor") {
+    recolorAll(px, py, currentColor, isGlassMode ? 128 : 255);
+    syncTexture(); playSound("click"); return;
+  }
   if (lastPaintedCoord?.x === px && lastPaintedCoord?.y === py) return;
   lastPaintedCoord = { x: px, y: py };
 
@@ -129,6 +133,26 @@ function floodFill(startX, startY, hexColor, fillA) {
       data[pIdx] = fillR; data[pIdx + 1] = fillG; data[pIdx + 2] = fillB; data[pIdx + 3] = fillA;
       if (x > 0) queue.push([x - 1, y]); if (x < texW - 1) queue.push([x + 1, y]);
       if (y > 0) queue.push([y - 1, y]); if (y < texH - 1) queue.push([y + 1, y]);
+    }
+  }
+  textureCtx.putImageData(imgData, 0, 0);
+}
+
+/**
+ * Replaces every pixel matching the color at (startX, startY) with the given
+ * color, anywhere in the texture — unlike floodFill, not limited to the
+ * contiguous region touching the starting pixel.
+ */
+function recolorAll(startX, startY, hexColor, fillA) {
+  const hex = hexColor.replace("#", ""), num = parseInt(hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex, 16);
+  const fillR = (num >> 16) & 255, fillG = (num >> 8) & 255, fillB = num & 255;
+  const imgData = textureCtx.getImageData(0, 0, texW, texH), data = imgData.data;
+  const sIdx = (startY * texW + startX) * 4;
+  const sR = data[sIdx], sG = data[sIdx + 1], sB = data[sIdx + 2], sA = data[sIdx + 3];
+  if (sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i] === sR && data[i + 1] === sG && data[i + 2] === sB && data[i + 3] === sA) {
+      data[i] = fillR; data[i + 1] = fillG; data[i + 2] = fillB; data[i + 3] = fillA;
     }
   }
   textureCtx.putImageData(imgData, 0, 0);

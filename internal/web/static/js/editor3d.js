@@ -7,6 +7,9 @@ import { playSound } from "./fx.js";
 
 const GRID_OVERLAY_SCALE = 8;
 const ZOOM_3D_STEP = 4;
+const PAN_Y_STEP = 2;
+const PAN_Y_MIN = -10;
+const PAN_Y_MAX = 20;
 
 let viewport3D = null;
 let editor3DCanvas = null;
@@ -57,11 +60,13 @@ export function getViewport3D() {
 /**
  * Updates texture rendered on the 3D mannequin.
  * @param {HTMLCanvasElement} canvas - Texture canvas to apply.
+ * @param {number} [uvWidth] - Logical skin width, when `canvas` is an upscaled
+ * grid-overlay canvas rather than the raw texture at its native resolution.
+ * @param {number} [uvHeight] - Logical skin height, same caveat as `uvWidth`.
  */
-export function update3DTexture(canvas) {
+export function update3DTexture(canvas, uvWidth, uvHeight) {
   if (viewport3D) {
-    viewport3D.updateTexture(canvas);
-    viewport3D.render();
+    viewport3D.setTexture(canvas, uvWidth, uvHeight);
   }
 }
 
@@ -90,26 +95,29 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
 
   viewport3D = new window.Skin3D.Viewport(editor3DCanvas);
 
-  // Fullscreen handling
-  const editorCard = document.querySelector(".editor-card");
-  const btnFullscreen = document.getElementById("btnFullscreen");
-  const isFsActive = () => !!(document.fullscreenElement || document.webkitFullscreenElement || editorCard?.classList.contains("is-fullscreen-fallback"));
+  // Fullscreen handling — fullscreens the whole document (not just the
+  // editor card) so the single header toggle button that opened fullscreen
+  // stays part of the fullscreen view and remains reachable to exit it,
+  // on every viewport width.
+  const root = document.documentElement;
+  const btnFullscreen = document.getElementById("btnHeaderFullscreen") || document.getElementById("btnFullscreenHeader");
+  const isFsActive = () => !!(document.fullscreenElement || document.webkitFullscreenElement || root.classList.contains("is-fullscreen-fallback"));
 
   const onFsChange = () => {
-    if (btnFullscreen) btnFullscreen.innerHTML = isFsActive() ? "🡼 Sair da Tela Cheia" : "⛶ Tela Cheia";
+    btnFullscreen?.classList.toggle("active", isFsActive());
+    if (btnFullscreen) btnFullscreen.title = isFsActive() ? "Sair da tela cheia" : "Expandir para tela cheia";
     setTimeout(() => { viewport3D?.render(); }, 60);
   };
 
   btnFullscreen?.addEventListener("click", () => {
-    if (!editorCard) return;
     if (isFsActive()) {
       if (document.exitFullscreen) document.exitFullscreen();
       else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-      editorCard.classList.remove("is-fullscreen-fallback");
+      root.classList.remove("is-fullscreen-fallback");
     } else {
-      const req = editorCard.requestFullscreen || editorCard.webkitRequestFullscreen;
-      if (req) req.call(editorCard);
-      else editorCard.classList.add("is-fullscreen-fallback");
+      const req = root.requestFullscreen || root.webkitRequestFullscreen;
+      if (req) req.call(root);
+      else root.classList.add("is-fullscreen-fallback");
     }
     onFsChange();
     playSound("click");
@@ -137,6 +145,24 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
     playSound("click");
   });
 
+  // Discrete vertical height adjustment (Subir / Descer) — shifts the camera
+  // look-at target's Y component, same pattern focusPart() already uses.
+  const panY = (delta) => {
+    if (!viewport3D) return;
+    viewport3D.target[1] = Math.max(PAN_Y_MIN, Math.min(PAN_Y_MAX, viewport3D.target[1] + delta));
+    viewport3D.render();
+  };
+  document.getElementById("btnPanUp")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    panY(PAN_Y_STEP);
+    playSound("click");
+  });
+  document.getElementById("btnPanDown")?.addEventListener("click", (e) => {
+    e.stopPropagation();
+    panY(-PAN_Y_STEP);
+    playSound("click");
+  });
+
   // Mannequin Widget body part focusing
   const mannequin = document.getElementById("mannequinWidget");
   mannequin?.querySelectorAll(".mannequin-part").forEach((el) => {
@@ -153,19 +179,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
     el.addEventListener("touchend", handleFocus);
   });
 
-  // Visibility and Snap buttons
-  document.querySelectorAll(".btn-part").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const part = btn.getAttribute("data-part");
-      const active = btn.classList.toggle("active");
-      if (viewport3D) {
-        viewport3D.partVisible[part] = active;
-        viewport3D.render();
-      }
-      playSound("click");
-    });
-  });
-
+  // Snap view buttons
   document.querySelectorAll(".btn-snap").forEach((btn) => {
     btn.addEventListener("click", () => {
       const dir = btn.getAttribute("data-dir");

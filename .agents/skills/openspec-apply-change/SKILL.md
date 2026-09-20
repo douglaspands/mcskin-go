@@ -105,11 +105,21 @@ In both branches, never create the root as a side effect: do not run `openspec i
 6. **Implement tasks (loop until done or blocked)**
 
    For each pending task:
-   - Show which task is being worked on
-   - Make the code changes required
-   - Keep changes minimal and focused
-   - Mark task complete in the tasks file: `- [ ]` → `- [x]`
-   - Continue to next task
+    - **Read model annotation**: Check the task's `<!-- model: ... | signal: ... -->` comment in `tasks.md`. If present, use that model for any subagent dispatched for this task. If absent, apply `model-selection` skill Decision Table to derive the tier.
+    - **Log before starting**: Append one line to `.agents/model-log.md` before dispatching the task:
+      ```
+      | <YYYY-MM-DD> | <change-name>/<task-short-desc> | <model> | <signal> | pending |
+      ```
+    - Show which task is being worked on
+    - Make the code changes required
+    - Keep changes minimal and focused
+    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
+    - **Update log outcome**: After the task completes, update the `pending` outcome in `.agents/model-log.md`:
+      - `ok` — completed successfully, model was appropriate
+      - `ok-overtier` — succeeded, but a cheaper tier would likely have worked
+      - `fail-undertier` — had to escalate to a higher model mid-task
+      - `fail-other` — failed for reasons unrelated to model capability
+    - Continue to next task
 
    **Pause if:**
    - Task is unclear → ask for clarification

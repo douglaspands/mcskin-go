@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>CRIE SKINS LEGAIS - Minecraft Bedrock Skin Pack</title>
-  <meta name="description" content="Converta sua imagem PNG em pacote de skin .mcpack para Minecraft Bedrock de forma super fácil e divertida!">
+  <meta name="description" content="Crie, edite e transforme suas skins em pacotes .mcpack para Minecraft Bedrock!">
+  <link rel="icon" type="image/png" href="/favicon.ico">
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/vendor/three.min.js"></script>
 </head>
@@ -13,391 +14,567 @@
   <!-- Canvas para partículas comemorativas -->
   <canvas id="confettiCanvas"></canvas>
 
-  <header>
-    <div class="header-banner">
-      <div class="header-badge">⭐ MINECRAFT BEDROCK EDITION ⭐</div>
-      <h1 class="site-title">
-        <span class="icon">⛏️</span> CRIE SKINS LEGAIS <span class="icon">⛏️</span>
-      </h1>
-      <p class="site-subtitle">Crie, edite e transforme suas skins em pacotes .mcpack para jogar no celular, tablet ou PC!</p>
+  <div class="viewport-container" id="viewportWrap">
+    <div class="app-root">
 
-      <!-- Barra de Navegação Superior (Conversor vs Criador) -->
-      <nav class="main-nav" aria-label="Navegação Principal">
-        <button type="button" class="nav-tab active" id="tabConverter" data-target="viewConverter">
-          <span class="nav-icon">📦</span> Conversor de Skin
-        </button>
-        <button type="button" class="nav-tab" id="tabEditor" data-target="viewEditor">
-          <span class="nav-icon">🎨</span> Criador de Skins 3D
-        </button>
-      </nav>
-    </div>
-  </header>
-
-  <main class="main-container">
-    <!-- TELA 1: CONVERSOR & WI-FI -->
-    <div class="view-panel active" id="viewConverter">
-      <div class="converter-grid">
-    <section class="mc-card">
-      <h2 class="card-title">🎨 1. Escolha sua Skin</h2>
-
-      <!-- Dropzone de Upload -->
-      <div class="dropzone" id="dropzone">
-        <div class="dropzone-icon">✨</div>
-        <div class="dropzone-text">Arraste sua skin aqui</div>
-        <div class="dropzone-hint">ou toque para escolher a imagem PNG do seu aparelho</div>
-        <div class="dropzone-highlight">64x64, 64x32 (Clássico) ou 128x128 pixels</div>
-        <input type="file" id="skinInput" accept="image/png" style="display: none;">
-      </div>
-
-      <!-- Preview Interativo do Personagem -->
-      <div class="preview-box" id="previewBox">
-        <div class="character-preview-frame">
-          <canvas id="skinCanvas" width="96" height="128" title="Seu Personagem"></canvas>
-        </div>
-        <div class="preview-details">
-          <div class="skin-file-name" id="fileNameDisplay">skin.png</div>
-          <div class="skin-dims" id="fileDimsDisplay">64 x 64 pixels</div>
-          <div class="converter-name-badge" id="converterSkinNameBadge" style="display: none;">
-            <span>🏷️ Salvar como: <strong id="converterCurrentNameText"></strong></span>
-            <button type="button" class="btn-rename-pill" id="btnConverterRename" title="Alterar nome do arquivo">✏️ Alterar</button>
-          </div>
-          <button type="button" class="btn-change-skin" id="btnChangeSkin">🔄 Escolher Outra</button>
-        </div>
-      </div>
-
-      <!-- Seletor de Modelo (Steve / Alex / Ambos) -->
-      <div class="model-section">
-        <div class="section-label">👤 2. Escolha o Tipo do Boneco:</div>
-        <div class="model-options">
-          <label class="model-card selected" id="cardBoth">
-            <span class="model-badge">⭐ TOP</span>
-            <input type="radio" name="model" value="both" checked>
-            <div class="model-name">Ambos</div>
-            <div class="model-desc">Funciona em tudo! (Steve e Alex)</div>
-          </label>
-
-          <label class="model-card" id="cardClassic">
-            <input type="radio" name="model" value="classic">
-            <div class="model-name">Steve</div>
-            <div class="model-desc">Braços largos de 4 pixels</div>
-          </label>
-
-          <label class="model-card" id="cardSlim">
-            <input type="radio" name="model" value="slim">
-            <div class="model-name">Alex</div>
-            <div class="model-desc">Braços finos de 3 pixels</div>
-          </label>
-        </div>
-      </div>
-
-      <!-- Botão Gigante de Download -->
-      <button type="button" class="btn-minecraft" id="btnConvert" disabled>
-        <span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>
-      </button>
-
-      <!-- Mensagens de Sucesso e Erro -->
-      <div class="status-card success" id="successBanner">
-        <div class="status-title">🎉 Uhuuu! Sua skin está pronta!</div>
-        <div class="status-msg">
-          O download começou automaticamente!<br>
-          Basta dar <strong>2 cliques no arquivo .mcpack</strong> baixado e o Minecraft vai abrir instalando sua skin!
-        </div>
-        <a id="downloadFallbackBtn" class="btn-minecraft" style="margin-top: 14px; text-decoration: none; font-size: 1rem; padding: 12px;" href="#" download>
-          📥 Baixar Novamente
-        </a>
-      </div>
-
-      <div class="status-card error" id="errorBanner">
-        <div class="status-title">⚠️ Ops! Algo deu errado</div>
-        <div class="status-msg" id="errorMessageText">
-          Verifique se a imagem é uma skin válida do Minecraft (tamanho 64x64, 64x32 ou 128x128 pixels).
-        </div>
-      </div>
-    </section>
-
-    <!-- Card Lateral: QR Code e Acesso Mobile Wi-Fi -->
-    <aside class="mc-card">
-      <h2 class="card-title">📱 No Celular ou Tablet</h2>
-      <div class="qr-container">
-        <div class="qr-step-box">
-          <div class="qr-step"><span class="step-num">1</span> Conecte no mesmo Wi-Fi de casa</div>
-          <div class="qr-step"><span class="step-num">2</span> Aponte a câmera para o QR Code abaixo</div>
-          <div class="qr-step"><span class="step-num">3</span> Baixe a skin direto no Minecraft do celular!</div>
-        </div>
-
-        <div class="qr-box" id="qrBoxClickable" title="Clique para ampliar em tela cheia">
-          <div id="qrcodeCanvas"></div>
-        </div>
-
-        <button type="button" class="btn-expand-qr" id="btnExpandQr">
-          🔍 Ampliar QR Code (Fácil Leitura)
-        </button>
-
-        <div class="network-url-pill" id="networkUrlDisplay">http://localhost:8080</div>
-
-        <button type="button" class="btn-copy" id="btnCopyUrl">
-          📋 Copiar Endereço
-        </button>
-
-        <!-- Dica para Câmeras de Baixa Definição -->
-        <div class="manual-url-box">
-          <span class="manual-label">💡 Câmera do tablet com dificuldade?</span>
-          <span>Basta abrir o navegador (Chrome ou Safari) no tablet e digitar:</span>
-          <div class="manual-ip" id="manualIpDisplay">http://localhost:8080</div>
-        </div>
-      </div>
-    </aside>
-      </div><!-- .converter-grid -->
-    </div><!-- #viewConverter -->
-
-    <!-- TELA 2: CRIADOR / EDITOR DE SKINS 3D & 2D -->
-    <div class="view-panel" id="viewEditor" style="display: none;">
-      <section class="mc-card editor-card">
-        <!-- Barra de Ação Rápida Superior -->
-        <div class="editor-topbar">
-          <div class="topbar-group">
-            <button type="button" class="btn-topbar" id="btnUndo" title="Desfazer ação">↩️ Desfazer</button>
-            <button type="button" class="btn-topbar" id="btnRedo" title="Refazer ação">↪️ Refazer</button>
-          </div>
-
-          <div class="topbar-group">
-            <span class="topbar-label">Modelo:</span>
-            <button type="button" class="btn-template active" id="tplSteve">👤 Steve</button>
-            <button type="button" class="btn-template" id="tplAlex">👱 Alex</button>
-            <button type="button" class="btn-template" id="tplBlank">⬜ Do Zero</button>
-          </div>
-
-          <div class="topbar-group">
-            <span class="topbar-label">Formato:</span>
-            <select id="editorDimSelect" class="mc-select">
-              <option value="64x64" selected>64x64 (Padrão)</option>
-              <option value="64x32">64x32 (Clássico)</option>
-              <option value="128x128">128x128 (HD)</option>
-            </select>
-          </div>
-
-          <div class="topbar-group">
-            <button type="button" class="btn-topbar" id="btnUploadSkin">📂 Abrir Skin (PNG)</button>
-            <input type="file" id="editorFileInput" accept="image/png" style="display: none;">
-            <button type="button" class="btn-topbar" id="btnEditSkinName" title="Alterar o nome do arquivo da skin">🏷️ <span id="editorSkinNameDisplay">Sem nome</span> ✏️</button>
-          </div>
-
-          <div class="topbar-group">
-            <button type="button" class="btn-topbar" id="btnToggleGrid" title="Mostrar/ocultar grade de pixels">▦ Grade de Pixels</button>
-            <button type="button" class="btn-topbar" id="btnFullscreen" title="Expandir para tela cheia">⛶ Tela Cheia</button>
+      <!-- CABEÇALHO COMPACTO (~44px) -->
+      <header class="compact-header">
+        <div class="brand-section" id="btnHomeBrand" title="Crie Skins Legais">
+          <img src="/favicon.ico" class="brand-app-icon" alt="mcskin icon" onerror="this.style.display='none'; document.getElementById('fallbackBrandIcon').style.display='inline';">
+          <span class="brand-icon" id="fallbackBrandIcon" style="display: none;">⛏️</span>
+          <div>
+            <span class="brand-title">CRIE SKINS</span>
+            <span class="brand-sub">Bedrock</span>
           </div>
         </div>
 
-        <!-- Área de Criação (Ferramentas à Esquerda, Canvas ao Centro) -->
-        <div class="editor-workspace">
-          <!-- Coluna Esquerda de Ferramentas -->
-          <aside class="editor-sidebar">
-            <!-- Alternador de Visualização: 3D vs Folha 2D -->
-            <div class="sidebar-section">
-              <div class="section-subtitle">Visualização:</div>
-              <div class="segmented-control">
-                <button type="button" class="seg-btn active" id="btnMode3D">🧊 Boneco 3D</button>
-                <button type="button" class="seg-btn" id="btnMode2D">📜 Folha 2D</button>
-              </div>
-            </div>
+        <nav class="header-tabs" id="headerTabsDesktop">
+          <button type="button" class="header-tab-btn" id="tabBtnConverter">📦 Conversor</button>
+          <button type="button" class="header-tab-btn active" id="tabBtnEditor">🎨 Criador 3D</button>
+        </nav>
 
-            <!-- Modo de Toque (Essencial para Telas Sensíveis) -->
-            <div class="sidebar-section touch-mode-box">
-              <div class="section-subtitle">Dedo na Tela (Celular / Tablet):</div>
-              <div class="segmented-control">
-                <button type="button" class="seg-btn active" id="btnTouchPaint">🖌️ Pintar</button>
-                <button type="button" class="seg-btn" id="btnTouchRotate">🔄 Girar</button>
-              </div>
-            </div>
+        <div class="header-right-actions">
+          <button type="button" class="btn-header-fullscreen" id="btnHeaderFullscreen" title="Tela Cheia">
+            ⛶
+          </button>
+          <button type="button" class="btn-hamburger" id="btnHamburger">
+            <span>☰</span> <span id="btnMenuText">MENU</span>
+          </button>
+        </div>
+      </header>
 
-            <!-- Ferramentas de Desenho -->
-            <div class="sidebar-section">
-              <div class="section-subtitle">Ferramentas:</div>
-              <div class="tools-grid">
-                <button type="button" class="btn-tool active" id="toolPencil" title="Lápis de Pixel">✏️ Lápis</button>
-                <button type="button" class="btn-tool" id="toolBucket" title="Balde de Tinta">🪣 Balde</button>
-                <button type="button" class="btn-tool" id="toolEraser" title="Borracha">🧹 Borracha</button>
-                <button type="button" class="btn-tool" id="toolPipette" title="Conta-Gotas">🎯 Pipeta</button>
-              </div>
-            </div>
+      <!-- ESTRUTURA DESKTOP SPLIT: Workspace + Menu Lateral à Direita (Uniforme com Mobile) -->
+      <div class="desktop-layout-split">
 
-            <!-- Camadas -->
-            <div class="sidebar-section">
-              <div class="section-subtitle">Camada de Pintura:</div>
-              <div class="segmented-control">
-                <button type="button" class="seg-btn active" id="btnLayerBase">👕 Corpo Base</button>
-                <button type="button" class="seg-btn" id="btnLayerOverlay">🧥 Camada 3D</button>
-              </div>
-              <label class="glass-option" id="lblGlassMode">
-                <input type="checkbox" id="chkGlassMode">
-                <span>🪟 Modo Vidro (50% Transparente)</span>
-              </label>
-            </div>
+        <!-- ÁREA PRINCIPAL (À Esquerda no Desktop) -->
+        <div class="main-workspace-content">
 
-            <!-- Paleta de Cores Minecraft -->
-            <div class="sidebar-section">
-              <div class="section-subtitle">Cores Fáceis do Minecraft:</div>
-              <div class="palette-grid" id="paletteGrid"></div>
-              <div class="color-picker-row">
-                <label for="customColorPicker" class="color-picker-label">Qualquer Cor:</label>
-                <input type="color" id="customColorPicker" value="#2ecc71" class="color-input">
-                <div class="current-color-box" id="currentColorBox"></div>
-              </div>
-            </div>
+          <!-- TELA 1: CONVERSOR RESPONSIVO MULTI-TELA -->
+          <main class="converter-view-wrap" id="viewConverter" style="display: none;">
+            <div class="converter-responsive-grid">
 
-            <!-- Ocultar Partes -->
-            <div class="sidebar-section">
-              <div class="section-subtitle">Ocultar Partes (Pintar por dentro):</div>
-              <div class="parts-grid">
-                <button type="button" class="btn-part active" data-part="head">Cabeça</button>
-                <button type="button" class="btn-part active" data-part="torso">Tronco</button>
-                <button type="button" class="btn-part active" data-part="rightArm">Braço D</button>
-                <button type="button" class="btn-part active" data-part="leftArm">Braço E</button>
-                <button type="button" class="btn-part active" data-part="rightLeg">Perna D</button>
-                <button type="button" class="btn-part active" data-part="leftLeg">Perna E</button>
-              </div>
-            </div>
-          </aside>
+              <!-- COLUNA 1: Upload e Preview da Imagem -->
+              <div class="converter-col">
+                <section class="mc-card">
+                  <div class="card-header-row">
+                    <h2 class="card-title">🎨 1. Imagem da Skin</h2>
+                    <span class="card-badge">PNG</span>
+                  </div>
 
-          <!-- Coluna Central de Desenho -->
-          <div class="editor-stage">
-            <!-- Visão 3D -->
-            <div class="viewport-3d-box" id="wrapper3D">
-              <div class="viewport-3d-canvas-wrap">
-                <canvas id="editor3DCanvas" width="480" height="640"></canvas>
-                <!-- Bonequinho 2D Flutuante para Focar Partes do Corpo -->
-                <div class="mannequin-widget" id="mannequinWidget" title="Toque nas partes para focar a câmera">
-                  <div class="mannequin-label">Focar</div>
-                  <div class="mannequin-doll">
-                    <div class="mannequin-part mannequin-head" data-mannequin-part="head" title="Focar Cabeça"></div>
-                    <div class="mannequin-row">
-                      <div class="mannequin-part mannequin-arm-d" data-mannequin-part="rightArm" title="Focar Braço Direito"></div>
-                      <div class="mannequin-part mannequin-torso" data-mannequin-part="torso" title="Focar Tronco"></div>
-                      <div class="mannequin-part mannequin-arm-e" data-mannequin-part="leftArm" title="Focar Braço Esquerdo"></div>
+                  <!-- Dropzone Interativa -->
+                  <div class="dropzone" id="dropzone" title="Toque ou arraste uma skin PNG">
+                    <div class="dropzone-icon">✨</div>
+                    <div class="dropzone-text">Toque para escolher imagem PNG</div>
+                    <div class="dropzone-hint">ou arraste o arquivo da skin aqui</div>
+                    <div class="dropzone-specs">Dimensões: 64x64, 64x32 ou 128x128</div>
+                    <input type="file" id="skinInput" accept="image/png" style="display: none;">
+                  </div>
+
+                  <!-- Preview da Skin Carregada -->
+                  <div class="converter-preview-box" id="previewBox" style="display: none;">
+                    <div class="preview-avatar-wrap">
+                      <div class="preview-mini-skin" id="demoSkinAvatar">
+                        <canvas id="skinCanvas" width="96" height="128" title="Seu Personagem"></canvas>
+                      </div>
                     </div>
-                    <div class="mannequin-row">
-                      <div class="mannequin-part mannequin-leg-d" data-mannequin-part="rightLeg" title="Focar Perna Direita"></div>
-                      <div class="mannequin-part mannequin-leg-e" data-mannequin-part="leftLeg" title="Focar Perna Esquerda"></div>
+                    <div class="preview-meta">
+                      <div class="preview-filename" id="fileNameDisplay">skin_personalizada.png</div>
+                      <div class="preview-dimensions" id="fileDimsDisplay">64 × 64 pixels • RGBA Válido</div>
+                      <button type="button" class="btn-secondary-sm" id="btnChangeSkin">🔄 Escolher Outra Imagem</button>
                     </div>
                   </div>
-                </div>
-                <!-- Controles Verticais Flutuantes de Zoom (🔍+, ⟲, 🔍−) -->
-                <div class="zoom-vertical-controls" id="zoom3DVerticalControls">
-                  <button type="button" class="btn-zoom-vert" id="btnZoom3DIn" title="Aumentar zoom">🔍+</button>
-                  <button type="button" class="btn-zoom-vert btn-zoom-reset" id="btnZoom3DReset" title="Recentrar visão de corpo inteiro">⟲</button>
-                  <button type="button" class="btn-zoom-vert" id="btnZoom3DOut" title="Diminuir zoom">🔍−</button>
+                </section>
+              </div>
+
+              <!-- COLUNA 2: Opções do Pacote e Download -->
+              <div class="converter-col">
+                <section class="mc-card">
+                  <div class="card-header-row">
+                    <h2 class="card-title">⚙️ 2. Pacote .mcpack</h2>
+                    <span class="card-badge">Bedrock</span>
+                  </div>
+
+                  <!-- Nome da Skin no Jogo -->
+                  <div class="form-group">
+                    <label class="form-label" for="converterSkinNameInput">🏷️ Nome da Skin no Jogo:</label>
+                    <input type="text" class="mc-input-field" id="converterSkinNameInput" value="Minha Skin Bedrock" placeholder="Digite o nome da skin">
+                  </div>
+
+                  <!-- Seletor de Modelo -->
+                  <div class="form-group">
+                    <label class="form-label">👤 Tipo do Modelo:</label>
+                    <div class="model-choice-cards">
+                      <div class="model-card-item active" id="cardBoth" data-model="both">
+                        <span class="model-card-badge">⭐ TOP</span>
+                        <div class="model-card-title">Ambos</div>
+                        <div class="model-card-desc">Steve & Alex juntos</div>
+                      </div>
+                      <div class="model-card-item" id="cardClassic" data-model="classic">
+                        <div class="model-card-title">Steve</div>
+                        <div class="model-card-desc">Braços 4px</div>
+                      </div>
+                      <div class="model-card-item" id="cardSlim" data-model="slim">
+                        <div class="model-card-title">Alex</div>
+                        <div class="model-card-desc">Braços 3px</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Botão Gigante de Download -->
+                  <button type="button" class="btn-minecraft-giant" id="btnConvert" disabled>
+                    ⚡ CRIAR PACOTE .MCPACK ⚡
+                  </button>
+
+                  <!-- Card de Sucesso -->
+                  <div class="converter-success-card" id="successBanner" style="display: none;">
+                    <div class="success-header">
+                      <span>🎉</span> <span>Pacote Criado com Sucesso!</span>
+                    </div>
+                    <div class="success-details">
+                      Arquivo: <code id="demoSuccessFileName">Minha_Skin_Bedrock.mcpack</code>
+                    </div>
+                    <div class="success-instructions">
+                      Dê 2 cliques no arquivo baixado e o Minecraft vai abrir instalando sua skin automaticamente!
+                    </div>
+                    <a id="downloadFallbackBtn" class="btn-secondary-sm" style="margin-top: 10px; display: inline-block; text-decoration: none;" href="#" download>
+                      📥 Baixar Novamente
+                    </a>
+                  </div>
+
+                  <div class="status-card error" id="errorBanner" style="display: none;">
+                    <div class="status-title">⚠️ Ops! Algo deu errado</div>
+                    <div class="status-msg" id="errorMessageText">
+                      Verifique se a imagem é uma skin válida do Minecraft (tamanho 64x64, 64x32 ou 128x128 pixels).
+                    </div>
+                  </div>
+                </section>
+
+                <!-- Guia Rápido de Instalação -->
+                <div class="converter-quick-guide">
+                  <div class="guide-item">
+                    <span class="guide-num">1</span>
+                    <span>Envie o PNG</span>
+                  </div>
+                  <div class="guide-arrow">➜</div>
+                  <div class="guide-item">
+                    <span class="guide-num">2</span>
+                    <span>Gere o .mcpack</span>
+                  </div>
+                  <div class="guide-arrow">➜</div>
+                  <div class="guide-item">
+                    <span class="guide-num">3</span>
+                    <span>Abra no Jogo</span>
+                  </div>
                 </div>
               </div>
-              <div class="snap-views-bar">
-                <button type="button" class="btn-snap" data-dir="front">👤 Frente</button>
-                <button type="button" class="btn-snap" data-dir="back">🔄 Costas</button>
-                <button type="button" class="btn-snap" data-dir="left">⬅️ Lado E</button>
-                <button type="button" class="btn-snap" data-dir="right">➡️ Lado D</button>
-                <button type="button" class="btn-snap" data-dir="top">⬆️ Cima</button>
-                <button type="button" class="btn-snap" data-dir="bottom">⬇️ Baixo</button>
+
+            </div>
+          </main>
+
+          <!-- TELA 2: CRIADOR / EDITOR 3D -->
+          <section class="editor-container active" id="viewEditor">
+
+            <!-- BARRA SUPERIOR EM LINHA ÚNICA -->
+            <div class="editor-top-options-bar" id="editorTopBar">
+              <!-- Desfazer / Refazer -->
+              <div class="top-history-group">
+                <button type="button" class="btn-action-icon" id="btnUndo" title="Desfazer">↩</button>
+                <button type="button" class="btn-action-icon" id="btnRedo" title="Refazer">↪</button>
+              </div>
+
+              <!-- Conteúdo: Steve / Alex / Grade em 1 Linha Estrita -->
+              <div class="model-toggle-pill">
+                <button type="button" class="model-pill-item active" id="tplSteve" title="Modelo Steve (Braços 4px)">👤 Steve</button>
+                <button type="button" class="model-pill-item" id="tplAlex" title="Modelo Alex (Braços 3px)">👱 Alex</button>
+              </div>
+
+              <button type="button" class="btn-toggle-grid" id="btnToggleGrid" title="Alternar grade de pixels">▦ Grade</button>
+
+              <!-- Elementos auxiliares ocultos para integração de estado e testes -->
+              <input type="file" id="editorFileInput" accept="image/png" style="display: none;">
+              <button type="button" id="tplBlank" style="display: none;"></button>
+              <button type="button" id="btnUploadSkin" style="display: none;"></button>
+              <button type="button" id="btnDownloadPng" style="display: none;"></button>
+              <button type="button" id="btnEditorConvert" style="display: none;"></button>
+              <span id="editorSkinNameDisplay" style="display: none;">Sem nome</span>
+            </div>
+
+            <!-- PALCO 3D (LOUSA DO BONECO) -->
+            <div class="immersive-3d-stage mode-rotate" id="stage3D">
+
+              <!-- Pílula Central Flutuante: Modo Girar vs Pintar -->
+              <div class="floating-mode-pill">
+                <button type="button" class="mode-pill-btn active" id="btnTouchRotate">
+                  <span>🖐️</span> <span>Girar</span>
+                </button>
+                <button type="button" class="mode-pill-btn" id="btnTouchPaint">
+                  <span>🖌️</span> <span>Pintar</span>
+                </button>
+              </div>
+
+              <!-- 1. BONEQUINHO 2D FLUTUANTE (MANNEQUIN DE FOCO) -->
+              <div class="mannequin-widget" id="mannequinWidget" title="Toque nas partes para focar a câmera no boneco 3D">
+                <div class="mannequin-label">Focar</div>
+                <div class="mannequin-doll">
+                  <div class="mannequin-part mannequin-head" id="mqHead" data-mannequin-part="head" title="Focar Cabeça"></div>
+                  <div class="mannequin-row">
+                    <div class="mannequin-part mannequin-arm-d" id="mqArmD" data-mannequin-part="rightArm" title="Focar Braço Direito"></div>
+                    <div class="mannequin-part mannequin-torso" id="mqTorso" data-mannequin-part="torso" title="Focar Tronco"></div>
+                    <div class="mannequin-part mannequin-arm-e" id="mqArmE" data-mannequin-part="leftArm" title="Focar Braço Esquerdo"></div>
+                  </div>
+                  <div class="mannequin-row">
+                    <div class="mannequin-part mannequin-leg-d" id="mqLegD" data-mannequin-part="rightLeg" title="Focar Perna Direita"></div>
+                    <div class="mannequin-part mannequin-leg-e" id="mqLegE" data-mannequin-part="leftLeg" title="Focar Perna Esquerda"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 2. CONTROLES DISCRETOS NA LOUSA (SUBIR, DESCER E ZOOM JUNTOS) -->
+              <div class="zoom-vertical-controls" id="zoom3DVerticalControls">
+                <button type="button" class="btn-hud-discreet" id="btnZoom3DIn" title="Aumentar Zoom">🔍+</button>
+                <button type="button" class="btn-hud-discreet" id="btnZoom3DOut" title="Diminuir Zoom">🔍−</button>
+                <div class="hud-divider"></div>
+                <button type="button" class="btn-hud-discreet" id="btnPanUp" title="Subir o boneco (ver pernas/pés)">▲</button>
+                <button type="button" class="btn-hud-discreet" id="btnPanDown" title="Descer o boneco (ver cabeça)">▼</button>
+                <div class="hud-divider"></div>
+                <button type="button" class="btn-hud-discreet" id="btnZoom3DReset" title="Recentrar posição e zoom">⟲</button>
+              </div>
+
+              <!-- O PERSONAGEM 3D INTERATIVO (BONECO DO 3D REAL COM THREE.JS MANTIDO!) -->
+              <div class="character-viewport-world" id="characterWorld">
+                <canvas id="editor3DCanvas" width="480" height="640"></canvas>
+              </div>
+
+              <!-- GAVETA DE CORES -->
+              <div class="color-bottom-sheet" id="colorBottomSheet">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                  <span style="font-size: 0.82rem; font-weight: 800; color: var(--mc-diamond);">🌈 Escolher Cor:</span>
+                  <button type="button" style="background: none; border: none; color: #fff; cursor: pointer; font-size: 1rem;" id="btnCloseColors">✖</button>
+                </div>
+
+                <!-- Seletor Livre de Cor (HTML5 Color Picker) -->
+                <div style="display: flex; align-items: center; justify-content: space-between; background: #1a1a1a; border: 1px solid #333; padding: 6px 10px; border-radius: 4px;">
+                  <div style="display: flex; align-items: center; gap: 6px;">
+                    <span style="font-size: 0.75rem; font-weight: 800; color: #eee;">Personalizada:</span>
+                    <span id="labelHexCode" style="font-family: monospace; font-size: 0.75rem; color: var(--mc-diamond);">#5da632</span>
+                  </div>
+                  <input type="color" id="customColorPicker" value="#5da632" style="border: none; width: 34px; height: 26px; border-radius: 4px; cursor: pointer; background: transparent;">
+                </div>
+
+                <div style="font-size: 0.72rem; color: #888; font-weight: 700; text-transform: uppercase;">Paleta Minecraft:</div>
+                <div class="palette-grid-sheet" id="paletteGrid">
+                  <div class="swatch-btn" style="background: #e74c3c;" data-color="#e74c3c" title="Redstone"></div>
+                  <div class="swatch-btn" style="background: #3498db;" data-color="#3498db" title="Diamante"></div>
+                  <div class="swatch-btn" style="background: #2ecc71;" data-color="#2ecc71" title="Esmeralda"></div>
+                  <div class="swatch-btn" style="background: #f1c40f;" data-color="#f1c40f" title="Ouro"></div>
+                  <div class="swatch-btn" style="background: #9b59b6;" data-color="#9b59b6" title="Ametista"></div>
+                  <div class="swatch-btn" style="background: #ffffff;" data-color="#ffffff" title="Neve"></div>
+                  <div class="swatch-btn" style="background: #1b1b1b;" data-color="#1b1b1b" title="Obsidiana"></div>
+                  <div class="swatch-btn" style="background: #795548;" data-color="#795548" title="Terra"></div>
+                  <div class="swatch-btn" style="background: #e67e22;" data-color="#e67e22" title="Cobre"></div>
+                  <div class="swatch-btn" style="background: #1abc9c;" data-color="#1abc9c" title="Prismarinho"></div>
+                </div>
               </div>
             </div>
 
-            <!-- Visão 2D Folha Aberta -->
-            <div class="viewport-2d-box" id="wrapper2D" style="display: none;">
-              <div class="sheet-hint">Toque nos quadradinhos das partes abertas para desenhar com precisão:</div>
-              <div class="canvas-2d-container">
-                <canvas id="editor2DCanvas" width="512" height="512"></canvas>
+            <!-- DICA CONTEXTUAL DIRETAMENTE ACIMA DOS BOTÕES -->
+            <div class="dock-hint-strip" id="dockHintStrip">
+              <span class="hint-icon" id="dockHintIcon">✏️</span>
+              <span class="hint-text" id="dockHintText">Pincel: Toque no boneco para pintar pixels individuais com a cor ativa.</span>
+              <span class="hint-badge" id="dockHintBadge">Ativo</span>
+            </div>
+
+            <!-- BARRA INFERIOR DE FERRAMENTAS -->
+            <div class="editor-bottom-dock">
+              <div class="dock-tool-item active" id="toolPencil" title="Pintar pixel por pixel">
+                <span class="tool-icon">✏️</span>
+                <span>Pincel</span>
               </div>
-              <div class="zoom-controls" id="zoom2DControls">
-                <button type="button" class="btn-zoom" id="btnZoom2DOut" title="Diminuir zoom">🔍➖</button>
-                <input type="range" id="zoom2DSlider" class="zoom-slider" min="1" max="4" step="0.5" value="1">
-                <button type="button" class="btn-zoom" id="btnZoom2DIn" title="Aumentar zoom">🔍➕</button>
+
+              <div class="dock-tool-item" id="toolBucket" title="Preencher face inteira">
+                <span class="tool-icon">🪣</span>
+                <span>Balde</span>
               </div>
+
+              <div class="dock-tool-item" id="toolRecolor" title="Substituir todas as cores iguais">
+                <span class="tool-icon">🔄</span>
+                <span>Trocar</span>
+              </div>
+
+              <div class="dock-tool-item" id="toolEraser" title="Apagar pixels">
+                <span class="tool-icon">🧹</span>
+                <span>Apagar</span>
+              </div>
+
+              <div class="dock-tool-item" id="toolColorPicker" title="Escolher cor">
+                <div class="active-color-swatch" id="activeColorSwatch"></div>
+                <span>Cores</span>
+              </div>
+
+              <div class="dock-tool-item" id="toolLayerToggle" title="Alternar camada Base / 3D">
+                <span class="tool-icon" id="layerIconGlyph">👕</span>
+                <span id="layerNameText">Base</span>
+              </div>
+            </div>
+
+          </section>
+
+        </div><!-- .main-workspace-content -->
+
+        <!-- MENU LATERAL DESKTOP (À Direita, uniforme com gaveta Mobile!) -->
+        <aside class="desktop-sidebar-menu hidden" id="desktopSidebarMenu">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 900; color: var(--mc-gold); font-size: 0.95rem;">⛏️ PAINEL RÁPIDO</span>
+            <button type="button" class="btn-action-icon" id="btnCollapseDesktopSidebar" title="Ocultar Painel Lateral">▶</button>
+          </div>
+
+          <div>
+            <div class="drawer-section-title">Navegação:</div>
+            <button type="button" class="drawer-nav-item" id="sideBtnConv">📦 Conversor de Skin</button>
+            <button type="button" class="drawer-nav-item active" id="sideBtnEdit" style="justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 8px;">🎨 Criador de Skins 3D</span>
+              <span class="nav-arrow" id="sideNavArrow">▾</span>
+            </button>
+
+            <!-- SUBMENU EXPANDIDO DO CRIADOR DE SKINS -->
+            <div class="nav-submenu-container" id="sideSubmenu">
+              <button type="button" class="submenu-item-btn" id="sideBtnNewSkin" title="Começar uma nova skin do zero">
+                <span class="sub-icon">📄</span>
+                <div class="sub-text">
+                  <div class="sub-title">Nova Skin</div>
+                  <div class="sub-desc">Steve, Alex ou em branco</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn" id="sideBtnOpenSkin" title="Abrir arquivo PNG do computador ou celular">
+                <span class="sub-icon">📂</span>
+                <div class="sub-text">
+                  <div class="sub-title">Abrir / Upload PNG</div>
+                  <div class="sub-desc">Continuar editando skin</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn" id="sideBtnSavePng" title="Exportar imagem PNG da skin">
+                <span class="sub-icon">💾</span>
+                <div class="sub-text">
+                  <div class="sub-title">Salvar Imagem PNG</div>
+                  <div class="sub-desc">Textura 64x64 transparente</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn btn-mcpack-highlight" id="sideBtnDownloadMcpack" title="Gerar pacote Bedrock pronto para o jogo">
+                <span class="sub-icon">⚡</span>
+                <div class="sub-text">
+                  <div class="sub-title">Baixar .mcpack</div>
+                  <div class="sub-desc">Instalar direto no Bedrock</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="drawer-section-title">📱 Conectar no Celular:</div>
+            <div class="drawer-wifi-card">
+              <div class="drawer-wifi-header">
+                <span>📶 Celular / Wi-Fi</span>
+                <span class="wifi-status-badge">🟢 Online</span>
+              </div>
+              <div class="drawer-qr-preview" id="sideQrPreview" title="Clique para ampliar o QR Code">
+                <div id="sideQrcodeCanvas"></div>
+              </div>
+              <div class="wifi-ip-container">
+                <div class="wifi-ip-box" id="sideWifiIp">http://localhost:8080</div>
+                <button type="button" class="btn-wifi-copy" id="btnCopyIpSide" title="Copiar endereço IP">
+                  <span class="copy-icon-glyph">📋</span> <span class="copy-text-label">Copiar Endereço IP</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: auto;">
+            <button type="button" class="btn-drawer-shutdown" id="btnSideShutdown">🛑 Desligar Servidor</button>
+          </div>
+        </aside>
+
+      </div><!-- .desktop-layout-split -->
+
+      <!-- GAVETA LATERAL MOBILE (Drawer) -->
+      <div class="drawer-backdrop" id="drawerBackdrop"></div>
+      <div class="drawer-panel" id="drawerPanel">
+        <div class="drawer-header">
+          <div class="drawer-title"><span>⛏️</span> MENU</div>
+          <button type="button" class="btn-close-drawer" id="btnCloseDrawer">✖ Fechar</button>
+        </div>
+
+        <div class="drawer-body">
+          <div>
+            <div class="drawer-section-title">Navegação:</div>
+            <button type="button" class="drawer-nav-item" id="drawerItemConv">📦 Conversor de Skin</button>
+            <button type="button" class="drawer-nav-item active" id="drawerItemEdit" style="justify-content: space-between;">
+              <span style="display: flex; align-items: center; gap: 8px;">🎨 Criador 3D</span>
+              <span class="nav-arrow" id="drawerNavArrow">▾</span>
+            </button>
+
+            <!-- SUBMENU EXPANDIDO DO CRIADOR 3D -->
+            <div class="nav-submenu-container" id="drawerSubmenu">
+              <button type="button" class="submenu-item-btn" id="drawerBtnNewSkin" title="Começar uma nova skin do zero">
+                <span class="sub-icon">📄</span>
+                <div class="sub-text">
+                  <div class="sub-title">Nova Skin</div>
+                  <div class="sub-desc">Steve, Alex ou em branco</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn" id="drawerBtnOpenSkin" title="Abrir arquivo PNG do seu aparelho">
+                <span class="sub-icon">📂</span>
+                <div class="sub-text">
+                  <div class="sub-title">Abrir / Upload PNG</div>
+                  <div class="sub-desc">Carregar imagem para editar</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn" id="drawerBtnSavePng" title="Exportar imagem PNG da skin">
+                <span class="sub-icon">💾</span>
+                <div class="sub-text">
+                  <div class="sub-title">Salvar Imagem PNG</div>
+                  <div class="sub-desc">Download 64x64 RGBA</div>
+                </div>
+              </button>
+
+              <button type="button" class="submenu-item-btn btn-mcpack-highlight" id="drawerBtnDownloadMcpack" title="Gerar pacote Bedrock pronto para o jogo">
+                <span class="sub-icon">⚡</span>
+                <div class="sub-text">
+                  <div class="sub-title">Baixar .mcpack</div>
+                  <div class="sub-desc">Instalar no Bedrock</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <div class="drawer-section-title">📱 Conectar outro aparelho:</div>
+            <div class="drawer-wifi-card">
+              <div class="drawer-wifi-header">
+                <span>📶 Celular / Wi-Fi</span>
+                <span class="wifi-status-badge">🟢 Online</span>
+              </div>
+              <div class="drawer-qr-preview" id="drawerQrPreview" title="Toque para ampliar o QR Code">
+                <div id="drawerQrcodeCanvas"></div>
+              </div>
+              <div class="wifi-ip-container">
+                <div class="wifi-ip-box" id="drawerWifiIp">http://localhost:8080</div>
+                <button type="button" class="btn-wifi-copy" id="btnCopyIpDrawer" title="Copiar endereço IP">
+                  <span class="copy-icon-glyph">📋</span> <span class="copy-text-label">Copiar Endereço IP</span>
+                </button>
+              </div>
+              <button type="button" class="drawer-btn-qr" id="drawerBtnQrModal">🔍 Ampliar QR Code</button>
             </div>
           </div>
         </div>
 
-        <!-- Ações Finais: Salvar PNG e Gerar Pacote -->
-        <div class="editor-name-bar" id="editorNamePill" style="display: none;">
-          <span>🏷️ Nome da Skin: <strong id="editorCurrentNameText"></strong></span>
-          <button type="button" class="btn-rename-pill" id="btnRenameSkin">✏️ Alterar</button>
+        <div class="drawer-footer">
+          <button type="button" class="btn-drawer-shutdown" id="drawerBtnShutdown">🛑 Desligar Servidor</button>
         </div>
-        <div class="editor-actions">
-          <button type="button" class="btn-minecraft btn-download-png" id="btnDownloadPng">
-            <span>💾 BAIXAR SKIN (.PNG)</span>
-          </button>
-          <button type="button" class="btn-minecraft btn-editor-convert" id="btnEditorConvert">
-            <span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>
-          </button>
-        </div>
+      </div>
 
-        <div class="status-card success" id="editorSuccessBanner" style="display: none;">
-          <div class="status-title">🎉 Uhuuu! Sua skin está pronta!</div>
-          <div class="status-msg" id="editorSuccessMsg"></div>
-          <a id="editorDownloadFallbackBtn" class="btn-minecraft" style="margin-top: 14px; text-decoration: none; font-size: 1rem; padding: 12px; display: none;" href="#" download>
-            📥 Baixar Novamente
-          </a>
-        </div>
-      </section>
-    </div>
-  </main>
+    </div><!-- .app-root -->
+  </div><!-- .viewport-container -->
 
-  <!-- Modal para QR Code Gigante em Alta Definição -->
-  <div class="qr-modal-backdrop" id="qrModal">
-    <div class="qr-modal-content">
-      <h3 class="modal-title">📱 Aponte a Câmera do Tablet</h3>
-      <p class="modal-hint">QR Code ampliado com alta visibilidade para câmeras simples</p>
-      <div class="qr-box-giant">
+  <!-- MODAL QR CODE GIGANTE -->
+  <div class="modal-backdrop" id="qrModal" style="display: none;">
+    <div class="modal-card">
+      <h3 style="color: var(--mc-gold);">📱 QR Code para Celular</h3>
+      <div class="drawer-qr-preview" style="width: 220px; height: 220px; margin: 10px auto;">
         <div id="qrcodeCanvasGiant"></div>
       </div>
-      <div class="network-url-pill" id="giantUrlDisplay">http://localhost:8080</div>
-      <p class="modal-hint">Dica: Segure o aparelho a cerca de 25 a 35 cm da tela.</p>
-      <button type="button" class="btn-close-modal" id="btnCloseQrModal">
-        ✖ Fechar Tela
-      </button>
+      <div class="wifi-ip-box" id="giantUrlDisplay" style="width: 100%; text-align: center;">http://localhost:8080</div>
+      <button type="button" class="proto-btn" id="btnCloseQrModal" style="width: 100%; margin-top: 8px;">✖ Fechar</button>
+    </div>
+  </div>
+
+  <!-- MODAL DESLIGAMENTO -->
+  <div class="modal-backdrop" id="shutdownModal" style="display: none;">
+    <div class="modal-card" style="border-color: var(--mc-redstone);">
+      <h3 style="color: var(--mc-redstone); display: flex; align-items: center; gap: 6px;">🛑 Desligar Servidor</h3>
+      <p style="color: #ccc; font-size: 0.85rem; margin: 10px 0;">Deseja realmente encerrar o servidor?</p>
+      <div style="display: flex; gap: 8px; width: 100%;">
+        <button type="button" class="btn-minecraft-giant" style="background: #e74c3c; flex: 1; padding: 8px;" id="btnConfirmShutdown">Sim, Desligar</button>
+        <button type="button" class="proto-btn" style="flex: 1; padding: 8px;" id="btnCancelShutdown">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INICIAR NOVA SKIN -->
+  <div class="modal-backdrop" id="modalNewSkin" style="display: none;">
+    <div class="modal-card">
+      <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+        <h3 style="color: var(--mc-gold); margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 6px;">
+          <span>📄</span> Iniciar Nova Skin
+        </h3>
+        <button type="button" class="btn-action-icon" id="btnCloseNewModal">✖</button>
+      </div>
+
+      <p style="color: #ccc; font-size: 0.8rem; margin: 4px 0 10px 0; text-align: center;">
+        Escolha o ponto de partida para a sua nova criação:
+      </p>
+
+      <div style="display: flex; flex-direction: column; gap: 8px; width: 100%;">
+        <button type="button" class="drawer-nav-item btn-preset-option" id="btnNewSteve" data-preset="steve">
+          <span style="font-size: 1.3rem;">👤</span>
+          <div style="text-align: left;">
+            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;">Steve Clássico</div>
+            <div style="font-size: 0.7rem; color: #aaa;">Braços padrão de 4 pixels</div>
+          </div>
+        </button>
+
+        <button type="button" class="drawer-nav-item btn-preset-option" id="btnNewAlex" data-preset="alex">
+          <span style="font-size: 1.3rem;">👱</span>
+          <div style="text-align: left;">
+            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;">Alex Slim</div>
+            <div style="font-size: 0.7rem; color: #aaa;">Braços finos de 3 pixels</div>
+          </div>
+        </button>
+
+        <button type="button" class="drawer-nav-item btn-preset-option" id="btnNewBlank" data-preset="blank">
+          <span style="font-size: 1.3rem;">⬜</span>
+          <div style="text-align: left;">
+            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;">Skin em Branco (Limpa)</div>
+            <div style="font-size: 0.7rem; color: #aaa;">Comece a pintar do zero absoluto</div>
+          </div>
+        </button>
+      </div>
+
+      <button type="button" class="proto-btn" id="btnCancelNewModal" style="width: 100%; margin-top: 4px;">Cancelar</button>
     </div>
   </div>
 
   <!-- Modal para Nome da Skin antes do Download -->
-  <div class="skin-modal-backdrop" id="skinNameModal" style="display: none;">
-    <div class="skin-modal-content">
-      <h3 class="modal-title">🏷️ Nome da sua Skin</h3>
-      <p class="modal-hint">Escolha um nome fácil para encontrar seu arquivo no aparelho:</p>
-      <div class="skin-name-field-wrap">
-        <input type="text" id="skinNameInput" class="skin-name-input" maxlength="32" placeholder="skin_custom">
+  <div class="modal-backdrop" id="skinNameModal" style="display: none;">
+    <div class="modal-card">
+      <h3 style="color: var(--mc-gold); margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 6px;">
+        🏷️ Nome da sua Skin
+      </h3>
+      <p style="color: #ccc; font-size: 0.8rem; margin: 4px 0 10px 0; text-align: center;">
+        Escolha um nome fácil para encontrar seu arquivo no aparelho:
+      </p>
+      <div style="width: 100%; margin: 8px 0;">
+        <input type="text" id="skinNameInput" class="mc-input-field" maxlength="32" placeholder="skin_custom" style="width: 100%;">
       </div>
-      <p class="modal-hint-sub">Dica: Letras, números e traços (ex: skin_dragao, steve_gamer).</p>
-      <div class="skin-modal-actions">
-        <button type="button" class="btn-minecraft btn-modal-confirm" id="btnConfirmSkinName">
-          <span>✔️ Confirmar e Baixar</span>
+      <p style="color: #888; font-size: 0.72rem; text-align: center; margin-bottom: 10px;">
+        Dica: Letras, números e traços (ex: skin_dragao, steve_gamer).
+      </p>
+      <div style="display: flex; gap: 8px; width: 100%;">
+        <button type="button" class="btn-minecraft-giant" id="btnConfirmSkinName" style="flex: 1; padding: 8px;">
+          ✔️ Confirmar e Baixar
         </button>
-        <button type="button" class="btn-modal-cancel" id="btnCancelSkinName">
+        <button type="button" class="proto-btn" id="btnCancelSkinName" style="flex: 1; padding: 8px;">
           Cancelar
         </button>
       </div>
     </div>
   </div>
 
-  <footer>
-    <p>⛏️ <strong>CRIE SKINS LEGAIS</strong> • Conversor para Minecraft Bedrock Edition</p>
-    <p>100% Grátis, Seguro e Rápido • Funciona em Celulares, Tablets, PCs e Consoles</p>
-    <div class="footer-shutdown-wrap">
-      <button type="button" class="btn-shutdown-server" id="btnShutdownServer" title="Desligar servidor local">🛑 Desligar Servidor</button>
-    </div>
-  </footer>
-
-  <!-- Modal para Desligar Servidor -->
-  <div class="shutdown-modal-backdrop" id="shutdownModal" style="display: none;">
-    <div class="shutdown-modal-content">
-      <h3 class="modal-title">🛑 Desligar Servidor Local</h3>
-      <p class="modal-hint">Deseja realmente desligar o servidor do mcskin?</p>
-      <p class="modal-hint-sub">Ao confirmar, o servidor será encerrado e você poderá fechar esta aba com segurança.</p>
-      <div class="shutdown-modal-actions">
-        <button type="button" class="btn-minecraft btn-modal-danger" id="btnConfirmShutdown">
-          <span>✔️ Sim, Desligar</span>
-        </button>
-        <button type="button" class="btn-modal-cancel" id="btnCancelShutdown">
-          Cancelar
-        </button>
-      </div>
-    </div>
-  </div>
+  <div class="toast-msg" id="toastMsg">Mensagem Toast</div>
 
   <!-- Overlay de Despedida -->
   <div class="goodbye-overlay" id="goodbyeOverlay" style="display: none;">

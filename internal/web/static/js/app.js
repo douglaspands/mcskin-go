@@ -17,13 +17,18 @@ import {
   textureCanvas,
   textureCtx
 } from "./editor2d.js";
-import { initPalette, getToolState, setColor } from "./palette.js";
+import { initPalette, getToolState, setColor, setModelType } from "./palette.js";
 import { playSound } from "./fx.js";
+import { initEditorLayout, setDockHint } from "./editor-layout.js";
+import { initEditorMenu } from "./editor-menu.js";
+import { loadSkinFile } from "./editor-file-loader.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   initShutdown();
   initNetwork();
   initConverter();
+  initEditorMenu();
+  initEditorLayout({ getViewport3D });
 
   let editorInitialized = false;
   const initEditor = () => {
@@ -48,21 +53,21 @@ document.addEventListener("DOMContentLoaded", () => {
       onRender2D: render2DSheet,
       onRender3D: () => getViewport3D()?.render(),
       onUploadTexture: (file) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const img = new Image();
-          img.onload = () => {
+        loadSkinFile(file)
+          .then(({ canvas, width, height, model }) => {
             pushUndo();
-            textureCanvas.width = img.width;
-            textureCanvas.height = img.height;
-            textureCtx.clearRect(0, 0, img.width, img.height);
-            textureCtx.drawImage(img, 0, 0);
+            textureCanvas.width = width;
+            textureCanvas.height = height;
+            textureCtx.clearRect(0, 0, width, height);
+            textureCtx.drawImage(canvas, 0, 0);
             syncTexture();
+            set3DModel(model);
+            setModelType(model);
+            getViewport3D()?.render();
             updateSkinNameDisplays(sanitizeName(file.name.replace(/\.[^/.]+$/, "")));
-          };
-          img.src = e.target.result;
-        };
-        reader.readAsDataURL(file);
+            setDockHint(`✅ Skin carregada! Modelo: ${model === "slim" ? "Alex (fino)" : "Steve (clássico)"}.`, "📂", "Carregada");
+          })
+          .catch((err) => setDockHint(`⚠️ ${err.message}`, "⚠️", "Erro"));
       }
     });
 
@@ -70,26 +75,29 @@ document.addEventListener("DOMContentLoaded", () => {
   };
 
   // Tab Navigation (Converter vs 3D Creator)
-  const tabConv = document.getElementById("tabConverter");
-  const tabEdit = document.getElementById("tabEditor");
+  const tabConv = document.getElementById("tabBtnConverter") || document.getElementById("tabConverter");
+  const tabEdit = document.getElementById("tabBtnEditor") || document.getElementById("tabEditor");
   const viewConv = document.getElementById("viewConverter");
   const viewEdit = document.getElementById("viewEditor");
 
   tabConv?.addEventListener("click", () => {
     tabConv.classList.add("active");
     tabEdit?.classList.remove("active");
-    if (viewConv) viewConv.classList.add("active");
-    if (viewEdit) viewEdit.classList.remove("active");
+    if (viewConv) { viewConv.style.display = "flex"; viewConv.classList.add("active"); }
+    if (viewEdit) { viewEdit.style.display = "none"; viewEdit.classList.remove("active"); }
     playSound("click");
   });
 
   tabEdit?.addEventListener("click", () => {
     tabEdit.classList.add("active");
     tabConv?.classList.remove("active");
-    if (viewEdit) viewEdit.classList.add("active");
-    if (viewConv) viewConv.classList.remove("active");
+    if (viewEdit) { viewEdit.style.display = "flex"; viewEdit.classList.add("active"); }
+    if (viewConv) { viewConv.style.display = "none"; viewConv.classList.remove("active"); }
     initEditor();
     getViewport3D()?.render();
     playSound("click");
   });
+
+  // Editor is active by default matching prototype
+  initEditor();
 });

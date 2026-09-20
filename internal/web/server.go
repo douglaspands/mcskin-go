@@ -36,10 +36,31 @@ func NewHandler(cfg Config) http.Handler {
 	if cfg.StaticFS != nil {
 		fileServer := http.FileServer(http.FS(cfg.StaticFS))
 		mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
+		// Dedicated favicon route: serves with explicit Content-Type image/png
+		mux.HandleFunc("/favicon.ico", handleFavicon(cfg.StaticFS))
 		mux.Handle("/", fileServer)
 	}
 
 	return mux
+}
+
+// handleFavicon serves the application favicon with an explicit Content-Type of image/png.
+// This overrides the default MIME detection which would return image/vnd.microsoft.icon for .ico files.
+func handleFavicon(staticFS fs.FS) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		data, err := fs.ReadFile(staticFS, "favicon.ico")
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+	}
 }
 
 func handleInfo(cfg Config) http.HandlerFunc {

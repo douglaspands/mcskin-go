@@ -1,0 +1,1 @@
+{"version":"1","schema":"mcskin-model-benchmark-v1","description":"Persistent benchmark log for model selection decisions across all opsx sessions. Append one entry per task dispatch. Never delete entries — mark them with outcome instead."}
