@@ -8,21 +8,23 @@ def evaluate_command(cmd: str):
 
     # 1. Deny destructive patterns
     destructive_patterns = [
-        (r'\brm\s+-[a-zA-Z]*[rR][a-zA-Z]*\s+(?:/|\*|\.|\.\.|\.git|~|\$HOME)(?:\s|$)', "Unbounded or dangerous recursive deletion"),
-        (r'\brm\s+-[a-zA-Z]*[rR][a-zA-Z]*\s*$', "Incomplete dangerous recursive deletion"),
-        (r'\bgit\s+push\s+.*(?:--force|-f)\b', "Destructive remote git force-push"),
-        (r'\bgit\s+reset\s+--hard\b', "Destructive git hard reset"),
-        (r'\bgit\s+clean\s+-[a-zA-Z]*f\b', "Destructive untracked file deletion (git clean -f)"),
-        (r'\bgit\s+branch\s+-D\b', "Forced git branch deletion"),
-        (r'\b(?:mkfs|dd\s+if=|fdisk|parted)\b', "Direct filesystem/disk formatting or partition modification"),
-        (r'\b(?:sudo|su)\b', "Superuser privilege escalation prohibited"),
-        (r'\b(?:shutdown|reboot|poweroff|init\s+0)\b', "System termination command"),
-        (r':\(\)\{\s*:\|:&\s*\};:', "Fork bomb pattern"),
-        (r'\bchmod\s+-[a-zA-Z]*\s*777\b', "Insecure recursive world-writable permissions change"),
+        (r'\brm\s+-[a-zA-Z]*[rR][a-zA-Z]*\s+(?:/|\*|\.|\.\.|\.git|~|\$HOME)(?:\s|$)', "Unbounded or dangerous recursive deletion", re.IGNORECASE),
+        (r'\brm\s+-[a-zA-Z]*[rR][a-zA-Z]*\s*$', "Incomplete dangerous recursive deletion", re.IGNORECASE),
+        (r'\bgit\s+push\s+.*(?:--force|-f)\b', "Destructive remote git force-push", re.IGNORECASE),
+        (r'\bgit\s+reset\s+--hard\b', "Destructive git hard reset", re.IGNORECASE),
+        (r'\bgit\s+clean\s+-[a-zA-Z]*f\b', "Destructive untracked file deletion (git clean -f)", re.IGNORECASE),
+        (r'\bgit\s+branch\s+-[a-zA-Z]*D\s+(?!feat/)\S+', "Forced deletion of protected git branch", 0),
+        (r'\b(?:mkfs|dd\s+if=|fdisk|parted)\b', "Direct filesystem/disk formatting or partition modification", re.IGNORECASE),
+        (r'\b(?:sudo|su)\b', "Superuser privilege escalation prohibited", re.IGNORECASE),
+        (r'\b(?:shutdown|reboot|poweroff|init\s+0)\b', "System termination command", re.IGNORECASE),
+        (r':\(\)\{\s*:\|:&\s*\};:', "Fork bomb pattern", 0),
+        (r'\bchmod\s+-[a-zA-Z]*\s*777\b', "Insecure recursive world-writable permissions change", re.IGNORECASE),
     ]
 
-    for pattern, desc in destructive_patterns:
-        if re.search(pattern, cmd_clean, re.IGNORECASE):
+    for item in destructive_patterns:
+        pattern, desc = item[0], item[1]
+        flags = item[2] if len(item) > 2 else re.IGNORECASE
+        if re.search(pattern, cmd_clean, flags):
             return {
                 "decision": "deny",
                 "reason": f"Blocked destructive command: {desc} ('{cmd_clean}')"
@@ -35,7 +37,7 @@ def evaluate_command(cmd: str):
         r'^\./bin/(?:mcskin|png-to-mcpack)\b',
         r'^(?:build-linux|build-windows)/(?:mcskin|png-to-mcpack)(?:\.exe)?\b',
         r'^openspec\s+',
-        r'^git\s+(?:status|diff|log|show|branch|add|commit|rev-parse|check-ignore|checkout|merge\s+--squash|push\s+(?:-u\s+)?origin\s+feat/[a-zA-Z0-9_.-]+|rm)\b',
+        r'^git\s+(?:status|diff|log|show|branch|add|commit|rev-parse|check-ignore|checkout|merge\s+--squash|push\s+(?:-u\s+)?origin\s+feat/[a-zA-Z0-9_.-]+|push\s+origin\s+--delete\s+feat/[a-zA-Z0-9_.-]+|rm)\b',
         r'^gh\s+(?:pr\s+(?:create|view|list|status|merge)|auth\s+status)\b',
         r'^(?:ls|cat|head|tail|grep|find|which|stat|file|unzip|mkdir|touch|echo|tar|zip|sha256sum|cp)\b',
         r'^chmod\s+\+x\s+',
