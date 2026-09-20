@@ -144,14 +144,15 @@ function floodFill(startX, startY, hexColor, fillA) {
  * contiguous region touching the starting pixel.
  */
 function recolorAll(startX, startY, hexColor, fillA) {
-  const hex = hexColor.replace("#", ""), num = parseInt(hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex, 16);
-  const fillR = (num >> 16) & 255, fillG = (num >> 8) & 255, fillB = num & 255;
   const imgData = textureCtx.getImageData(0, 0, texW, texH), data = imgData.data;
   const sIdx = (startY * texW + startX) * 4;
   const sR = data[sIdx], sG = data[sIdx + 1], sB = data[sIdx + 2], sA = data[sIdx + 3];
+  if (sA < 10) return;
+  const hex = hexColor.replace("#", ""), num = parseInt(hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex, 16);
+  const fillR = (num >> 16) & 255, fillG = (num >> 8) & 255, fillB = num & 255;
   if (sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
   for (let i = 0; i < data.length; i += 4) {
-    if (data[i] === sR && data[i + 1] === sG && data[i + 2] === sB && data[i + 3] === sA) {
+    if (data[i + 3] >= 10 && data[i] === sR && data[i + 1] === sG && data[i + 2] === sB) {
       data[i] = fillR; data[i + 1] = fillG; data[i + 2] = fillB; data[i + 3] = fillA;
     }
   }

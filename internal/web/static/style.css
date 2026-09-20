@@ -520,18 +520,50 @@
     }
 
     .drawer-qr-preview {
-      width: 110px;
-      height: 110px;
-      background: #fff;
-      padding: 6px;
+      width: 140px;
+      height: 140px;
+      max-width: 100%;
+      background: #ffffff;
+      padding: 8px;
       border-radius: 6px;
-      border: 2px solid #000;
+      border: 2px solid #000000;
+      box-shadow: inset 1px 1px 0 #cccccc, 0 4px 12px rgba(0,0,0,0.5);
       cursor: pointer;
+      box-sizing: border-box;
       transition: transform 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      overflow: hidden;
     }
 
     .drawer-qr-preview:hover {
-      transform: scale(1.04);
+      transform: scale(1.03);
+    }
+
+    #sideQrcodeCanvas,
+    #drawerQrcodeCanvas,
+    #qrcodeCanvasGiant {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+    }
+
+    #sideQrcodeCanvas canvas,
+    #sideQrcodeCanvas img,
+    #drawerQrcodeCanvas canvas,
+    #drawerQrcodeCanvas img,
+    #qrcodeCanvasGiant canvas,
+    #qrcodeCanvasGiant img {
+      max-width: 100% !important;
+      max-height: 100% !important;
+      width: auto !important;
+      height: auto !important;
+      display: block !important;
+      object-fit: contain;
     }
 
     .qr-pixels-mini {
@@ -1800,6 +1832,76 @@
       flex-direction: column;
       align-items: center;
       gap: 12px;
+    }
+
+    /* Design System: Botões Secundários e de Cancelamento Minecraft */
+    .btn-minecraft-secondary,
+    .btn-modal-cancel,
+    .proto-btn {
+      background: linear-gradient(180deg, #424242 0%, #2a2a2a 100%);
+      border: 2px solid var(--mc-black);
+      box-shadow: inset 2px 2px 0px #666666, inset -2px -2px 0px #1a1a1a, var(--pixel-shadow);
+      color: #e0e0e0;
+      font-size: 0.88rem;
+      font-weight: 800;
+      padding: 10px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      text-shadow: 1px 1px 0px #000;
+      transition: all 0.15s ease;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    .btn-minecraft-secondary:hover,
+    .btn-modal-cancel:hover,
+    .proto-btn:hover {
+      background: linear-gradient(180deg, #505050 0%, #353535 100%);
+      color: #ffffff;
+      border-color: #555555;
+    }
+
+    .btn-minecraft-secondary:active,
+    .btn-modal-cancel:active,
+    .proto-btn:active {
+      transform: translateY(2px);
+      box-shadow: inset -2px -2px 0px #666666, inset 2px 2px 0px #1a1a1a;
+    }
+
+    .btn-modal-confirm {
+      background: linear-gradient(180deg, #5da632 0%, #3c6e1e 100%);
+      border: 2px solid var(--mc-black);
+      box-shadow: inset 2px 2px 0px var(--mc-green-light), var(--pixel-shadow);
+      color: #fff;
+      font-size: 0.88rem;
+      font-weight: 900;
+      padding: 10px 16px;
+      border-radius: 4px;
+      cursor: pointer;
+      text-shadow: 1px 1px 0px #000;
+      transition: all 0.15s ease;
+      user-select: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      box-sizing: border-box;
+      font-family: inherit;
+    }
+
+    .btn-modal-confirm:hover {
+      background: linear-gradient(180deg, #6eb838 0%, #447a22 100%);
+    }
+
+    .btn-modal-confirm:active {
+      transform: translateY(2px);
+      box-shadow: inset -2px -2px 0px var(--mc-green-light);
     }
   
     /* ==========================================================================
