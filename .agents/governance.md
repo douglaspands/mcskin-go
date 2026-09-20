@@ -30,7 +30,7 @@ stateDiagram-v2
 | **GreenImplementation** | Verified failing test | Test suite passes | Implement only the minimal code necessary to satisfy tests |
 | **Verification** | All tasks in `/openspec-apply-change` complete | Full suite `go test ./...` and `go build ./...` succeed | **Automatic Trigger**: Automatically transitions to `POQAReview` immediately upon completing implementation tasks |
 | **POQAReview** | Build and unit tests succeed | Skill `feature-qa-reviewer` produces formal `APROVADO` report | Simulates PO (user requirements, usability 6+, theme, UX) and QA (binary checks, edge cases, Bedrock compliance). If issues found, transitions to bounded remediation loop |
-| **Completed** | PO/QA Approved, clean git status, spec archived via `/opsx-archive` | User confirmation requested for squash merge or GitHub PR | Prompt user to choose between `git checkout main && git merge --squash feat/<nome_spec>` or GitHub Pull Request (`git push origin feat/<nome_spec> && gh pr create ...`). All tasks marked `[x]` |
+| **Completed** | PO/QA Approved, clean git status, spec archived and committed on `feat/<nome_spec>` | User confirmation requested for squash merge or GitHub PR | **Post-Archive & Main Protection Invariant**: All git updates (archive move, spec sync) MUST be committed on `feat/<nome_spec>` before PR. Upon returning to `main`: zero further commits on feature branch, and ABSOLUTELY ZERO direct commits on `main`. Prompt user to choose between `git checkout main && git merge --squash feat/<nome_spec>` or GitHub PR (`git push origin feat/<nome_spec> && gh pr create ...`). All tasks marked `[x]` |
 
 ---
 
@@ -93,6 +93,7 @@ Commands are categorized into 3 permission tiers, enforced both via prompt rules
 | **Inspection** | `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **Artifact Cleanup**| `rm -rf bin/`, `rm -rf files/*.mcpack` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **Unrecognized** | External network tools, arbitrary scripts | **Tier 2 (Ask User)** | Requires user approval |
+| **Direct Commits on main** | `git commit` on `main` (outside squash merge) | **Tier 3 (BLOCKED)** | Denied by security policy |
 | **Dangerous Deletion** | `rm -rf /`, `rm -rf *`, `rm -rf .`, `rm -rf ..`, `rm -rf .git`, `rm -rf ~` | **Tier 3 (BLOCKED)** | Denied by security policy |
 | **Destructive Git** | `git push --force`, `git push -f`, `git reset --hard`, `git clean -f`, `git branch -D` | **Tier 3 (BLOCKED)** | Denied by security policy |
 | **System Modification** | `sudo`, `su`, `mkfs`, `dd if=`, `chmod -R 777`, `shutdown`, `reboot` | **Tier 3 (BLOCKED)** | Denied by security policy |

@@ -51,7 +51,12 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
 5. **Archive (`/opsx-archive`)**:
    - Triggered explicitly when the user runs `/opsx-archive` (or `openspec archive`).
    - Once all tasks are complete, verified, and approved by PO/QA, archive the change to sync specs.
-   - **MANDATORY SQUASH MERGE OR PULL REQUEST PROMPT (ONLY AFTER ARCHIVE)**: Immediately after archiving and synchronization are finished within the archive workflow, request user confirmation to choose between:
+   - **MANDATORY ARCHIVE COMMIT ON FEATURE BRANCH**: All git updates (moving change to `archive/` and syncing `openspec/specs/`) MUST be staged and committed directly on the feature branch `feat/<nome_spec>` BEFORE pushing or opening the PR:
+     ```bash
+     git add openspec/
+     git commit -m "docs(openspec): archive change <nome_spec> and sync main specs"
+     ```
+   - **MANDATORY SQUASH MERGE OR PULL REQUEST PROMPT (ONLY AFTER ARCHIVE)**: Immediately after archiving, committing, and synchronization are finished within the archive workflow, request user confirmation to choose between:
      1. **Local Squash Merge into `main`**:
         ```bash
         git checkout main && git merge --squash feat/<nome_spec>
@@ -60,7 +65,11 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
         ```bash
         git push origin feat/<nome_spec>
         gh pr create --base main --head feat/<nome_spec> --title "feat: <nome_spec>"
+        git checkout main
         ```
+   - **POST-PR INVARIANT (NO COMMITS ON BRANCH, ZERO COMMITS ON MAIN)**:
+     - Once the PR is created and git switches back to `main`, **NO further commits may be made to the feature branch** (it is frozen awaiting review/merge).
+     - **ABSOLUTELY NO DIRECT COMMITS ON `main`**: The `main` branch is strictly protected. Committing directly to `main` is strictly prohibited. All git updates must have already occurred inside the archive command on the feature branch. The working tree on `main` must remain clean.
 
 ---
 
@@ -120,6 +129,7 @@ To guarantee safe, efficient, and bounded execution cycles:
   - **Targeted Cleanup**: `rm -rf bin/`, `rm -rf files/*.mcpack`.
 
 - **Destructive & Strictly Blocked Commands (Tier 3)**:
+  - **Direct Commits to Main**: Committing directly to the `main` branch (`git commit` on `main`). All commits must occur on a feature branch (`feat/...`) during implementation/archive or via PR merge.
   - **Unbounded Deletion**: `rm -rf /`, `rm -rf *`, `rm -rf .`, `rm -rf ..`, `rm -rf .git`, `rm -rf ~`.
   - **Destructive Git**: `git push --force`, `git push -f`, `git reset --hard`, `git clean -f`, `git branch -D`.
   - **Disk & System Writes**: `dd if=`, `mkfs`, `fdisk`, `parted`, `shutdown`, `reboot`.
@@ -143,6 +153,7 @@ To guarantee the absolute protection and stability of the host environment:
 
 ## 5. Git & Commit Guidelines
 
+- **Zero Direct Commits on `main`**: Commits must NEVER be made directly to `main`. All updates, archiving, spec synchronizations, and fixes happen on feature branches.
 - Follow the [Conventional Commits](https://www.conventionalcommits.org/) specification:
   - `feat: ...` for new capabilities.
   - `fix: ...` for bug fixes.

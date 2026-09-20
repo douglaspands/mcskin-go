@@ -27,6 +27,7 @@ You are explicitly permitted and encouraged to autonomously execute harmless dev
 
 ### Destructive & Strictly Prohibited Commands (Tier 3)
 The following commands are hard-blocked by project policy. You must NEVER propose or execute them:
+- Direct commits to `main` branch (`git commit` on `main`). All commits must occur on a feature branch (`feat/...`) or via PR merge.
 - `rm -rf` targeting root, current directory, parent directory, `*`, or `.git` (e.g. `rm -rf /`, `rm -rf *`, `rm -rf .git`). Only targeted removal of build outputs (`bin/`, `files/*.mcpack`) is allowed.
 - Destructive git operations: `git push --force`, `git push -f`, `git reset --hard`, `git clean -f`, `git branch -D`.
 - Destructive disk operations: `mkfs`, `dd if=`, `fdisk`, `parted`.
@@ -58,16 +59,26 @@ The following commands are hard-blocked by project policy. You must NEVER propos
       3. Scope Boundary: Halt if fix requires expanding requirements beyond the spec (trigger `/openspec-update-change`).
       4. Targeted Verification: Re-run tests before re-evaluating with QA.
     - **Apply Phase Boundary**: Upon receiving formal approval (`APROVADO`), commit the implementation and inform the user to run `/opsx-archive`. **NEVER automatically archive or solicit PR/merge during the apply phase.**
-  - **Final Step ONLY on `/opsx-archive`**: After the user executes `/opsx-archive` and all spec synchronization and archiving steps are completed, explicitly request user confirmation to choose between:
-    1. Merge the feature branch into `main` using the squash method:
+  - **Final Step ONLY on `/opsx-archive`**: After the user executes `/opsx-archive` and all spec synchronization and archiving steps are completed:
+    1. **Mandatory Archive Commit on Feature Branch**: All git updates (moving change to `archive/` and syncing `openspec/specs/`) MUST be committed directly on `feat/<nome_spec>` BEFORE pushing or opening the PR:
        ```bash
-       git checkout main && git merge --squash feat/<nome_spec>
+       git add openspec/
+       git commit -m "docs(openspec): archive change <nome_spec> and sync main specs"
        ```
-    2. Create a Pull Request on GitHub:
-       ```bash
-       git push origin feat/<nome_spec>
-       gh pr create --base main --head feat/<nome_spec> --title "feat: <nome_spec>"
-       ```
+    2. Explicitly request user confirmation to choose between:
+       - **Local Squash Merge into `main`**:
+         ```bash
+         git checkout main && git merge --squash feat/<nome_spec>
+         ```
+       - **Create a Pull Request on GitHub**:
+         ```bash
+         git push origin feat/<nome_spec>
+         gh pr create --base main --head feat/<nome_spec> --title "feat: <nome_spec>"
+         git checkout main
+         ```
+    3. **Post-PR Invariant (No Commits on Branch, ZERO Commits on `main`)**:
+       - Once the PR is created and returning to `main`, **NEVER make any further commits on the feature branch** (it is frozen awaiting review/merge).
+       - **ABSOLUTELY NEVER COMMIT DIRECTLY ON `main`**. The `main` branch is strictly protected. All git updates must happen inside the archive command on the feature branch. The working tree on `main` must remain clean.
 
 ---
 

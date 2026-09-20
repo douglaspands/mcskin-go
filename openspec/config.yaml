@@ -17,8 +17,8 @@ context: |
     - Token Optimization & Born Modularized ("Nascem Otimizadas"): All new and refactored source files in `cmd/`, `internal/`, and `internal/web/static/js/` SHALL NOT exceed 300 lines or 15 KB. Third-party vendor libraries MUST be isolated in `internal/web/static/vendor/` and excluded from AI context reads. Compact test runner `./scripts/test-compact.sh` is silent on PASS. Offload research, verbose test repair loops, and code investigations to subagents.
     - Autonomy: Autonomous execution for local read, test, build, and git commit. Permission required for destructive commands.
   Git Conventions:
-    - Branching Strategy: The VERY FIRST action upon triggering `/opsx-propose` MUST be creating the branch `feat/<nome_spec>` (`git checkout -b feat/<nome_spec>`) to ensure safe rollback isolation.
-    - Merging Strategy: After `/opsx-archive` completes all change archiving and spec synchronization, request user confirmation to merge `feat/<nome_spec>` into `main` using the squash method (`git merge --squash`).
+    - Merging Strategy: After `/opsx-archive` completes all change archiving and spec synchronization, commit all archive changes on `feat/<nome_spec>`. Then request user confirmation to merge `feat/<nome_spec>` into `main` using squash merge or open a GitHub PR.
+    - Post-PR & Main Protection: Upon PR creation and checkout back to `main`, no further commits may be made to the feature branch, and direct commits to `main` are strictly prohibited. All git updates must occur in the archive command.
     - Commits: Conventional Commits format (feat, fix, test, refactor, docs, chore).
 
 rules:
@@ -54,4 +54,6 @@ operations:
       - "Verify PO/QA review verdict is APROVADO before archiving"
       - "Verify all tests pass (go test ./...) and binaries build before archiving"
       - "Summarize changes and spec synchronization outcome"
-      - "MANDATORY PR/MERGE PROMPT: ONLY after archive command execution and spec synchronization are complete, request user confirmation to choose between squash merge into main or GitHub PR"
+      - "MANDATORY ARCHIVE COMMIT: Stage and commit all archive folder moves and synced specs directly to feat/<nome_spec> before pushing or opening a PR"
+      - "MANDATORY PR/MERGE PROMPT: ONLY after archive execution, spec synchronization, and git commit on feat/<nome_spec> are complete, request user confirmation to choose between squash merge into main or GitHub PR"
+      - "POST-PR INVARIANT: Upon PR creation and checkout back to main, NEVER make further commits on the branch, and ABSOLUTELY NEVER commit directly to main. All git updates must happen in the archive command."
