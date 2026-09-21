@@ -1,288 +1,259 @@
 # mcskin
 
-> **Crie skins do Minecraft Bedrock direto no navegador — sem propaganda, sem cadastro, sem instalar nada.** Um editor 3D/2D completo que roda localmente no seu computador e abre em qualquer celular ou tablet da mesma rede Wi-Fi via QR Code.
+> **Crie e instale skins do Minecraft Bedrock direto no navegador — sem propaganda, sem cadastro, 100% seguro para crianças.** Um editor 3D/2D e conversor que roda no computador de casa e conecta com celulares e tablets da mesma rede Wi-Fi via QR Code.
 
+[![Idade Recomendada](https://img.shields.io/badge/crian%C3%A7as-6%2B%20anos-orange.svg)]()
+[![Zero Anúncios](https://img.shields.io/badge/an%C3%BAncios-zero-brightgreen.svg)]()
+[![Rede Local](https://img.shields.io/badge/privacidade-100%25%20rede%20local-success.svg)]()
+[![Formato Bedrock](https://img.shields.io/badge/bedrock-.mcpack%20oficial-blueviolet.svg)]()
 [![Go Version](https://img.shields.io/badge/go-1.25%2B-blue.svg)](https://golang.org)
-[![Platform](https://img.shields.io/badge/plataformas-linux%20%7C%20windows-lightgrey.svg)]()
+[![Plataformas](https://img.shields.io/badge/plataformas-windows%20%7C%20linux-lightgrey.svg)]()
 [![Zero Dependências](https://img.shields.io/badge/depend%C3%AAncias-zero-brightgreen.svg)]()
 [![Licença](https://img.shields.io/badge/licen%C3%A7a-MIT-green.svg)](LICENSE)
 
 ---
 
-## 💡 Por que o `mcskin` existe
+## 💡 Por que o `mcskin` foi criado?
 
-A maioria dos "criadores de skin" na internet são sites cheios de anúncios piscando, pop-ups, botões de download falsos e pedidos de cadastro — uma armadilha para uma criança de 6 anos que só quer pintar a própria skin. O `mcskin` nasceu para resolver isso:
+A maioria dos sites de skins na internet é uma armadilha para uma criança de 6 anos que só quer personalizar seu personagem: anúncios piscando por toda parte, botões falsos de download que tentam instalar vírus, exigência de cadastros com e-mail e interfaces difíceis de usar em telas de toque.
 
-- 🚫 **Zero propaganda, zero rastreamento, zero cadastro**: o servidor roda no computador de casa, dentro da sua própria rede Wi-Fi. Nada é enviado para a internet, não existe conta para criar nem anúncio para clicar.
-- 🧒 **Feito para mãos pequenas**: botões grandes (64px+), linguagem simples em português, efeitos sonoros de "level up" e uma estética autêntica de blocos — pensado desde o início para crianças de 6 anos ou mais.
-- 📴 **100% offline e auto-contido**: um único binário Go, sem Node/NPM, sem CDN externo, sem dependências. Funciona até sem internet, contanto que o computador e o celular estejam na mesma rede local.
-- 📱 **Sem instalar app nenhum**: a criança aponta a câmera do tablet ou celular para o QR Code na tela do computador, abre no navegador e já está editando — e ao terminar, baixa o `.mcpack` e instala no Minecraft com 1 toque.
+O **`mcskin`** foi criado para devolver a tranquilidade aos pais e a alegria da criação às crianças:
+
+| O que acontece em sites da internet? | Como é no `mcskin`? |
+| :--- | :--- |
+| ❌ **Anúncios invasivos**, banners piscando e vídeos pop-up | ✅ **Zero anúncios**: tela limpa, silenciosa e 100% focada na criatividade |
+| ❌ **Botões falsos de "Download"** que levam a vírus e malwares | ✅ **1 clique seguro**: gera apenas o pacote `.mcpack` oficial direto da sua máquina |
+| ❌ **Exigência de cadastro**, login, e-mail ou dados pessoais | ✅ **Sem contas nem senhas**: anonimato total e privacidade de dados da família |
+| ❌ **Botões minúsculos** e menus difíceis para dedos pequenos | ✅ **Feito para crianças (6+)**: botões grandes (64px+) e atalhos táteis acolhedores |
+| ❌ **Transferência complicada** por cabos, pen drives ou e-mails | ✅ **Conexão instantânea via QR Code**: celular/tablet acessa pela rede Wi-Fi local |
+| ❌ **Skins incompatíveis** com braços quebrados no jogo | ✅ **Bedrock Oficial Dual-Model**: gera automaticamente variantes Steve (4px) e Alex (3px) |
 
 ---
 
-## 🌐 Modo Web — Editor de Skins 3D e 2D no Navegador
+## 🚀 Como Começar em 3 Passos
 
-Este é o coração do projeto: um servidor web local ("CRIE SKINS LEGAIS") com um **editor de skins 3D e 2D completo**, projetado para caber inteiro na tela sem precisar de rolagem vertical, com navegação rápida, suporte a dispositivos móveis e importação inteligente de skins geradas por IA.
+Não precisa instalar aplicativos nas lojas (App Store ou Google Play), nem configurar servidores complexos. Basta seguir estes 3 passos simples:
 
-```bash
-# Inicia o servidor web na porta padrão (8080) e abre o navegador automaticamente
-./bin/mcskin --web
+```
+ [1. Iniciar no PC]  ───────>  [2. Conectar Tablet/Celular]  ───────>  [3. Pintar e Jogar!]
+ Duplo clique no executável       Aponte a câmera pro QR Code             Crie a skin e abra no
+ (abre o navegador local)         (abre direto no navegador)              Minecraft com 1 toque
 ```
 
-> No Windows, basta dar duplo clique em `mcskin.exe` sem nenhum argumento — o modo web inicia sozinho, com metadados de confiança nativos e sem requerer privilégios de administrador.
+### 1️⃣ Iniciar no Computador
+- **No Windows**: Dê um duplo clique no arquivo `mcskin.exe`. O navegador abrirá automaticamente na tela *"CRIE SKINS LEGAIS"*.
+- **No Linux / macOS**: Execute no terminal:
+  ```bash
+  ./bin/mcskin --web
+  ```
+
+### 2️⃣ Conectar o Tablet ou Celular (Opcional)
+- Aponte a câmera do celular ou tablet para o **QR Code** exibido na tela do computador.
+- O editor abrirá instantaneamente no navegador do aparelho, conectado através da sua rede Wi-Fi de casa. Sem cabos, sem Bluetooth e sem instalar nada!
+
+### 3️⃣ Pintar e Jogar!
+- Escolha uma cor na paleta e pinte livremente no modelo 3D ou na folha 2D.
+- Ao terminar, clique em **"Baixar Pacote Bedrock (.mcpack)"** e toque em **"Abrir com o Minecraft"**. Sua skin já estará pronta no Vestiário do jogo!
+
+---
+
+## 🎨 Vitrine da Interface Web — "CRIE SKINS LEGAIS"
+
+O editor foi desenvolvido com foco total em ergonomia infantil, garantindo que mesmo crianças pequenas possam explorar sua imaginação sem frustrações.
 
 <p align="center">
-  <img src="docs/screenshots/editor-3d-redesign-desktop.jpg" alt="Editor 3D com novo layout sem rolagem, dock de ferramentas e barra superior" width="760"><br>
-  <sub>Editor 3D com o layout imersivo sem rolagem: alternador 3D/2D no topo, controles de zoom, dock inferior com pincel, balde, substituição de cor e menu lateral rápido.</sub>
+  <img src="docs/screenshots/editor-3d-redesign-desktop.jpg" alt="Editor 3D com layout imersivo sem rolagem, dock de ferramentas e barra superior" width="760"><br>
+  <sub><b>Editor 3D Imersivo</b>: tudo cabe na tela sem rolagem vertical, com dock inferior de fácil alcance, cores vivas, QR Code de conexão e controles de visualização simplificados.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/editor-nova-skin-modal.jpg" alt="Modal Nova Skin com opções Steve, Alex e Boneco em Branco" width="400">
+  <img src="docs/screenshots/editor-2d-folha-grade.jpg" alt="Editor 2D com folha de textura desdobrada e grade suave" width="460">
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/screenshots/editor-mobile-drawer.jpg" alt="Menu de navegação em gaveta deslizante no celular" width="260">
+  <img src="docs/screenshots/editor-mobile-drawer.jpg" alt="Menu de navegação em gaveta deslizante no celular" width="230">
 </p>
-<p align="center"><sub>Esquerda: modal "Nova Skin" para começar de Steve (4px), Alex (3px) ou Boneco em Branco. Direita: navegação otimizada em gaveta no celular.</sub></p>
-
-- 🧊/📜 **Alternador 3D & 2D Integrado**: Alterne instantaneamente com um clique entre o boneco tridimensional interativo e a folha de textura desdobrada (2D), permitindo pintar partes escondidas ou dobraduras com precisão absoluta.
-- 🖌️ **Pintura Livre e Permissiva**: Pincel pixel a pixel, balde de preenchimento de face, substituição de cores iguais (recolor) e borracha — qualquer ferramenta tem permissão total para sobrescrever outra e pintar livremente sobre pixels existentes ou modelos em branco.
-- 🤖 **Importação Inteligente de Skins por IA**: Carregue imagens geradas por qualquer IA (DALL-E, Midjourney, Bing, ChatGPT, etc.) em qualquer resolução (≥ 1024px para 128x128 HD, < 1024px para 64x64, ou 2:1 para 64x32) com redimensionamento de alta fidelidade e preservação de nitidez de pixels.
-- 🪄 **Detecção & Remoção Automática de Fundo**: Identifica automaticamente se a imagem gerada por IA veio com fundo sólido e abre um modal com 1 clique para remover o fundo mantendo o boneco perfeitamente recortado.
-- 🔲 **Grade de Precisão Sutil**: Linhas de referência ultrafinas em 16x com sombra suave (`rgba(0, 0, 0, 0.10)`), permitindo visualizar os limites de cada pixel sem poluir visualmente a textura.
-- 🧭 **Navegação sem Rolagem**: Tudo cabe na tela — menu lateral no desktop, gaveta deslizante no celular, e dicas contextuais dinâmicas na barra de ferramentas.
-- 🆕 **"Nova Skin" com Presets Autênticos**: Comece do Steve (braços de 4px), da Alex (braços de 3px) ou de um Boneco em Branco pronto para pintar.
-- 🖥️ **Tela Cheia & Zoom Touch**: Zoom suave por botões, roda do mouse e gesto de pinça no celular, além de modo tela cheia para foco total.
-- 📦 **Exportação Direta**: Baixe o arquivo PNG editado ou gere o arquivo `.mcpack` pronto com 1 clique para instalar no Minecraft Bedrock.
-
-### 📦 Conversor Rápido (sem precisar editar)
-
-Já tem um PNG pronto da sua skin? A aba do Conversor empacota o `.mcpack` instantaneamente e exibe um QR Code local para você abrir e baixar direto no celular ou tablet na mesma rede Wi-Fi, sem necessidade de cabos.
+<p align="center"><sub><b>Esquerda</b>: modo 2D desdobrado com grade de precisão para alcançar partes escondidas. <b>Direita</b>: navegação móvel em gaveta deslizante no celular/tablet.</sub></p>
 
 <p align="center">
-  <img src="docs/screenshots/conversor-skin.png" alt="Tela do Conversor de Skin com Dropzone e QR Code" width="560"><br>
-  <sub>Tela do Conversor: arraste seu PNG ou imagem de IA, defina o nome do pacote e instale direto no Minecraft Bedrock.</sub>
+  <img src="docs/screenshots/editor-nova-skin-modal.jpg" alt="Modal Nova Skin com opções Steve, Alex e Boneco em Branco" width="360"><br>
+  <sub><b>Modal Nova Skin</b>: ponto de partida intuitivo para Steve Clássico (4px), Alex Slim (3px) ou Skin em Branco.</sub>
+</p>
+
+### Destaques Pensados para os Pequenos:
+
+- 🧒 **Botões Grandes (64px+) & Área de Toque Generosa**: Nada de botões minúsculos que causam cliques acidentais. Todas as ferramentas e paletas foram desenhadas para telas sensíveis ao toque.
+- 🔄/🖌️ **Alternador "Pintar" vs. "Girar"**: Uma trava inteligente que evita estragar o desenho ao tentar girar o boneco, ou girar a câmera sem querer quando a criança só queria pintar um detalhe.
+- 📐 **Layout Imersivo 100dvh (Zero Rolagem)**: A interface inteira se ajusta perfeitamente à tela do aparelho, eliminando barras de rolagem que atrapalham a navegação dos pequenos.
+- 🧊/📜 **Alternador 3D & 2D Integrado**: Alterne com 1 toque entre o boneco tridimensional interativo e a folha de textura aberta (2D) para alcançar dobraduras e partes escondidas com máxima precisão.
+- 🤖 **Importação Inteligente de Skins geradas por IA**: Carregue imagens criadas no ChatGPT, Midjourney, DALL-E ou Bing em qualquer resolução — o sistema redimensiona e preserva a nitidez pixel a pixel automaticamente.
+- 🪄 **Detecção & Remoção de Fundo em 1 Toque**: Identifica se a imagem veio com fundo sólido e oferece a remoção automática sem complicar a vida dos pais.
+- 🔲 **Grade de Precisão Sutil**: Linhas de referência ultrafinas em 16x com sombra suave para enxergar cada pixel sem poluir o visual da skin.
+- 🔊 **Efeitos Sonoros Lúdicos**: Sons autênticos de "level up" celebram o momento em que a criança conclui e salva sua criação.
+
+---
+
+### 📦 Conversor Rápido (para quem já tem uma imagem PNG)
+
+Se a criança já tiver uma imagem de skin pronta no computador ou gerada por inteligência artificial, não é necessário desenhar do zero:
+
+<p align="center">
+  <img src="docs/screenshots/conversor-skin.png" alt="Tela do Conversor de Skin com Dropzone e QR Code" width="720"><br>
+  <sub><b>Conversor Rápido</b>: arraste o arquivo PNG ou imagem de IA, defina o nome do pacote e escaneie o QR Code no tablet para instalar no Minecraft Bedrock.</sub>
 </p>
 
 ---
 
-## 🎯 Proposta & Missão
+## 🎮 Como Equipar a Skin no Minecraft Bedrock
 
-- 📱 **Foco Mobile (Tablets e Celulares)**: conexão sem fios instantânea via QR Code local (Wi-Fi) — a criança abre a interface e baixa o `.mcpack` direto no aparelho, instalando no jogo com 1 toque (*"Abrir com o Minecraft"*).
-- 🔄 **Atualização Ágil**: reempacotamento rápido de texturas sem perder compatibilidade com o vestiário do jogo.
-- 👥 **Dual-Model por Padrão**: gera ambos os modelos (Steve 4px e Alex 3px) compartilhando uma única textura. Zero desperdício de espaço!
-- ⚡ **Zero Dependências & Air-Gapped**: 100% Go standard library, sem Node/NPM, sem CDNs externos, funcionando totalmente offline.
+Após baixar o arquivo `.mcpack`, veja como é fácil colocá-lo no jogo:
+
+### No Windows 10 / 11:
+1. Dê um **duplo clique** no arquivo `.mcpack` baixado.
+2. O Minecraft iniciará automaticamente exibindo a notificação: `Importação iniciada...` seguida por `Importação de pacote de capa bem-sucedida`.
+
+### No Celular ou Tablet (Android / iOS / iPadOS):
+1. Baixe o arquivo `.mcpack` pelo navegador do aparelho.
+2. Toque na notificação de download concluído e selecione **"Abrir com o Minecraft"** (ou localize o arquivo no app *Arquivos* / *Downloads* do aparelho).
+
+### Dentro do Jogo (Vestiário):
+1. Na tela principal do Minecraft, clique em **Vestiário** (ou *Dressing Room*).
+2. Toque no ícone de cabide (**Capas Clássicas**).
+3. Localize o pacote com o nome da sua skin.
+4. Por padrão, o `mcskin` cria os dois modelos oficiais:
+   - **`<Nome> (Classic)`**: braços normais de 4 pixels (Steve).
+   - **`<Nome> (Slim)`**: braços finos de 3 pixels (Alex).
+5. Escolha a sua preferida e toque em **Equipar**!
 
 ---
 
-## 🚀 Uso via Linha de Comando (CLI)
+## 💻 Uso via Linha de Comando (CLI)
 
-Além do modo web acima, o `mcskin` também funciona como uma ferramenta de linha de comando direta: basta passar o caminho da imagem da sua skin PNG e o pacote `.mcpack` será gerado automaticamente no mesmo diretório.
-
-### Sintaxe Básica
+Para usuários avançados, administradores de servidores ou desenvolvedores, o `mcskin` também oferece um modo CLI completo, rápido e sem dependências:
 
 ```bash
 mcskin [opções] <caminho/para/skin.png>
 ```
 
-### Opções Disponíveis
+### Tabela Completa de Opções
 
 | Opção | Descrição |
 | :--- | :--- |
-| *(sem flag)* | **Padrão:** Gera ambos os modelos (Clássico 4px e Slim 3px) no mesmo pacote. |
+| *(sem flag)* | **Padrão:** Gera ambos os modelos (Clássico 4px e Slim 3px) no mesmo pacote `.mcpack`. |
 | `--both` | Força explicitamente a inclusão dos dois modelos (Clássico e Slim). |
 | `--classic` | Restringe a geração apenas ao modelo clássico (braços de 4px / Steve). |
 | `--slim` | Restringe a geração apenas ao modelo fino (braços de 3px / Alex). |
 | `--force` | Sobrescreve o arquivo `.mcpack` de saída se ele já existir (padrão: `true`). |
 | `-i`, `--input` | Informa o caminho do arquivo PNG de entrada via parâmetro nomeado. |
-| `-w`, `--web` | Inicia o servidor web local com o Conversor e o Criador de Skins 3D/2D (ver seção "Modo Web" no início deste documento). |
+| `-w`, `--web` | Inicia o servidor web local com o Conversor e o Editor 3D/2D. |
 | `-p`, `--port` | Define a porta do servidor web (padrão: `8080`). Usado apenas com `--web`. |
 | `--no-browser` | No modo web, não abre o navegador padrão automaticamente. |
-| `-v`, `--version` | Exibe a versão, commit e data de compilação do binário. |
-| `-h`, `--help` | Exibe a mensagem de ajuda com todos os parâmetros. |
+| `-v`, `--version` | Exibe a versão, commit e data de compilação do executável. |
+| `-h`, `--help` | Exibe a mensagem de ajuda com todos os parâmetros disponíveis. |
 
-> **Nota:** As opções `--classic` e `--slim` são mutuamente exclusivas e não podem ser combinadas.
+> *Nota: As opções `--classic` e `--slim` são mutuamente exclusivas.*
 
----
-
-### Exemplos Práticos
-
-#### 1. Conversão Padrão (Ambos os Modelos: Clássico e Slim)
-
-Por padrão, quando nenhum modelo for especificado, o pacote gerará ambas as variantes:
+### Exemplos de Linha de Comando
 
 ```bash
+# Conversão padrão gerando ambos os modelos (Steve e Alex):
 ./bin/mcskin minhas_skins/guerreiro.png
-```
+# -> Gera: minhas_skins/guerreiro.mcpack
 
-**Saída:**
-```text
-Successfully converted "guerreiro" to Bedrock skin pack [both (classic & slim)]:
-  Output: minhas_skins/guerreiro.mcpack (2855 bytes)
-```
-- O arquivo `minhas_skins/guerreiro.mcpack` é criado imediatamente contendo as skins `guerreiro (Classic)` e `guerreiro (Slim)`.
-
-#### 2. Restringir Apenas ao Modelo Clássico (Steve, braços de 4px)
-
-```bash
+# Restringir apenas ao modelo clássico (Steve, 4px):
 ./bin/mcskin --classic minhas_skins/steve_custom.png
-```
 
-#### 3. Restringir Apenas ao Modelo Fino / Slim (Alex, braços de 3px)
-
-```bash
+# Restringir apenas ao modelo slim (Alex, 3px):
 ./bin/mcskin --slim minhas_skins/alex_custom.png
-```
 
-#### 4. Consultar Versão do Binário
-
-```bash
-./bin/mcskin --version
-# Exemplo: mcskin version v1.0.0 (commit: 9b600f4, built at: 2026-09-20T03:21:18Z)
-```
-
-#### 5. No Windows (Prompt de Comando ou PowerShell)
-
-```cmd
-bin\mcskin.exe C:\Users\SeuUsuario\Imagens\skin_personalizada.png
+# Iniciar servidor web em porta customizada sem abrir navegador:
+./bin/mcskin --web --port 9090 --no-browser
 ```
 
 ---
 
-## 🎮 Como Importar a Skin no Minecraft Bedrock
+## 📦 Estrutura Técnica do Pacote `.mcpack`
 
-Após gerar o arquivo `.mcpack`, a importação no jogo é automática:
-
-1. **Windows 10 / 11:**
-   - Dê um duplo clique no arquivo `.mcpack` gerado.
-   - O Minecraft Bedrock iniciará automaticamente exibindo a notificação: `Importação iniciada...` seguida por `Importação de pacote de capa bem-sucedida`.
-2. **Android / iOS:**
-   - Envie ou compartilhe o arquivo `.mcpack` para o seu dispositivo móvel.
-   - Toque no arquivo e selecione **"Abrir com o Minecraft"**.
-3. **Equipando a Skin no Jogo:**
-   - No menu principal do Minecraft, acesse o **Vestiário** (Dressing Room) > ícone de cabide (**Capas Clássicas**).
-   - O seu pacote aparecerá na lista de capas disponíveis.
-   - Se gerado com a opção padrão (dual-model), você verá duas capas:
-     - **`<Nome> (Classic)`** (braços normais de 4 pixels)
-     - **`<Nome> (Slim)`** (braços finos de 3 pixels)
-   - Clique no modelo desejado e selecione **Equipar**!
-
----
-
-## 📦 Estrutura do Pacote Gerado
-
-O arquivo `.mcpack` gerado é um arquivo ZIP válido em conformidade com o padrão oficial do Minecraft Bedrock:
+O arquivo `.mcpack` gerado é um arquivo ZIP padronizado em conformidade com as diretrizes oficiais do Minecraft Bedrock:
 
 ```text
 [nome_da_skin].mcpack
-├── manifest.json       # Manifesto com UUIDs v4 (RFC-4122) únicos para identificação do pacote
+├── manifest.json       # Manifesto com UUIDs v4 (RFC-4122) únicos para o pacote
 ├── skins.json          # Registro das skins e mapeamento de geometria (classic e slim)
 ├── texts/
-│   └── en_US.lang      # Chaves de localização para exibição dos nomes das skins no jogo
+│   └── en_US.lang      # Chaves de localização para exibição dos nomes no jogo
 └── [nome_da_skin].png  # Imagem da textura compartilhada na raiz do pacote
 ```
 
-### Exemplo de `skins.json` (Dual-Model Padrão)
-
-```json
-{
-  "skins": [
-    {
-      "localization_name": "guerreiro_classic",
-      "geometry": "geometry.humanoid.custom",
-      "texture": "guerreiro.png",
-      "type": "free"
-    },
-    {
-      "localization_name": "guerreiro_slim",
-      "geometry": "geometry.humanoid.customSlim",
-      "texture": "guerreiro.png",
-      "type": "free"
-    }
-  ],
-  "serialize_name": "guerreiro"
-}
-```
-
-### Requisitos da Imagem de Entrada
-
+### Requisitos Técnicos da Imagem PNG:
 - **Formato**: PNG válido (RGBA).
 - **Dimensões aceitas**:
   - `64x64` pixels (padrão moderno do Minecraft).
-  - `64x32` pixels (formato clássico, legado do Minecraft pré-1.8).
-  - `128x128` pixels (skins de alta resolução em conformidade Bedrock).
+  - `128x128` pixels (skins em alta resolução HD suportadas pelo Bedrock).
+  - `64x32` pixels (formato clássico legado pré-1.8).
 
 ---
 
-## 📥 Downloads das Releases (GitHub Actions CI/CD)
+## 📥 Downloads das Releases (CI/CD Oficial)
 
-As versões oficiais são geradas automaticamente através do workflow de integração contínua [`.github/workflows/release.yml`](.github/workflows/release.yml) sempre que uma tag de versão (`v*`) é criada:
+Os executáveis estáticos oficiais são compilados automaticamente através do GitHub Actions ([`.github/workflows/release.yml`](.github/workflows/release.yml)) a cada nova versão lançada:
 
-- **Linux (`amd64`)**: Arquivo `mcskin_<tag>_linux_amd64.tar.gz` contendo o executável estático e a documentação.
-- **Windows (`amd64`)**: Arquivo `mcskin_<tag>_windows_amd64.zip` contendo o `mcskin.exe` e a documentação.
-- **Integridade**: Cada release acompanha o arquivo `checksums.txt` com as somas de verificação SHA256 de todos os pacotes.
+- **Windows (`amd64`)**: Arquivo `mcskin_<tag>_windows_amd64.zip` com ícones oficiais e metadados nativos (`mcskin.exe`).
+- **Linux (`amd64`)**: Arquivo `mcskin_<tag>_linux_amd64.tar.gz` contendo o binário estático e documentação.
+- **Integridade**: Acompanha o arquivo `checksums.txt` com as somas de verificação SHA-256 de todos os binários.
 
-Para baixar a versão mais recente, acesse a página de **[Releases no GitHub](https://github.com/douglas/mcskin/releases)**.
+Acesse a página de **[Releases no GitHub](https://github.com/douglaspands/mcskin/releases)** para baixar a versão mais recente.
 
 ---
 
 ## 🛠️ Guia para Desenvolvedores
 
-Esta seção é destinada a quem deseja compilar o projeto do código-fonte, rodar testes ou contribuir.
+Esta seção é destinada a quem deseja compilar o projeto do código-fonte, executar a suíte de testes ou contribuir com o repositório.
 
 ### Pré-requisitos
-
 - [Go](https://go.dev/dl/) versão 1.25 ou superior.
 - Git.
-- `make` (opcional, para uso dos atalhos de automação).
+- `make` (opcional, para uso dos comandos automatizados).
 
----
-
-### Compilação com Make
-
-O repositório inclui um `Makefile` com comandos prontos:
+### Compilação com Makefile
 
 ```bash
-# Compila os binários para Linux e Windows na pasta bin/ com injeção de versão
+# Compila os binários para Linux e Windows na pasta bin/ com injeção de versão:
 make build
 
-# Compila apenas para Linux (amd64)
+# Compila apenas para Linux (amd64):
 make build-linux
 
-# Compila apenas para Windows (.exe, amd64)
+# Compila apenas para Windows (.exe com manifesto de confiança embutido):
 make build-windows
 
-# Executa todos os testes unitários
+# Executa todos os testes unitários:
 make test
 
-# Executa o linter oficial (go vet)
+# Executa o linter oficial (go vet):
 make lint
 
-# Limpa binários compilados e arquivos temporários
+# Limpa artefatos compilados e arquivos temporários:
 make clean
 ```
 
----
-
-### Execução dos Testes
-
-O projeto segue rigorosamente o padrão **Test-Driven Development (TDD)** e **isolamento total de testes unitários**:
+### Test-Driven Development (TDD) & Isolamento em Memória
+O projeto segue o padrão rigoroso de **TDD** e **100% de isolamento em testes unitários**:
 
 ```bash
-# Executa a suíte completa de testes
-go test -v ./...
+# Executa a suíte de testes compacta (silenciosa em caso de sucesso):
+./scripts/test-compact.sh
 
-# Executa testes direcionados por pacote
+# Executa testes unitários por pacote:
 go test -v ./internal/bedrock/...
 go test -v ./internal/converter/...
+go test -v ./internal/skin/...
+go test -v ./internal/pack/...
 go test -v ./cmd/mcskin/...
 ```
 
-> **Regra de Isolamento**: Todos os testes unitários são 100% mockados em memória (`bytes.Buffer`, `bytes.Reader`). Nenhum teste unitário faz requisições de rede ou cria arquivos persistentes fora de diretórios temporários transitórios (`t.TempDir()`).
+> **Regra de Isolamento**: Testes unitários são 100% mockados em memória (`bytes.Buffer`, `bytes.Reader`). Nenhum teste unitário faz requisições externas de rede nem grava em disco fora de pastas temporárias transitórias (`t.TempDir()`).
 
----
-
-### Verificação com a Skill Bedrock Verifier
-
-Para validar a integridade técnica de um `.mcpack` gerado (UUIDs, esquemas JSON, geometrias e dimensões):
+### Verificação do `.mcpack` com a Skill do Projeto
+Para inspecionar e validar esquemas JSON, UUIDs v4 e conformidade de texturas de qualquer pacote gerado:
 
 ```bash
 python3 .agents/skills/bedrock-skin-pack-verifier/scripts/verify-mcpack.py caminho/para/skin.mcpack
@@ -292,4 +263,4 @@ python3 .agents/skills/bedrock-skin-pack-verifier/scripts/verify-mcpack.py camin
 
 ## 📄 Licença
 
-Este projeto está licenciado sob os termos da licença [MIT](LICENSE). Livre para uso pessoal e comercial.
+Este projeto está licenciado sob os termos da licença [MIT](LICENSE). É livre e gratuito para uso pessoal, educacional e comercial.

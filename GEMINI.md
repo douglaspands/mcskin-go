@@ -19,6 +19,13 @@ You are explicitly permitted and encouraged to autonomously execute harmless dev
   - `./bin/png-to-mcpack ...`
 - **OpenSpec**:
   - `openspec ...`
+- **Node.js**:
+  - `node ...` (e.g. `node --test ...`, `node --check ...`, script executions)
+- **Python & uv**:
+  - `uv ...` (e.g. `uv venv .venv`, `uv pip ...`)
+  - `python3 ...` (e.g. python scripts, `.venv/bin/python ...`)
+- **Browser Automation**:
+  - `google-chrome ...` (e.g. `google-chrome --headless=new ...`)
 - **Git & GitHub (safe inspection & PR workflow)**:
   - `git status`, `git diff`, `git log`, `git show`, `git branch`, `git add`, `git commit`
   - `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`
@@ -106,4 +113,36 @@ To guarantee the safety and integrity of the host machine and execution environm
 - **Autonomous Permission Provisioning**: Upon user approval:
   1. Create the skill files in `.agents/skills/<name>/`.
   2. Immediately configure and grant the authorized permissions in the command safety gate (`.agents/scripts/command-gate.py`) and project documentation (`GEMINI.md`, `AGENTS.md`, `.agents/governance.md`) so that agents can execute the skill autonomously without repeatedly asking for permission.
+
+---
+
+## 5. Environment Tooling & Runtimes (Zero Search / Token Preservation)
+
+To completely eliminate token waste and prevent search loops (`which`, `find /`, `whereis`), all harnesses must strictly observe the pre-configured runtime environments:
+
+- **Version Manager (`asdf`)**:
+  - All language runtimes (`golang`, `nodejs`, `python`) are managed via `asdf` and tracked in `.tool-versions`:
+    - `golang 1.27.0` (Shims: `/home/douglas/.asdf/shims/go` or `go`)
+    - `nodejs lts` (Shims: `/home/douglas/.asdf/shims/node` or `node`)
+    - `python 3.14.7` (Shims: `/home/douglas/.asdf/shims/python3` or `python3`)
+  - **Invariance**: NEVER search for Go, Node, or Python binaries across the system filesystem. They are deterministically available via asdf shims.
+
+- **Python & `uv` (Strict Local Venv Policy)**:
+  - Package & virtualenv manager: `uv` (available at `/home/linuxbrew/.linuxbrew/bin/uv` or `uv`).
+  - **Zero Global Installs**: Installing packages globally via `pip install` or `pip install --user` is strictly forbidden.
+  - **Mandatory Local Venv**: Whenever Python dependencies are required, always create and use a local virtual environment in `.venv/` using `uv`:
+    ```bash
+    uv venv .venv
+    .venv/bin/python -m pip install <package>  # or uv pip install <package>
+    ```
+  - The `.venv/` and `venv/` directories are gitignored and localized to the repository.
+
+- **Node.js (No Global Installs)**:
+  - Node is available via asdf shims (`node`, `npm`).
+  - **Zero Global Installs**: Global package installation (`npm install -g`, `pnpm add -g`) is strictly prohibited. Use native Node capabilities (`node --test`, native `WebSocket`, standard library ES6 modules) or repository-local scripts.
+
+- **Headless Browser (Google Chrome)**:
+  - Binary location: `/usr/bin/google-chrome` (or `google-chrome`).
+  - **Zero Search**: NEVER run discovery commands searching for browsers (`which chromium`, `find / -name chrome`, etc.). Use `/usr/bin/google-chrome` directly (e.g. for headless screenshots or automation via `--headless=new`).
+
 

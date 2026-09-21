@@ -40,7 +40,10 @@ def evaluate_command(cmd: str):
         r'^(?:ls|cat|head|tail|grep|find|which|stat|file|unzip|mkdir|touch|echo|tar|zip|sha256sum|cp)\b',
         r'^chmod\s+\+x\s+',
         r'^rm\s+-rf\s+(?:bin|dist|build-[a-zA-Z0-9_-]+|files/\*\.mcpack|/tmp/.*)\b',
-        r'^python3\b',
+        r'^python3?\b',
+        r'^uv\b',
+        r'^node\b',
+        r'^google-chrome\b',
         r'^cd\s+',
     ]
 
