@@ -19,12 +19,20 @@ export let gridEnabled = false;
 const MAX_UNDO = 20, undoStack = [], redoStack = [];
 let lastPaintedCoord = null;
 
+export function setTextureResolution(w, h) {
+  if (texW === w && texH === h && textureCanvas.width === w && textureCanvas.height === h) return;
+  texW = w; texH = h;
+  textureCanvas.width = w; textureCanvas.height = h;
+  undoStack.length = 0; redoStack.length = 0;
+  lastPaintedCoord = null;
+  syncTexture();
+}
+
 export const pushUndo = () => {
   redoStack.length = 0;
   undoStack.push(textureCtx.getImageData(0, 0, texW, texH));
   if (undoStack.length > MAX_UNDO) undoStack.shift();
 };
-
 export const undo = () => {
   if (!undoStack.length) return;
   redoStack.push(textureCtx.getImageData(0, 0, texW, texH));
@@ -42,51 +50,37 @@ export function syncTexture() {
   update3DTexture(gridEnabled ? buildGridOverlayCanvas(textureCanvas, texW, texH) : textureCanvas, texW, texH);
   render2DSheet();
 }
-/**
- * Loads starter template (Steve, Alex, or Blank) into texture canvas.
- */
+
 export function loadTemplate(type, modelType = "classic") {
   pushUndo();
   textureCtx.clearRect(0, 0, texW, texH);
-  const fillBox = (x, y, w, h, col) => { textureCtx.fillStyle = col; textureCtx.fillRect(x, y, w, h); };
+  const s = Math.max(1, Math.round(texW / 64));
+  const fb = (x, y, w, h, col) => { textureCtx.fillStyle = col; textureCtx.fillRect(x * s, y * s, w * s, h * s); };
+  const isBlank = type === "blank", isAlex = type === "alex";
+  if (type === "steve" || isAlex || isBlank) {
+    const skinTone = isBlank ? "#fff" : (isAlex ? "#f1c27d" : "#d39a74"), hair = isBlank ? "#fff" : (isAlex ? "#d35400" : "#462c16");
+    const shirt = isBlank ? "#fff" : (isAlex ? "#5da632" : "#0093a8"), pants = isBlank ? "#fff" : (isAlex ? "#4a3c31" : "#2e3e7e"), shoes = isBlank ? "#fff" : "#404040";
+    const eyeColor = isBlank ? "#fff" : (isAlex ? "#4aa338" : "#2980b9");
 
-  const isBlank = type === "blank";
-  if (type === "steve" || type === "alex" || isBlank) {
-    const isAlex = type === "alex";
-    const skinTone = isBlank ? "#ffffff" : (isAlex ? "#f1c27d" : "#d39a74"), hair = isBlank ? "#ffffff" : (isAlex ? "#d35400" : "#462c16");
-    const shirt = isBlank ? "#ffffff" : (isAlex ? "#5da632" : "#0093a8"), pants = isBlank ? "#ffffff" : (isAlex ? "#4a3c31" : "#2e3e7e"), shoes = isBlank ? "#ffffff" : "#404040";
-    const eyeColor = isBlank ? "#ffffff" : (isAlex ? "#4aa338" : "#2980b9");
-
-    // Head (top, chin/neck, sides, back, front)
-    fillBox(8, 0, 8, 8, hair); fillBox(16, 0, 8, 8, skinTone); fillBox(0, 8, 8, 8, hair); fillBox(16, 8, 8, 8, hair); fillBox(24, 8, 8, 8, hair);
-    fillBox(8, 8, 8, 8, skinTone); fillBox(8, 8, 8, 2, hair); fillBox(9, 12, 2, 1, "#ffffff"); fillBox(13, 12, 2, 1, "#ffffff");
-    fillBox(10, 12, 1, 1, eyeColor); fillBox(13, 12, 1, 1, eyeColor); fillBox(10, 14, 4, 1, isBlank ? "#ffffff" : (isAlex ? "#c0392b" : "#7d3f28"));
-
-    // Torso (all 6 faces) + neck cutout
-    fillBox(20, 16, 8, 4, shirt); fillBox(28, 16, 8, 4, shirt); fillBox(16, 20, 4, 12, shirt); fillBox(20, 20, 8, 12, shirt);
-    fillBox(28, 20, 4, 12, shirt); fillBox(32, 20, 8, 12, shirt); fillBox(22, 20, 4, 2, skinTone);
+    fb(8, 0, 8, 8, hair); fb(16, 0, 8, 8, skinTone); fb(0, 8, 32, 8, hair); fb(8, 8, 8, 8, skinTone); fb(8, 8, 8, 2, hair);
+    fb(9, 12, 2, 1, "#fff"); fb(13, 12, 2, 1, "#fff"); fb(10, 12, 1, 1, eyeColor); fb(13, 12, 1, 1, eyeColor); fb(10, 14, 4, 1, isBlank ? "#fff" : (isAlex ? "#c0392b" : "#7d3f28"));
+    fb(20, 16, 16, 4, shirt); fb(16, 20, 24, 12, shirt); fb(22, 20, 4, 2, skinTone);
 
     const armW = modelType === "slim" ? 3 : 4;
-    // Right arm: top/bottom, 4 sleeve faces (y=20..24), 4 skin faces (y=24..32)
-    fillBox(44, 16, armW, 4, shirt); fillBox(44 + armW, 16, armW, 4, skinTone);
-    fillBox(40, 20, 4, 4, shirt); fillBox(44, 20, armW, 4, shirt); fillBox(44 + armW, 20, 4, 4, shirt); fillBox(48 + armW, 20, armW, 4, shirt);
-    fillBox(40, 24, 4, 8, skinTone); fillBox(44, 24, armW, 8, skinTone); fillBox(44 + armW, 24, 4, 8, skinTone); fillBox(48 + armW, 24, armW, 8, skinTone);
+    fb(44, 16, armW, 4, shirt); fb(44 + armW, 16, armW, 4, skinTone);
+    fb(40, 20, 4, 4, shirt); fb(44, 20, armW, 4, shirt); fb(44 + armW, 20, 4, 4, shirt); fb(48 + armW, 20, armW, 4, shirt);
+    fb(40, 24, 4, 8, skinTone); fb(44, 24, armW, 8, skinTone); fb(44 + armW, 24, 4, 8, skinTone); fb(48 + armW, 24, armW, 8, skinTone);
 
-    // Right leg: top, bottom sole, pants (y=20..30), shoes (y=30..32)
-    fillBox(4, 16, 4, 4, pants); fillBox(8, 16, 4, 4, shoes);
-    fillBox(0, 20, 4, 10, pants); fillBox(4, 20, 4, 10, pants); fillBox(8, 20, 4, 10, pants); fillBox(12, 20, 4, 10, pants);
-    fillBox(0, 30, 4, 2, shoes); fillBox(4, 30, 4, 2, shoes); fillBox(8, 30, 4, 2, shoes); fillBox(12, 30, 4, 2, shoes);
+    fb(4, 16, 4, 4, pants); fb(8, 16, 4, 4, shoes);
+    fb(0, 20, 16, 10, pants);
+    fb(0, 30, 4, 2, shoes); fb(4, 30, 4, 2, shoes); fb(8, 30, 4, 2, shoes); fb(12, 30, 4, 2, shoes);
 
     if (texH >= 64) {
-      // Left arm: top/bottom, 4 sleeve faces (y=52..56), 4 skin faces (y=56..64)
-      fillBox(36, 48, armW, 4, shirt); fillBox(36 + armW, 48, armW, 4, skinTone);
-      fillBox(32, 52, 4, 4, shirt); fillBox(36, 52, armW, 4, shirt); fillBox(36 + armW, 52, 4, 4, shirt); fillBox(40 + armW, 52, armW, 4, shirt);
-      fillBox(32, 56, 4, 8, skinTone); fillBox(36, 56, armW, 8, skinTone); fillBox(36 + armW, 56, 4, 8, skinTone); fillBox(40 + armW, 56, armW, 8, skinTone);
-
-      // Left leg: top, bottom sole, pants (y=52..62), shoes (y=62..64)
-      fillBox(20, 48, 4, 4, pants); fillBox(24, 48, 4, 4, shoes);
-      fillBox(16, 52, 4, 10, pants); fillBox(20, 52, 4, 10, pants); fillBox(24, 52, 4, 10, pants); fillBox(28, 52, 4, 10, pants);
-      fillBox(16, 62, 4, 2, shoes); fillBox(20, 62, 4, 2, shoes); fillBox(24, 62, 4, 2, shoes); fillBox(28, 62, 4, 2, shoes);
+      fb(36, 48, armW, 4, shirt); fb(36 + armW, 48, armW, 4, skinTone);
+      fb(32, 52, 4, 4, shirt); fb(36, 52, armW, 4, shirt); fb(36 + armW, 52, 4, 4, shirt); fb(40 + armW, 52, armW, 4, shirt);
+      fb(32, 56, 4, 8, skinTone); fb(36, 56, armW, 8, skinTone); fb(36 + armW, 56, 4, 8, skinTone); fb(40 + armW, 56, armW, 8, skinTone);
+      fb(20, 48, 4, 4, pants); fb(24, 48, 4, 4, shoes);
+      fb(16, 52, 16, 10, pants); fb(16, 62, 16, 2, shoes);
     }
   }
   syncTexture();
@@ -222,18 +216,17 @@ export function render2DSheet() {
  * Initializes 2D canvas drawing events, zoom controls, and export handlers.
  */
 export function initEditor2D({ getToolState, onPickColor }) {
+  const on = (id, evt, fn) => document.getElementById(id)?.addEventListener(evt, fn);
   const canvas = document.getElementById("editor2DCanvas");
   if (canvas) {
     const setZoom = (z) => {
       zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, z));
-      const slider = document.getElementById("zoom2DSlider");
-      if (slider) slider.value = zoomFactor2D;
+      const s = document.getElementById("zoom2DSlider"); if (s) s.value = zoomFactor2D;
       render2DSheet();
     };
-
-    document.getElementById("zoom2DSlider")?.addEventListener("input", (e) => setZoom(parseFloat(e.target.value)));
-    document.getElementById("btnZoom2DIn")?.addEventListener("click", () => { setZoom(zoomFactor2D + ZOOM_2D_STEP); playSound("click"); });
-    document.getElementById("btnZoom2DOut")?.addEventListener("click", () => { setZoom(zoomFactor2D - ZOOM_2D_STEP); playSound("click"); });
+    on("zoom2DSlider", "input", (e) => setZoom(parseFloat(e.target.value)));
+    on("btnZoom2DIn", "click", () => { setZoom(zoomFactor2D + ZOOM_2D_STEP); playSound("click"); });
+    on("btnZoom2DOut", "click", () => { setZoom(zoomFactor2D - ZOOM_2D_STEP); playSound("click"); });
 
     let isDrawing = false;
     const getCoord = (e) => {
@@ -250,30 +243,38 @@ export function initEditor2D({ getToolState, onPickColor }) {
     canvas.addEventListener("touchmove", (e) => { if (e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
     canvas.addEventListener("touchend", handleEnd);
   }
-
-  document.getElementById("btnToggleGrid")?.addEventListener("click", () => {
+  on("btnToggleGrid", "click", () => {
     gridEnabled = !gridEnabled;
     document.getElementById("btnToggleGrid")?.classList.toggle("active", gridEnabled);
     syncTexture(); playSound("click");
   });
+  ["btnUndo", "btnUndoIcon"].forEach((id) => on(id, "click", undo));
+  ["btnRedo", "btnRedoIcon"].forEach((id) => on(id, "click", redo));
 
-  ["btnUndo", "btnUndoIcon"].forEach((id) => document.getElementById(id)?.addEventListener("click", undo));
-  ["btnRedo", "btnRedoIcon"].forEach((id) => document.getElementById(id)?.addEventListener("click", redo));
+  const getExportCanvas = (targetRes) => {
+    if (targetRes >= texW) return textureCanvas; // never upsample
+    const c = document.createElement("canvas"); c.width = c.height = targetRes;
+    const ctx = c.getContext("2d"); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
+    ctx.drawImage(textureCanvas, 0, 0, targetRes, targetRes);
+    return c;
+  };
 
   document.getElementById("btnDownloadPng")?.addEventListener("click", () => {
-    promptSkinName((name) => {
+    promptSkinName((name, resChoice) => {
+      const exportCanvas = getExportCanvas(resChoice);
       const a = document.createElement("a");
-      a.href = textureCanvas.toDataURL("image/png"); a.download = `${name}.png`;
+      a.href = exportCanvas.toDataURL("image/png"); a.download = `${name}.png`;
       document.body.appendChild(a); a.click(); document.body.removeChild(a); playSound("click");
-    });
+    }, { isHD: texW === 128 });
   });
 
   document.getElementById("btnEditorConvert")?.addEventListener("click", () => {
-    promptSkinName((name) => {
+    promptSkinName((name, resChoice) => {
       const btn = document.getElementById("btnEditorConvert");
       if (btn) { btn.disabled = true; btn.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>"; }
       playSound("click");
-      textureCanvas.toBlob((blob) => {
+      const exportCanvas = getExportCanvas(resChoice);
+      exportCanvas.toBlob((blob) => {
         if (!blob) { if (btn) { btn.disabled = false; btn.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>"; } return; }
         const fd = new FormData();
         fd.append("skin", blob, `${name}.png`); fd.append("name", name); fd.append("model", getToolState().currentModelType);
@@ -290,6 +291,6 @@ export function initEditor2D({ getToolState, onPickColor }) {
           .catch((err) => alert(err.message))
           .finally(() => { if (btn) { btn.disabled = false; btn.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>"; } });
       }, "image/png");
-    });
+    }, { isHD: texW === 128 });
   });
 }

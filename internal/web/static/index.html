@@ -80,6 +80,13 @@
                     <div class="preview-meta">
                       <div class="preview-filename" id="fileNameDisplay">skin_personalizada.png</div>
                       <div class="preview-dimensions" id="fileDimsDisplay">64 × 64 pixels • RGBA Válido</div>
+                      <div id="converterResSelector" style="display: none; margin: 6px 0; width: 100%;">
+                        <span style="font-size: 0.75rem; color: #aaa; font-weight: 700; display: block; margin-bottom: 4px;">Resolução do Pacote:</span>
+                        <div style="display: flex; gap: 6px;">
+                          <button type="button" class="btn-secondary-sm active" id="btnRes128" data-res="128" style="flex: 1; padding: 4px 6px; font-size: 0.75rem;">🌟 128x128 HD</button>
+                          <button type="button" class="btn-secondary-sm" id="btnRes64" data-res="64" style="flex: 1; padding: 4px 6px; font-size: 0.75rem;">🟩 64x64 Clássico</button>
+                        </div>
+                      </div>
                       <button type="button" class="btn-secondary-sm" id="btnChangeSkin">🔄 Escolher Outra Imagem</button>
                     </div>
                   </div>
@@ -565,6 +572,17 @@
       </p>
       <div style="width: 100%; margin: 8px 0;">
         <input type="text" id="skinNameInput" class="mc-input-field" maxlength="32" placeholder="skin_custom" style="width: 100%;">
+      </div>
+      <div id="exportResSelectorGroup" style="display: none; width: 100%; margin: 6px 0 10px 0; text-align: left;">
+        <span style="font-size: 0.75rem; color: #aaa; font-weight: 700; display: block; margin-bottom: 4px;">Resolução de Exportação:</span>
+        <div style="display: flex; gap: 8px;">
+          <label style="flex: 1; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #fff; cursor: pointer;">
+            <input type="radio" name="exportResolution" value="128" checked> 🌟 128x128 HD
+          </label>
+          <label style="flex: 1; display: flex; align-items: center; gap: 4px; font-size: 0.75rem; color: #fff; cursor: pointer;">
+            <input type="radio" name="exportResolution" value="64"> 🟩 64x64 Padrão
+          </label>
+        </div>
       </div>
       <p style="color: #888; font-size: 0.72rem; text-align: center; margin-bottom: 10px;">
         Dica: Letras, números e traços (ex: skin_dragao, steve_gamer).

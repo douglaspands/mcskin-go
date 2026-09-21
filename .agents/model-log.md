@@ -29,3 +29,20 @@
 | 2026-09-20 | ai-skin-import-and-2d-editor/task-5.2-token-guardian-checks | gemini-3.8-flash | token guardian line and byte count budget verification | ok |
 | 2026-09-20 | ai-skin-import-and-2d-editor/task-5.3-run-regression-suite | gemini-3.8-flash | execute full regression suite (7 phases) | ok |
 | 2026-09-20 | ai-skin-import-and-2d-editor/task-5.4-feature-qa-reviewer | pro | PO/QA reviewer protocol validation | ok |
+| 2026-09-20 | adaptive-skin-resolution/task-1.1-test-downsampling | gemini-3.8-flash | 1-file test authoring | ok |
+| 2026-09-20 | adaptive-skin-resolution/task-1.2-baseline-go-tests | gemini-3.8-flash | command execution / verification | ok |
+| 2026-09-20 | adaptive-skin-resolution/task-2.1-stepped-downsampling | gemini-3.8-flash | single-file algorithm implementation | ok |
+| 2026-09-20 | adaptive-skin-resolution/task-3.1-dynamic-resolution-editor2d | gemini-3.8-flash | single-file UI/canvas component | ok |
+| 2026-09-20 | adaptive-skin-resolution/task-3.2-editor3d-resolution-scaling | gemini-3.8-flash | single-file 3D math & picking | ok |
+| 2026-09-20 | adaptive-skin-resolution/task-3.3-converter-resolution-selector | gemini-3.8-flash | single-file DOM & UI wiring | ok |
+| 2026-09-20 | adaptive-skin-resolution/task-4.1-app-resolution-orchestration | gemini-3.8-flash | multi-component orchestration | ok |
+| 2026-09-20 | adaptive-skin-resolution/task-5.1-token-guardian-audit | gemini-3.8-flash | token audit and test run | ok |
+| 2026-09-20 | adaptive-skin-resolution/task-5.2-feature-qa-reviewer | pro | PO/QA adversarial eval | pending |
+
+
+
+
+
+
+
+

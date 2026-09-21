@@ -870,6 +870,13 @@
       color: #fff;
     }
 
+    .btn-secondary-sm.active {
+      background: #2ecc71;
+      border-color: #55ff55;
+      color: #000;
+      font-weight: 900;
+    }
+
     /* Formulário do Pacote */
     .form-group {
       display: flex;

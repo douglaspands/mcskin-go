@@ -4,28 +4,23 @@
  */
 
 import { playSound, launchConfetti } from "./fx.js";
-import { processImageDimensions } from "./editor-file-loader.js";
+import { processImageDimensions, downsampleImage } from "./editor-file-loader.js";
 
-let selectedFile = null;
-let loadedImage = null;
-let currentSkinName = "";
-let hasConfirmedSkinName = false;
-let pendingDownloadAction = null;
-let selectedModel = "both";
+let selectedFile = null, loadedImage = null, currentSkinName = "";
+let currentUploadImage = null, currentUploadFile = null, converterTargetRes = 128;
+let hasConfirmedSkinName = false, pendingDownloadAction = null, selectedModel = "both";
 
 export function updateSkinNameDisplays(name) {
   const display = name || "Sem nome";
   ["editorSkinNameDisplay", "editorCurrentNameText", "converterCurrentNameText"].forEach((id) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = display;
+    const el = document.getElementById(id); if (el) el.textContent = display;
   });
   const input = document.getElementById("converterSkinNameInput");
   if (input && name) input.value = name;
 }
 
 export function generateDefaultSkinName() {
-  const now = new Date();
-  const pad = (n) => (n < 10 ? "0" : "") + n;
+  const now = new Date(), pad = (n) => (n < 10 ? "0" : "") + n;
   return `skin_${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
 }
 
@@ -33,24 +28,31 @@ export function sanitizeName(n) {
   return (n || "").replace(/[^a-zA-Z0-9_-]/g, "_").trim() || "custom_skin";
 }
 
-export function promptSkinName(suggestedName, actionCallback, forceModal) {
+export function promptSkinName(suggestedName, actionCallback, options) {
   if (typeof suggestedName === "function") {
-    forceModal = actionCallback;
+    options = actionCallback;
     actionCallback = suggestedName;
     suggestedName = null;
   }
+  const isObj = typeof options === "object" && options !== null;
+  const forceModal = isObj ? !!options.forceModal : !!options;
+  const isHD = isObj ? !!options.isHD : false;
   if (hasConfirmedSkinName && currentSkinName && !forceModal) {
-    if (actionCallback) actionCallback(currentSkinName);
+    const resRadio = document.querySelector('input[name="exportResolution"]:checked');
+    const chosenRes = resRadio ? parseInt(resRadio.value, 10) : (isHD ? 128 : 64);
+    if (actionCallback) actionCallback(currentSkinName, chosenRes);
     return;
   }
   pendingDownloadAction = actionCallback;
   const nameToUse = sanitizeName(suggestedName || currentSkinName || generateDefaultSkinName());
-  const modal = document.getElementById("skinNameModal");
-  const input = document.getElementById("skinNameInput");
+  const modal = document.getElementById("skinNameModal"), input = document.getElementById("skinNameInput");
+  const resGroup = document.getElementById("exportResSelectorGroup");
+  // Show resolution selector only for HD textures (128x128); never upsample
+  if (resGroup) resGroup.style.display = isHD ? "block" : "none";
+  if (isHD) document.querySelectorAll('input[name="exportResolution"]').forEach((r) => { r.checked = r.value === "128"; });
   if (input) input.value = nameToUse;
   if (modal) {
-    modal.style.display = "flex";
-    modal.classList.add("open");
+    modal.style.display = "flex"; modal.classList.add("open");
     if (input) setTimeout(() => { input.focus(); input.select(); }, 50);
   }
 }
@@ -79,21 +81,13 @@ export function renderSkinCharacter(img, model) {
   drawPart(44, 20, armWidth, 12, isSlim ? 0.5 : 0, 8, armWidth, 12); // Right arm
   if (img.height >= 64) drawPart(44, 36, armWidth, 12, isSlim ? 0.5 : 0, 8, armWidth, 12);
   const armLeftX = isSlim ? 11.5 : 12;
-  if (img.height >= 64) {
-    drawPart(36, 52, armWidth, 12, armLeftX, 8, armWidth, 12);
-    drawPart(52, 52, armWidth, 12, armLeftX, 8, armWidth, 12);
-  } else {
-    drawPart(44, 20, armWidth, 12, armLeftX, 8, armWidth, 12);
-  }
+  if (img.height >= 64) { drawPart(36, 52, armWidth, 12, armLeftX, 8, armWidth, 12); drawPart(52, 52, armWidth, 12, armLeftX, 8, armWidth, 12); }
+  else { drawPart(44, 20, armWidth, 12, armLeftX, 8, armWidth, 12); }
   drawPart(4, 20, 4, 12, isSlim ? 3.5 : 4, 20, 4, 12); // Right leg
   if (img.height >= 64) drawPart(4, 36, 4, 12, isSlim ? 3.5 : 4, 20, 4, 12);
   const legLeftX = isSlim ? 7.5 : 8;
-  if (img.height >= 64) {
-    drawPart(20, 52, 4, 12, legLeftX, 20, 4, 12);
-    drawPart(4, 52, 4, 12, legLeftX, 20, 4, 12);
-  } else {
-    drawPart(4, 20, 4, 12, legLeftX, 20, 4, 12);
-  }
+  if (img.height >= 64) { drawPart(20, 52, 4, 12, legLeftX, 20, 4, 12); drawPart(4, 52, 4, 12, legLeftX, 20, 4, 12); }
+  else { drawPart(4, 20, 4, 12, legLeftX, 20, 4, 12); }
 }
 
 export function initConverter() {
@@ -133,8 +127,10 @@ export function initConverter() {
     hasConfirmedSkinName = true;
     updateSkinNameDisplays(chosen);
     const cb = pendingDownloadAction;
+    const resRadio = document.querySelector('input[name="exportResolution"]:checked');
+    const chosenRes = resRadio ? parseInt(resRadio.value, 10) : 128;
     closeSkinModal();
-    if (cb) cb(chosen);
+    if (cb) cb(chosen, chosenRes);
   };
 
   getEl("btnCancelSkinName")?.addEventListener("click", closeSkinModal);
@@ -190,6 +186,18 @@ export function initConverter() {
           if (btnConvert) btnConvert.disabled = false;
         }
 
+        currentUploadImage = img;
+        currentUploadFile = file;
+        const resSelector = getEl("converterResSelector");
+        if (processed.isHighRes) {
+          converterTargetRes = 128;
+          if (resSelector) resSelector.style.display = "block";
+          getEl("btnRes128")?.classList.add("active");
+          getEl("btnRes64")?.classList.remove("active");
+        } else if (resSelector) {
+          resSelector.style.display = "none";
+        }
+
         loadedImage = finalImage;
         if (getEl("fileNameDisplay")) getEl("fileNameDisplay").textContent = file.name;
         if (getEl("fileDimsDisplay")) {
@@ -210,38 +218,56 @@ export function initConverter() {
     reader.readAsDataURL(file);
   };
 
+  const applyConverterRes = (targetRes) => {
+    if (!currentUploadImage) return;
+    converterTargetRes = targetRes;
+    getEl("btnRes128")?.classList.toggle("active", targetRes === 128);
+    getEl("btnRes64")?.classList.toggle("active", targetRes === 64);
+    const c = (currentUploadImage.width === targetRes && currentUploadImage.height === targetRes)
+      ? currentUploadImage
+      : downsampleImage(currentUploadImage, targetRes, targetRes);
+    c.toBlob((blob) => {
+      selectedFile = new File([blob], currentUploadFile?.name || "skin.png", { type: "image/png" });
+      if (btnConvert) btnConvert.disabled = false;
+    }, "image/png");
+    loadedImage = c;
+    if (getEl("fileDimsDisplay")) {
+      getEl("fileDimsDisplay").textContent = `${currentUploadImage.width} × ${currentUploadImage.height} ➔ ${targetRes} × ${targetRes} pixels (Ajustado para Bedrock)`;
+    }
+    renderSkinCharacter(c, getActiveModel());
+    playSound("click");
+  };
+
+  getEl("btnRes128")?.addEventListener("click", () => applyConverterRes(128));
+  getEl("btnRes64")?.addEventListener("click", () => applyConverterRes(64));
+
   dropzone?.addEventListener("click", () => skinInput?.click());
   getEl("btnChangeSkin")?.addEventListener("click", (e) => {
     e.stopPropagation();
     if (previewBox) { previewBox.style.display = "none"; previewBox.classList.remove("active"); }
     if (dropzone) dropzone.style.display = "flex";
     if (skinInput) skinInput.value = "";
-    selectedFile = null;
-    loadedImage = null;
+    selectedFile = null; loadedImage = null; currentUploadImage = null; currentUploadFile = null;
+    const resSel = getEl("converterResSelector"); if (resSel) resSel.style.display = "none";
     if (btnConvert) btnConvert.disabled = true;
     hideErrors();
-    const suc = getEl("successBanner");
-    if (suc) { suc.style.display = "none"; suc.classList.remove("active"); }
+    const suc = getEl("successBanner"); if (suc) { suc.style.display = "none"; suc.classList.remove("active"); }
     playSound("click");
   });
 
-  dropzone?.addEventListener("dragover", (e) => { e.preventDefault(); dropzone.classList.add("dragover"); });
-  dropzone?.addEventListener("dragleave", (e) => { e.preventDefault(); dropzone.classList.remove("dragover"); });
-  dropzone?.addEventListener("drop", (e) => {
+  ["dragover", "dragleave", "drop"].forEach((evt) => dropzone?.addEventListener(evt, (e) => {
     e.preventDefault();
-    dropzone.classList.remove("dragover");
-    if (e.dataTransfer?.files.length) handleFile(e.dataTransfer.files[0]);
-  });
+    dropzone.classList.toggle("dragover", evt !== "dragleave");
+    if (evt === "drop" && e.dataTransfer?.files.length) handleFile(e.dataTransfer.files[0]);
+  }));
   skinInput?.addEventListener("change", () => { if (skinInput.files.length) handleFile(skinInput.files[0]); });
 
   btnConvert?.addEventListener("click", () => {
     if (!selectedFile) return;
     const finalName = sanitizeName(nameField?.value || currentSkinName || selectedFile.name.replace(/\.[^/.]+$/, ""));
-    btnConvert.disabled = true;
-    btnConvert.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>";
+    btnConvert.disabled = true; btnConvert.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>";
     hideErrors();
-    const suc = getEl("successBanner");
-    if (suc) { suc.style.display = "none"; suc.classList.remove("active"); }
+    const suc = getEl("successBanner"); if (suc) { suc.style.display = "none"; suc.classList.remove("active"); }
 
     const formData = new FormData();
     formData.append("skin", selectedFile, finalName + ".png");
@@ -249,33 +275,21 @@ export function initConverter() {
     formData.append("model", getActiveModel());
 
     fetch("/api/convert", { method: "POST", body: formData })
-      .then((res) => {
-        if (!res.ok) return res.json().then((d) => { throw new Error(d.error || "Erro ao gerar arquivo"); });
-        return res.blob();
-      })
+      .then((res) => res.ok ? res.blob() : res.json().then((d) => { throw new Error(d.error || "Erro ao gerar arquivo"); }))
       .then((blob) => {
-        playSound("success");
-        launchConfetti();
-        const cleanName = finalName + ".mcpack";
-        const blobUrl = URL.createObjectURL(blob);
-        const a = document.createElement("a");
-        a.href = blobUrl;
-        a.download = cleanName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-
+        playSound("success"); launchConfetti();
+        const cleanName = finalName + ".mcpack", blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement("a"); a.href = blobUrl; a.download = cleanName;
+        document.body.appendChild(a); a.click(); document.body.removeChild(a);
         if (getEl("demoSuccessFileName")) getEl("demoSuccessFileName").textContent = cleanName;
         const fallback = getEl("downloadFallbackBtn");
         if (fallback) { fallback.href = blobUrl; fallback.download = cleanName; }
         if (suc) { suc.style.display = "flex"; suc.classList.add("active"); }
-        btnConvert.disabled = false;
-        btnConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK ⚡</span>";
+        btnConvert.disabled = false; btnConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK ⚡</span>";
       })
       .catch((err) => {
         showError(err.message);
-        btnConvert.disabled = false;
-        btnConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK ⚡</span>";
+        btnConvert.disabled = false; btnConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK ⚡</span>";
       });
   });
 }
