@@ -50,24 +50,21 @@ export function loadTemplate(type, modelType = "classic") {
   textureCtx.clearRect(0, 0, texW, texH);
   const fillBox = (x, y, w, h, col) => { textureCtx.fillStyle = col; textureCtx.fillRect(x, y, w, h); };
 
-  if (type === "steve" || type === "alex") {
+  const isBlank = type === "blank";
+  if (type === "steve" || type === "alex" || isBlank) {
     const isAlex = type === "alex";
-    const skinTone = isAlex ? "#f1c27d" : "#d39a74", hair = isAlex ? "#d35400" : "#462c16";
-    const shirt = isAlex ? "#5da632" : "#0093a8", pants = isAlex ? "#4a3c31" : "#2e3e7e", shoes = "#404040";
-    const eyeColor = isAlex ? "#4aa338" : "#2980b9";
+    const skinTone = isBlank ? "#ffffff" : (isAlex ? "#f1c27d" : "#d39a74"), hair = isBlank ? "#ffffff" : (isAlex ? "#d35400" : "#462c16");
+    const shirt = isBlank ? "#ffffff" : (isAlex ? "#5da632" : "#0093a8"), pants = isBlank ? "#ffffff" : (isAlex ? "#4a3c31" : "#2e3e7e"), shoes = isBlank ? "#ffffff" : "#404040";
+    const eyeColor = isBlank ? "#ffffff" : (isAlex ? "#4aa338" : "#2980b9");
 
     // Head (top, chin/neck, sides, back, front)
-    fillBox(8, 0, 8, 8, hair); fillBox(16, 0, 8, 8, skinTone);
-    fillBox(0, 8, 8, 8, hair); fillBox(16, 8, 8, 8, hair); fillBox(24, 8, 8, 8, hair);
-    fillBox(8, 8, 8, 8, skinTone); fillBox(8, 8, 8, 2, hair); // Face with hair bangs
-    fillBox(9, 12, 2, 1, "#ffffff"); fillBox(13, 12, 2, 1, "#ffffff");
-    fillBox(10, 12, 1, 1, eyeColor); fillBox(13, 12, 1, 1, eyeColor);
-    fillBox(10, 14, 4, 1, isAlex ? "#c0392b" : "#7d3f28");
+    fillBox(8, 0, 8, 8, hair); fillBox(16, 0, 8, 8, skinTone); fillBox(0, 8, 8, 8, hair); fillBox(16, 8, 8, 8, hair); fillBox(24, 8, 8, 8, hair);
+    fillBox(8, 8, 8, 8, skinTone); fillBox(8, 8, 8, 2, hair); fillBox(9, 12, 2, 1, "#ffffff"); fillBox(13, 12, 2, 1, "#ffffff");
+    fillBox(10, 12, 1, 1, eyeColor); fillBox(13, 12, 1, 1, eyeColor); fillBox(10, 14, 4, 1, isBlank ? "#ffffff" : (isAlex ? "#c0392b" : "#7d3f28"));
 
     // Torso (all 6 faces) + neck cutout
-    fillBox(20, 16, 8, 4, shirt); fillBox(28, 16, 8, 4, shirt);
-    fillBox(16, 20, 4, 12, shirt); fillBox(20, 20, 8, 12, shirt); fillBox(28, 20, 4, 12, shirt); fillBox(32, 20, 8, 12, shirt);
-    fillBox(22, 20, 4, 2, skinTone); // Collar neck cutout
+    fillBox(20, 16, 8, 4, shirt); fillBox(28, 16, 8, 4, shirt); fillBox(16, 20, 4, 12, shirt); fillBox(20, 20, 8, 12, shirt);
+    fillBox(28, 20, 4, 12, shirt); fillBox(32, 20, 8, 12, shirt); fillBox(22, 20, 4, 2, skinTone);
 
     const armW = modelType === "slim" ? 3 : 4;
     // Right arm: top/bottom, 4 sleeve faces (y=20..24), 4 skin faces (y=24..32)
@@ -95,6 +92,18 @@ export function loadTemplate(type, modelType = "classic") {
   syncTexture();
 }
 
+export const resetLastPaintedCoord = () => { lastPaintedCoord = null; };
+
+const isBaseUV = (x, y) => {
+  const s = texW / 64, hx = x / s, hy = y / s;
+  return (hx < 32 && hy < 16) || (hx < 56 && hy >= 16 && hy < 32) || (texH >= 64 * s && hy >= 48 && hy < 64 && hx >= 16 && hx < 48);
+};
+
+const parseHex = (hex) => {
+  const h = hex.replace("#", ""), n = parseInt(h.length === 3 ? h[0] + h[0] + h[1] + h[1] + h[2] + h[2] : h, 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+};
+
 /**
  * Paints or erases a single pixel on the texture.
  */
@@ -107,20 +116,25 @@ export function paintPixel(px, py, { currentTool, currentColor, isGlassMode, onP
   }
   if (currentTool === "bucket") {
     floodFill(px, py, currentColor, isGlassMode ? 128 : 255);
+    lastPaintedCoord = null;
     syncTexture(); playSound("click"); return;
   }
   if (currentTool === "recolor") {
     recolorAll(px, py, currentColor, isGlassMode ? 128 : 255);
+    lastPaintedCoord = null;
     syncTexture(); playSound("click"); return;
   }
-  if (lastPaintedCoord?.x === px && lastPaintedCoord?.y === py) return;
-  lastPaintedCoord = { x: px, y: py };
+  if (lastPaintedCoord?.x === px && lastPaintedCoord?.y === py &&
+      lastPaintedCoord?.tool === currentTool &&
+      lastPaintedCoord?.color === currentColor &&
+      lastPaintedCoord?.glass === isGlassMode) return;
+  lastPaintedCoord = { x: px, y: py, tool: currentTool, color: currentColor, glass: isGlassMode };
 
   if (currentTool === "eraser") {
     textureCtx.clearRect(px, py, 1, 1);
   } else {
-    const hex = currentColor.replace("#", ""), n = parseInt(hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex, 16);
-    textureCtx.fillStyle = `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${isGlassMode ? 0.5 : 1.0})`;
+    const [r, g, b] = parseHex(currentColor);
+    textureCtx.fillStyle = isGlassMode ? `rgba(${r},${g},${b},0.5)` : currentColor;
     textureCtx.clearRect(px, py, 1, 1);
     textureCtx.fillRect(px, py, 1, 1);
   }
@@ -128,12 +142,16 @@ export function paintPixel(px, py, { currentTool, currentColor, isGlassMode, onP
 }
 
 function floodFill(startX, startY, hexColor, fillA) {
-  const hex = hexColor.replace("#", ""), num = parseInt(hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex, 16);
-  const fillR = (num >> 16) & 255, fillG = (num >> 8) & 255, fillB = num & 255;
+  const [fillR, fillG, fillB] = parseHex(hexColor);
   const imgData = textureCtx.getImageData(0, 0, texW, texH), data = imgData.data;
   const sIdx = (startY * texW + startX) * 4;
   const sR = data[sIdx], sG = data[sIdx + 1], sB = data[sIdx + 2], sA = data[sIdx + 3];
-  if (sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
+  const isTargetTransparent = sA < 10;
+  if (!isTargetTransparent && sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
+
+  const matches = (pIdx, x, y) => isTargetTransparent
+    ? (data[pIdx + 3] < 10 && isBaseUV(x, y))
+    : (data[pIdx + 3] >= 10 && data[pIdx] === sR && data[pIdx + 1] === sG && data[pIdx + 2] === sB);
 
   const queue = [[startX, startY]], visited = new Uint8Array(texW * texH);
   while (queue.length > 0) {
@@ -141,7 +159,7 @@ function floodFill(startX, startY, hexColor, fillA) {
     if (visited[idx]) continue;
     visited[idx] = 1;
     const pIdx = idx * 4;
-    if (data[pIdx] === sR && data[pIdx + 1] === sG && data[pIdx + 2] === sB && data[pIdx + 3] === sA) {
+    if (matches(pIdx, x, y)) {
       data[pIdx] = fillR; data[pIdx + 1] = fillG; data[pIdx + 2] = fillB; data[pIdx + 3] = fillA;
       if (x > 0) queue.push([x - 1, y]); if (x < texW - 1) queue.push([x + 1, y]);
       if (y > 0) queue.push([y - 1, y]); if (y < texH - 1) queue.push([y + 1, y]);
@@ -151,20 +169,24 @@ function floodFill(startX, startY, hexColor, fillA) {
 }
 
 /**
- * Replaces every pixel matching the color at (startX, startY) with the given
- * color, anywhere in the texture — unlike floodFill, not limited to the
- * contiguous region touching the starting pixel.
+ * Replaces every pixel matching the color at (startX, startY) with the given color.
+ * Supports replacing transparent / blank pixels with solid colors like white.
  */
 function recolorAll(startX, startY, hexColor, fillA) {
+  const [fillR, fillG, fillB] = parseHex(hexColor);
   const imgData = textureCtx.getImageData(0, 0, texW, texH), data = imgData.data;
   const sIdx = (startY * texW + startX) * 4;
   const sR = data[sIdx], sG = data[sIdx + 1], sB = data[sIdx + 2], sA = data[sIdx + 3];
-  if (sA < 10) return;
-  const hex = hexColor.replace("#", ""), num = parseInt(hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex, 16);
-  const fillR = (num >> 16) & 255, fillG = (num >> 8) & 255, fillB = num & 255;
-  if (sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
+  const isTargetTransparent = sA < 10;
+  if (!isTargetTransparent && sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
+
   for (let i = 0; i < data.length; i += 4) {
-    if (data[i + 3] >= 10 && data[i] === sR && data[i + 1] === sG && data[i + 2] === sB) {
+    const pIdx = i / 4, px = pIdx % texW, py = (pIdx / texW) | 0;
+    if (isTargetTransparent) {
+      if (data[i + 3] < 10 && isBaseUV(px, py)) {
+        data[i] = fillR; data[i + 1] = fillG; data[i + 2] = fillB; data[i + 3] = fillA;
+      }
+    } else if (data[i + 3] >= 10 && data[i] === sR && data[i + 1] === sG && data[i + 2] === sB) {
       data[i] = fillR; data[i + 1] = fillG; data[i + 2] = fillB; data[i + 3] = fillA;
     }
   }
@@ -190,24 +212,9 @@ export function render2DSheet() {
   ctx.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, cW, texH * scale);
 
   if (gridEnabled) {
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)"; ctx.lineWidth = 1;
-    for (let gx = 0; gx <= texW; gx++) {
-      const lx = Math.round(gx * scale) + 0.5;
-      ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, texH * scale); ctx.stroke();
-    }
-    for (let gy = 0; gy <= texH; gy++) {
-      const ly = Math.round(gy * scale) + 0.5;
-      ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(cW, ly); ctx.stroke();
-    }
-  }
-
-  ctx.lineWidth = 1; ctx.strokeStyle = "rgba(77, 238, 234, 0.45)";
-  ctx.strokeRect(0, 0, 32 * scale, 16 * scale); ctx.strokeRect(32 * scale, 0, 32 * scale, 16 * scale); ctx.strokeRect(16 * scale, 16 * scale, 24 * scale, 16 * scale);
-  ctx.font = "bold 11px sans-serif"; ctx.fillStyle = "#fecb00"; ctx.fillText("CABEÇA", 4, 12);
-  if (texH >= 64) {
-    ctx.fillText("TRONCO", 18 * scale, 20 * scale);
-    ctx.fillText("BRAÇO D", 41 * scale, 20 * scale);
-    ctx.fillText("PERNA D", 2 * scale, 20 * scale);
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.10)"; ctx.lineWidth = 1;
+    for (let gx = 0; gx <= texW; gx++) { const lx = Math.round(gx * scale) + 0.5; ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, texH * scale); ctx.stroke(); }
+    for (let gy = 0; gy <= texH; gy++) { const ly = Math.round(gy * scale) + 0.5; ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(cW, ly); ctx.stroke(); }
   }
 }
 
@@ -250,10 +257,8 @@ export function initEditor2D({ getToolState, onPickColor }) {
     syncTexture(); playSound("click");
   });
 
-  document.getElementById("btnUndo")?.addEventListener("click", undo);
-  document.getElementById("btnRedo")?.addEventListener("click", redo);
-  document.getElementById("btnUndoIcon")?.addEventListener("click", undo);
-  document.getElementById("btnRedoIcon")?.addEventListener("click", redo);
+  ["btnUndo", "btnUndoIcon"].forEach((id) => document.getElementById(id)?.addEventListener("click", undo));
+  ["btnRedo", "btnRedoIcon"].forEach((id) => document.getElementById(id)?.addEventListener("click", redo));
 
   document.getElementById("btnDownloadPng")?.addEventListener("click", () => {
     promptSkinName((name) => {

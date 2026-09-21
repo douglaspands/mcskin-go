@@ -7,7 +7,7 @@
 const DEFAULT_HINT = "Toque ou clique em uma ferramenta para começar a pintar!";
 
 const HINTS = {
-  toolPencil: { icon: "✏️", text: "Pincel: Toque no boneco para pintar pixels individuais com a cor ativa.", badge: "Pintar" },
+  toolPencil: { icon: "🖌️", text: "Pincel: Toque no boneco para pintar pixels individuais com a cor ativa.", badge: "Pintar" },
   toolBucket: { icon: "🪣", text: "Balde: Preencha áreas inteiras com a cor ativa.", badge: "Preencher" },
   toolRecolor: { icon: "🔄", text: "Trocar Cor: Substitua todos os pixels da mesma cor em todo o boneco!", badge: "Substituir" },
   toolEraser: { icon: "🧹", text: "Borracha: Apague pixels deixando transparentes.", badge: "Apagar" },
@@ -23,6 +23,8 @@ const HINTS = {
   btnZoom3DReset: { icon: "⟲", text: "Recentrar: Restaura a posição inicial e o zoom da câmera.", badge: "Recentrar" },
   btnPanUp: { icon: "▲", text: "Subir: Move a visualização para cima (ver pernas e pés).", badge: "Mover" },
   btnPanDown: { icon: "▼", text: "Descer: Move a visualização para baixo (ver cabeça).", badge: "Mover" },
+  btnMode3D: { icon: "🧊", text: "Modo 3D: Gire ou pinte diretamente no boneco tridimensional.", badge: "Modo 3D" },
+  btnMode2D: { icon: "📜", text: "Editor 2D: Pinte na textura desdobrada para alcançar áreas escondidas.", badge: "Editor 2D" },
 };
 
 const MANNEQUIN_HINTS = {
@@ -78,7 +80,7 @@ function bindDockHints() {
   }, true);
 
   root.addEventListener("pointerleave", (e) => {
-    if (resolveHint(e.target)) setDockHint(DEFAULT_HINT, "✏️", "Ativo");
+    if (resolveHint(e.target)) setDockHint(DEFAULT_HINT, "🖌️", "Ativo");
   }, true);
 
   root.addEventListener("pointerup", (e) => {

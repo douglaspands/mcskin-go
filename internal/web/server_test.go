@@ -409,7 +409,7 @@ func TestEditorStaticAssets_JavaScriptLogic(t *testing.T) {
 
 	// 3. js/editor3d.js photography-style grid & coordinate normalization with getBoundingClientRect
 	expectedGridLogic := []string{
-		"rgba(255, 255, 255, 0.12)", // subtle photography grid
+		"rgba(0, 0, 0, 0.10)", // subtle photography grid
 		"rect.width",
 		"rect.height",
 	}

@@ -29,6 +29,7 @@ build-linux:
 
 build-windows:
 	mkdir -p $(BIN_DIR)
+	go run scripts/gen-windows-syso.go
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="$(LDFLAGS)" -o $(BIN_DIR)/$(BINARY_NAME).exe ./cmd/$(BINARY_NAME)
 
 build-darwin-arm64:
