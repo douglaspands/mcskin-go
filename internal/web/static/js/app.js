@@ -10,6 +10,7 @@ import { initEditor3D, set3DModel, getViewport3D } from "./editor3d.js";
 import {
   initEditor2D,
   loadTemplate,
+  setTextureResolution,
   syncTexture,
   paintPixel,
   pushUndo,
@@ -50,16 +51,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     initPalette({
-      onLoadTemplate: (type, model) => loadTemplate(type, model),
+      onLoadTemplate: (type, model) => {
+        setTextureResolution(64, 64);
+        loadTemplate(type, model);
+      },
       onSetModel: (model) => set3DModel(model),
       onRender2D: render2DSheet,
       onRender3D: () => getViewport3D()?.render(),
       onUploadTexture: (file) => {
         loadSkinFile(file)
-          .then(({ canvas, width, height, model, isAI }) => {
+          .then(({ canvas, width, height, model, isAI, isHighRes }) => {
+            setTextureResolution(width, height);
             pushUndo();
-            textureCanvas.width = width;
-            textureCanvas.height = height;
             textureCtx.clearRect(0, 0, width, height);
             textureCtx.drawImage(canvas, 0, 0);
             syncTexture();
@@ -67,8 +70,8 @@ document.addEventListener("DOMContentLoaded", () => {
             setModelType(model);
             getViewport3D()?.render();
             updateSkinNameDisplays(sanitizeName(file.name.replace(/\.[^/.]+$/, "")));
-            const msg = isAI && width === 128
-              ? `✅ Imagem IA importada com sucesso em HD (128x128)! Modelo: ${model === "slim" ? "Alex" : "Steve"}.`
+            const msg = (isAI || isHighRes) && width === 128
+              ? `✅ Imagem importada com sucesso em HD (128x128)! Modelo: ${model === "slim" ? "Alex" : "Steve"}.`
               : `✅ Skin carregada! Modelo: ${model === "slim" ? "Alex (fino)" : "Steve (clássico)"}.`;
             setDockHint(msg, "📂", "Carregada");
           })
