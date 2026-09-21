@@ -4,36 +4,42 @@
  * reactive #dockHintStrip guidance.
  */
 
-const DEFAULT_HINT = "Toque ou clique em uma ferramenta para começar a pintar!";
+import { t } from "./i18n.js";
+
+const DEFAULT_HINT_KEY = "hint_default";
 
 const HINTS = {
-  toolPencil: { icon: "🖌️", text: "Pincel: Toque no boneco para pintar pixels individuais com a cor ativa.", badge: "Pintar" },
-  toolBucket: { icon: "🪣", text: "Balde: Preencha áreas inteiras com a cor ativa.", badge: "Preencher" },
-  toolRecolor: { icon: "🔄", text: "Trocar Cor: Substitua todos os pixels da mesma cor em todo o boneco!", badge: "Substituir" },
-  toolEraser: { icon: "🧹", text: "Borracha: Apague pixels deixando transparentes.", badge: "Apagar" },
-  toolColorPicker: { icon: "🎨", text: "Cores: Escolha entre a paleta Minecraft ou selecione qualquer cor personalizada.", badge: "Cores" },
-  btnUndo: { icon: "↩️", text: "Desfazer: Reverte a última alteração realizada.", badge: "Desfazer" },
-  btnRedo: { icon: "↪️", text: "Refazer: Reaplica a última alteração desfeita.", badge: "Refazer" },
-  btnToggleGrid: { icon: "▦", text: "Grade: Mostra ou esconde as linhas de grade dos pixels no boneco.", badge: "Grade" },
-  btnHeaderFullscreen: { icon: "⛶", text: "Tela Cheia: Expande o aplicativo para tela inteira no aparelho.", badge: "Tela Cheia" },
-  btnTouchPaint: { icon: "🖌️", text: "Pintar: Toque e arraste para desenhar no boneco.", badge: "Pintar" },
-  btnTouchRotate: { icon: "🖐️", text: "Girar: Arraste com um dedo para girar o boneco livremente.", badge: "Girar" },
-  btnZoom3DIn: { icon: "🔍+", text: "Aproximar: Aumenta o zoom da visualização.", badge: "Zoom" },
-  btnZoom3DOut: { icon: "🔍−", text: "Afastar: Diminui o zoom da visualização.", badge: "Zoom" },
-  btnZoom3DReset: { icon: "⟲", text: "Recentrar: Restaura a posição inicial e o zoom da câmera.", badge: "Recentrar" },
-  btnPanUp: { icon: "▲", text: "Subir: Move a visualização para cima (ver pernas e pés).", badge: "Mover" },
-  btnPanDown: { icon: "▼", text: "Descer: Move a visualização para baixo (ver cabeça).", badge: "Mover" },
-  btnMode3D: { icon: "🧊", text: "Modo 3D: Gire ou pinte diretamente no boneco tridimensional.", badge: "Modo 3D" },
-  btnMode2D: { icon: "📜", text: "Editor 2D: Pinte na textura desdobrada para alcançar áreas escondidas.", badge: "Editor 2D" },
+  toolPencil: { icon: "🖌️", key: "hint_pencil", badgeKey: "badge_paint" },
+  toolBucket: { icon: "🪣", key: "hint_bucket", badgeKey: "badge_fill" },
+  toolRecolor: { icon: "🔄", key: "hint_recolor", badgeKey: "badge_recolor" },
+  toolEraser: { icon: "🧹", key: "hint_eraser", badgeKey: "badge_erase" },
+  toolColorPicker: { icon: "🎨", key: "hint_color_picker", badgeKey: "badge_colors" },
+  btnUndo: { icon: "↩️", key: "hint_undo", badgeKey: "badge_undo" },
+  btnRedo: { icon: "↪️", key: "hint_redo", badgeKey: "badge_redo" },
+  btnToggleGrid: { icon: "▦", key: "hint_grid", badgeKey: "badge_grid" },
+  btnHeaderFullscreen: { icon: "⛶", key: "hint_fullscreen", badgeKey: "badge_fullscreen" },
+  btnSideFullscreen: { icon: "⛶", key: "hint_fullscreen", badgeKey: "badge_fullscreen" },
+  btnTouchPaint: { icon: "🖌️", key: "hint_paint", badgeKey: "badge_paint" },
+  btnTouchRotate: { icon: "🖐️", key: "hint_rotate", badgeKey: "badge_rotate" },
+  btnZoom3DIn: { icon: "🔍+", key: "hint_zoom_in", badgeKey: "badge_zoom" },
+  btnZoom3DOut: { icon: "🔍−", key: "hint_zoom_out", badgeKey: "badge_zoom" },
+  btnZoom3DReset: { icon: "⟲", key: "hint_zoom_reset", badgeKey: "badge_recenter" },
+  btnPanUp: { icon: "▲", key: "hint_pan_up", badgeKey: "badge_move" },
+  btnPanDown: { icon: "▼", key: "hint_pan_down", badgeKey: "badge_move" },
+  btnMode3D: { icon: "🧊", key: "hint_mode_3d", badgeKey: "badge_mode_3d" },
+  btnMode2D: { icon: "📜", key: "hint_mode_2d", badgeKey: "badge_mode_2d" },
+  btnZoom2DIn: { icon: "🔍+", key: "hint_zoom_2d_in", badgeKey: "badge_zoom" },
+  btnZoom2DOut: { icon: "🔍−", key: "hint_zoom_2d_out", badgeKey: "badge_zoom" },
+  btnZoom2DReset: { icon: "⟲", key: "hint_zoom_2d_reset", badgeKey: "badge_recenter" },
 };
 
 const MANNEQUIN_HINTS = {
-  head: { icon: "👤", text: "Foco: Cabeça do boneco.", badge: "Cabeça" },
-  torso: { icon: "👕", text: "Foco: Tronco e peito do boneco.", badge: "Tronco" },
-  rightArm: { icon: "💪", text: "Foco: Braço direito do boneco.", badge: "Braço D" },
-  leftArm: { icon: "💪", text: "Foco: Braço esquerdo do boneco.", badge: "Braço E" },
-  rightLeg: { icon: "🦵", text: "Foco: Perna direita do boneco.", badge: "Perna D" },
-  leftLeg: { icon: "🦵", text: "Foco: Perna esquerda do boneco.", badge: "Perna E" },
+  head: { icon: "👤", key: "part_head" },
+  torso: { icon: "👕", key: "part_torso" },
+  rightArm: { icon: "💪", key: "part_right_arm" },
+  leftArm: { icon: "💪", key: "part_left_arm" },
+  rightLeg: { icon: "🦵", key: "part_right_leg" },
+  leftLeg: { icon: "🦵", key: "part_left_leg" },
 };
 
 /**
@@ -49,7 +55,7 @@ export function setDockHint(text, icon = "💡", badge = "Dica") {
   const badgeEl = document.getElementById("dockHintBadge");
 
   if (!strip || !textEl) return;
-  textEl.textContent = text || DEFAULT_HINT;
+  textEl.textContent = text || t(DEFAULT_HINT_KEY);
   if (iconEl && icon) iconEl.textContent = icon;
   if (badgeEl && badge) badgeEl.textContent = badge;
 
@@ -62,9 +68,14 @@ export function setDockHint(text, icon = "💡", badge = "Dica") {
 function resolveHint(el) {
   const target = el?.closest?.("[id], [data-mannequin-part]");
   if (!target) return null;
-  if (target.id && HINTS[target.id]) return HINTS[target.id];
+  if (target.id && HINTS[target.id]) {
+    const h = HINTS[target.id];
+    return { icon: h.icon, text: t(h.key), badge: t(h.badgeKey) };
+  }
   if (target.dataset.mannequinPart && MANNEQUIN_HINTS[target.dataset.mannequinPart]) {
-    return MANNEQUIN_HINTS[target.dataset.mannequinPart];
+    const m = MANNEQUIN_HINTS[target.dataset.mannequinPart];
+    const part = t(m.key);
+    return { icon: m.icon, text: `${t("focus_label")}: ${part}`, badge: part };
   }
   return null;
 }
@@ -80,12 +91,16 @@ function bindDockHints() {
   }, true);
 
   root.addEventListener("pointerleave", (e) => {
-    if (resolveHint(e.target)) setDockHint(DEFAULT_HINT, "🖌️", "Ativo");
+    if (resolveHint(e.target)) setDockHint(t(DEFAULT_HINT_KEY), "🖌️", t("badge_paint"));
   }, true);
 
   root.addEventListener("pointerup", (e) => {
     const hint = resolveHint(e.target);
     if (hint) setDockHint(hint.text, hint.icon, hint.badge);
+  });
+
+  window.addEventListener("mcskin:langchange", () => {
+    setDockHint(t(DEFAULT_HINT_KEY), "🖌️", t("badge_paint"));
   });
 }
 

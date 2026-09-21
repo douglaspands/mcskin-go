@@ -16,7 +16,7 @@ def evaluate_command(cmd: str):
         (r'\bgit\s+branch\s+-[a-zA-Z]*D\s+(?!feat/)\S+', "Forced deletion of protected git branch", 0),
         (r'\b(?:mkfs|dd\s+if=|fdisk|parted)\b', "Direct filesystem/disk formatting or partition modification", re.IGNORECASE),
         (r'\b(?:sudo|su)\b', "Superuser privilege escalation prohibited", re.IGNORECASE),
-        (r'\b(?:shutdown|reboot|poweroff|init\s+0)\b', "System termination command", re.IGNORECASE),
+        (r'(?<![/.-])\b(?:shutdown|reboot|poweroff|init\s+0)\b(?![/.-])', "System termination command", re.IGNORECASE),
         (r':\(\)\{\s*:\|:&\s*\};:', "Fork bomb pattern", 0),
         (r'\bchmod\s+-[a-zA-Z]*\s*777\b', "Insecure recursive world-writable permissions change", re.IGNORECASE),
     ]

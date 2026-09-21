@@ -177,6 +177,10 @@ export function initEditorMenu() {
     playSound("click");
   });
 
+  document.getElementById("btnSideFullscreen")?.addEventListener("click", () => {
+    document.getElementById("btnHeaderFullscreen")?.click();
+  });
+
   document.getElementById("tabBtnConverter")?.addEventListener("click", () => syncNavState("viewConverter"));
   document.getElementById("tabBtnEditor")?.addEventListener("click", () => syncNavState("viewEditor"));
 }

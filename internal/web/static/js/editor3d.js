@@ -92,7 +92,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
   // stays part of the fullscreen view and remains reachable to exit it,
   // on every viewport width.
   const root = document.documentElement;
-  const btnFullscreen = document.getElementById("btnHeaderFullscreen") || document.getElementById("btnFullscreenHeader");
+  const btnFullscreen = document.getElementById("btnHeaderFullscreen") || document.getElementById("btnDrawerFullscreen") || document.getElementById("btnFullscreenHeader");
   const isFsActive = () => !!(document.fullscreenElement || document.webkitFullscreenElement || root.classList.contains("is-fullscreen-fallback"));
 
   const onFsChange = () => {
@@ -103,8 +103,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
 
   btnFullscreen?.addEventListener("click", () => {
     if (isFsActive()) {
-      if (document.exitFullscreen) document.exitFullscreen();
-      else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+      (document.exitFullscreen || document.webkitExitFullscreen)?.call(document);
       root.classList.remove("is-fullscreen-fallback");
     } else {
       const req = root.requestFullscreen || root.webkitRequestFullscreen;
@@ -139,13 +138,9 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
   const mannequin = document.getElementById("mannequinWidget");
   mannequin?.querySelectorAll(".mannequin-part").forEach((el) => {
     const handleFocus = (e) => {
-      e.stopPropagation();
-      e.preventDefault();
+      e.stopPropagation(); e.preventDefault();
       const part = el.getAttribute("data-mannequin-part");
-      if (viewport3D && part) {
-        viewport3D.focusPart(part);
-        playSound("click");
-      }
+      if (viewport3D && part) { viewport3D.focusPart(part); playSound("click"); }
     };
     el.addEventListener("click", handleFocus);
     el.addEventListener("touchend", handleFocus);
@@ -153,31 +148,27 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
 
   // Snap view buttons
   document.querySelectorAll(".btn-snap").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      viewport3D?.snapTo(btn.getAttribute("data-dir"));
-      playSound("click");
-    });
+    btn.addEventListener("click", () => { viewport3D?.snapTo(btn.getAttribute("data-dir")); playSound("click"); });
   });
 
   // 3D Pointer Events (Mouse, Touch, Pen)
-  let isPointerDown = false;
-  let lastX = 0, lastY = 0;
-  let pinchStartDist = null, pinchStartZoom = null;
+  let isPointerDown = false, lastX = 0, lastY = 0;
+  let pinchStartDist = null, pinchStartZoom = null, twoTouchMidX = null, twoTouchMidY = null;
 
   const stage3D = document.getElementById("stage3D");
   stage3D?.addEventListener("contextmenu", (e) => e.preventDefault());
   editor3DCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
-  const isInteractiveEl = (t) => t?.closest?.("button, .mannequin-widget, .zoom-vertical-controls, .floating-mode-pill, .color-bottom-sheet, .viewport-2d-box");
+  const is3DActive = () => document.getElementById("characterWorld")?.style.display !== "none";
+  const isInteractiveEl = (t) => t?.closest?.("button, .mannequin-widget, .zoom-vertical-controls, .floating-mode-pill, .color-bottom-sheet, .viewport-2d-box, .editor-2d-wrapper, #wrapper2D, #editor2DCanvas");
 
   const getDistance = (touches) => {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
+    const dx = touches[0].clientX - touches[1].clientX, dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
   };
 
   const onWheel = (e) => {
-    if (isInteractiveEl(e.target)) return;
+    if (!is3DActive() || isInteractiveEl(e.target)) return;
     e.preventDefault();
     if (viewport3D) setZoom(viewport3D.zoom + (e.deltaY > 0 ? ZOOM_3D_STEP * 0.6 : -ZOOM_3D_STEP * 0.6));
   };
@@ -191,13 +182,12 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
   };
 
   const handlePointerStart = (e) => {
-    if (isInteractiveEl(e.target)) return;
+    if (!is3DActive() || isInteractiveEl(e.target)) return;
     isPointerDown = true;
     if (onResetCoord) onResetCoord();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-    lastX = clientX;
-    lastY = clientY;
+    lastX = clientX; lastY = clientY;
 
     if (getTouchMode() === "paint" && viewport3D) {
       onPushUndo();
@@ -210,16 +200,14 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
   };
 
   const handlePointerMove = (e) => {
-    if (!isPointerDown) return;
+    if (!is3DActive() || !isPointerDown) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
     if (getTouchMode() === "rotate" && viewport3D) {
       const rect = editor3DCanvas.getBoundingClientRect();
-      const dx = clientX - lastX;
-      const dy = clientY - lastY;
-      lastX = clientX;
-      lastY = clientY;
+      const dx = clientX - lastX, dy = clientY - lastY;
+      lastX = clientX; lastY = clientY;
       if (e.buttons === 2 || e.shiftKey) {
         panY((dy / (rect.height || 1)) * 24);
       } else {
@@ -250,19 +238,21 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
   window.addEventListener("mouseup", handlePointerEnd);
 
   editor3DCanvas.addEventListener("mousemove", (e) => {
-    if (isPointerDown || !viewport3D) return;
+    if (!is3DActive() || isPointerDown || !viewport3D) return;
     const hit = scaleHit(viewport3D.pickPixel(e.clientX, e.clientY, getCurrentLayer() === "overlay"));
     viewport3D.setHoverPixel(hit);
   });
   editor3DCanvas.addEventListener("mouseleave", () => { viewport3D?.setHoverPixel(null); });
 
   const onTouchStart = (e) => {
-    if (isInteractiveEl(e.target)) return;
+    if (!is3DActive() || isInteractiveEl(e.target)) return;
     if (e.cancelable) e.preventDefault();
     if (e.touches.length === 2) {
       isPointerDown = false;
       pinchStartDist = getDistance(e.touches);
       pinchStartZoom = viewport3D ? viewport3D.zoom : null;
+      twoTouchMidX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      twoTouchMidY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
       return;
     }
     handlePointerStart(e);
@@ -273,9 +263,25 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
 
   editor3DCanvas.addEventListener("touchmove", (e) => {
     if (e.cancelable) e.preventDefault();
-    if (e.touches.length === 2 && pinchStartDist && pinchStartZoom !== null) {
-      const newDist = getDistance(e.touches);
-      setZoom(pinchStartZoom * (pinchStartDist / newDist));
+    if (!is3DActive()) return;
+    if (e.touches.length === 2 && viewport3D) {
+      if (pinchStartDist && pinchStartZoom !== null) {
+        const newDist = getDistance(e.touches);
+        if (newDist > 0) setZoom(pinchStartZoom * (pinchStartDist / newDist));
+      }
+      const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
+      const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
+      if (twoTouchMidX !== null && twoTouchMidY !== null) {
+        const rect = editor3DCanvas.getBoundingClientRect();
+        const dx = midX - twoTouchMidX;
+        const dy = midY - twoTouchMidY;
+        viewport3D.rotY += (dx / (rect.width || 1)) * 4.0;
+        viewport3D.rotX = Math.max(-Math.PI / 2 + 0.1, Math.min(Math.PI / 2 - 0.1, viewport3D.rotX + (dy / (rect.height || 1)) * 4.0));
+        viewport3D.setHoverPixel(null);
+        viewport3D.render();
+      }
+      twoTouchMidX = midX;
+      twoTouchMidY = midY;
       return;
     }
     handlePointerMove(e);
@@ -285,6 +291,8 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
     if (e.touches.length < 2) {
       pinchStartDist = null;
       pinchStartZoom = null;
+      twoTouchMidX = null;
+      twoTouchMidY = null;
     }
     handlePointerEnd();
   });

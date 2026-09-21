@@ -38,20 +38,20 @@ jobs:
 
           # Build Linux amd64
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o build-linux/mcskin ./cmd/mcskin
-          cp README.md build-linux/
-          tar -czf "dist/mcskin_${TAG}_linux_amd64.tar.gz" -C build-linux mcskin README.md
+          cp README*.md build-linux/
+          tar -czf "dist/mcskin_${TAG}_linux_amd64.tar.gz" -C build-linux mcskin README.md README.en.md README.es.md
 
           # Build Windows amd64
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -ldflags="${LDFLAGS}" -o build-windows/mcskin.exe ./cmd/mcskin
-          cp README.md build-windows/
-          (cd build-windows && zip "../dist/mcskin_${TAG}_windows_amd64.zip" mcskin.exe README.md)
+          cp README*.md build-windows/
+          (cd build-windows && zip "../dist/mcskin_${TAG}_windows_amd64.zip" mcskin.exe README.md README.en.md README.es.md)
 
           # Build macOS arm64 and package mcskin.app bundle
           CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="${LDFLAGS}" -o build-darwin/mcskin ./cmd/mcskin
           chmod +x scripts/package-mac-app.sh
           ./scripts/package-mac-app.sh build-darwin/mcskin build-darwin
-          cp README.md build-darwin/
-          (cd build-darwin && zip -r "../dist/mcskin_${TAG}_darwin_arm64.zip" mcskin.app mcskin README.md)
+          cp README*.md build-darwin/
+          (cd build-darwin && zip -r "../dist/mcskin_${TAG}_darwin_arm64.zip" mcskin.app mcskin README.md README.en.md README.es.md)
 
           # Generate SHA256 Checksums
           (cd dist && sha256sum mcskin_${TAG}_linux_amd64.tar.gz mcskin_${TAG}_windows_amd64.zip mcskin_${TAG}_darwin_arm64.zip > checksums.txt)

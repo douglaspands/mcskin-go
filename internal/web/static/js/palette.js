@@ -6,6 +6,7 @@
 import { playSound } from "./fx.js";
 import { setDockHint } from "./editor-layout.js";
 import { resetLastPaintedCoord } from "./editor2d.js";
+import { t } from "./i18n.js";
 
 export const mcColors = [
   { name: "Redstone", color: "#e74c3c" },
@@ -61,20 +62,23 @@ export function setViewMode(mode, { onRender2D, onRender3D } = {}) {
   const mannequin = document.getElementById("mannequinWidget");
   const touchPill = document.querySelector(".floating-mode-pill");
   const zoomControls = document.getElementById("zoom3DVerticalControls");
+  const zoom2DControls = document.getElementById("zoom2DVerticalControls");
   const wrapper2D = document.getElementById("wrapper2D");
 
   if (is2D) {
     if (charWorld) charWorld.style.display = "none";
     if (mannequin) mannequin.style.display = "none";
-    if (touchPill) touchPill.style.display = "none";
+    if (touchPill) touchPill.style.display = "flex";
     if (zoomControls) zoomControls.style.display = "none";
+    if (zoom2DControls) zoom2DControls.style.display = "flex";
     if (wrapper2D) wrapper2D.style.display = "flex";
     if (onRender2D) onRender2D();
   } else {
     if (wrapper2D) wrapper2D.style.display = "none";
+    if (zoom2DControls) zoom2DControls.style.display = "none";
     if (charWorld) charWorld.style.display = "";
     if (mannequin) mannequin.style.display = "";
-    if (touchPill) touchPill.style.display = "";
+    if (touchPill) touchPill.style.display = "flex";
     if (zoomControls) zoomControls.style.display = "";
     if (onRender3D) onRender3D();
   }
@@ -204,7 +208,7 @@ export function initPalette({ onLoadTemplate, onSetModel, onRender2D, onRender3D
     if (currentViewMode === "3d") return;
     resetLastPaintedCoord();
     setViewMode("3d", { onRender2D, onRender3D });
-    setDockHint("Modo 3D: Gire ou pinte diretamente no boneco tridimensional.", "🧊", "Modo 3D");
+    setDockHint(t("hint_mode_3d"), "🧊", t("badge_mode_3d"));
     playSound("click");
   });
 
@@ -212,7 +216,7 @@ export function initPalette({ onLoadTemplate, onSetModel, onRender2D, onRender3D
     if (currentViewMode === "2d") return;
     resetLastPaintedCoord();
     setViewMode("2d", { onRender2D, onRender3D });
-    setDockHint("Editor 2D: Pinte na textura desdobrada para alcançar áreas escondidas.", "📜", "Editor 2D");
+    setDockHint(t("hint_mode_2d"), "📜", t("badge_mode_2d"));
     playSound("click");
   });
 

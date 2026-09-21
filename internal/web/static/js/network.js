@@ -107,6 +107,17 @@ export function initNetwork() {
   fetch("/api/info")
     .then((res) => res.json())
     .then((info) => {
+      if (info.enableQr === false) {
+        document.querySelectorAll(".drawer-wifi-card").forEach((card) => {
+          const parent = card.parentElement;
+          if (parent && parent.classList.contains("drawer-wifi-container")) parent.style.display = "none";
+          else if (parent) parent.style.display = "none";
+          else card.style.display = "none";
+        });
+        const expandBtn = document.getElementById("btnExpandQr");
+        if (expandBtn) expandBtn.style.display = "none";
+        return;
+      }
       const targetUrl = info.preferredUrl || info.localUrl || activeUrl;
       renderQR(targetUrl);
     })

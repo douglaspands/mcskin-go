@@ -31,6 +31,8 @@ type Config struct {
 	StaticFS        fs.FS
 	ShutdownTrigger func() error
 	ShutdownDelay   time.Duration
+	EnableQR        bool
+	EnableShutdown  bool
 }
 
 // NewHandler constructs an http.Handler with all application routes.
@@ -97,6 +99,8 @@ func handleInfo(cfg Config) http.HandlerFunc {
 		}
 
 		info := ResolveServerInfo(cfg.Port, cfg.AddrsProvider)
+		info.EnableQR = cfg.EnableQR
+		info.EnableShutdown = cfg.EnableShutdown
 		w.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(w).Encode(info)
 	}

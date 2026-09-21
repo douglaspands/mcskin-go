@@ -1378,6 +1378,8 @@
       box-sizing: border-box;
       z-index: 10;
       padding: 12px;
+      touch-action: none;
+      user-select: none;
     }
 
     #editor2DCanvas {
@@ -1390,6 +1392,22 @@
       border-radius: 4px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.7);
       background: #1e1e1e;
+      cursor: crosshair;
+      transform-origin: center center;
+      will-change: transform;
+    }
+
+    .immersive-3d-stage.mode-rotate #editor2DCanvas,
+    .immersive-3d-stage.mode-rotate #wrapper2D {
+      cursor: grab;
+    }
+
+    .immersive-3d-stage.mode-rotate #editor2DCanvas:active,
+    .immersive-3d-stage.mode-rotate #wrapper2D:active {
+      cursor: grabbing;
+    }
+
+    .immersive-3d-stage.mode-paint #editor2DCanvas {
       cursor: crosshair;
     }
 
@@ -2137,4 +2155,74 @@
       .editor-file-actions-grid {
         grid-template-columns: repeat(4, 1fr) !important;
       }
+    }
+
+    /* Language Segmented Control */
+    .drawer-lang-selector-group {
+      margin: 8px 0;
+    }
+
+    .lang-segmented-control {
+      display: flex;
+      background: #181f26;
+      border: 1px solid #2e3b48;
+      border-radius: 4px;
+      overflow: hidden;
+      margin: 4px 0 10px 0;
+    }
+
+    .btn-lang-segment {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: #8fa0b0;
+      font-size: 0.8rem;
+      font-weight: 800;
+      padding: 6px 0;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+      user-select: none;
+    }
+
+    .btn-lang-segment:hover {
+      background: #252e38;
+      color: #fff;
+    }
+
+    .btn-lang-segment.active {
+      background: #364453;
+      color: var(--mc-diamond);
+      box-shadow: inset 0 -2px 0 var(--mc-diamond);
+    }
+
+    /* Fullscreen Button in Drawer */
+    .btn-drawer-fullscreen {
+      width: 100%;
+      background: #252e38;
+      color: #e0e8f0;
+      border: 2px solid #3c4c5c;
+      border-radius: 4px;
+      padding: 9px 12px;
+      font-size: 0.85rem;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-bottom: 6px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-drawer-fullscreen:hover {
+      background: #364453;
+      border-color: var(--mc-diamond);
+      color: #fff;
+    }
+
+    .btn-drawer-fullscreen.active {
+      background: #1e3a50;
+      border-color: var(--mc-diamond);
+      color: var(--mc-diamond);
     }
