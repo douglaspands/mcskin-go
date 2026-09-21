@@ -28,10 +28,10 @@ You are explicitly permitted and encouraged to autonomously execute harmless dev
   - `google-chrome ...` (e.g. `google-chrome --headless=new ...`)
 - **Git & GitHub (safe inspection & PR workflow)**:
   - `git status`, `git diff`, `git log`, `git show`, `git branch`, `git add`, `git commit`
-  - `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`
+  - `git checkout -b feat/...`, `git checkout main`, `git pull origin main`, `git merge --squash ...`, `git push origin feat/...`
   - `gh pr create ...`, `gh pr view ...`, `gh pr status`
 - **Inspections**:
-  - `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p`
+  - `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p`, `wc`, `diff`
 
 ### Destructive & Strictly Prohibited Commands (Tier 3)
 The following commands are hard-blocked by project policy. You must NEVER propose or execute them:
@@ -52,14 +52,17 @@ The following commands are hard-blocked by project policy. You must NEVER propos
   - Integration tests must be strictly segregated from unit tests (e.g., dedicated integration test suites or files).
 - **Zero Dependencies**: Go standard library only.
 - **Cross-Platform**: Windows (`.exe`) and Linux paths (`filepath.ToSlash` for ZIP entries).
+- **Standardized High-Effort Execution (`flash` / `sonnet`)**:
+  All subagents, task implementations, and skill executions (including `feature-qa-reviewer`) MUST strictly use **`flash` (Antigravity)** and **`sonnet` (Claude Code) in High Effort Mode** (high reasoning effort / thinking budget). The cheap tier (`flash_lite`, `haiku`) and heavy tier (`pro`, `opus`) are strictly prohibited per `.agents/skills/model-selection/SKILL.md`.
 - **OpenSpec Branching & Squash Merge Protocol**:
-  - **First Step on `/opsx-propose`**: The absolute first command executed MUST be creating and checking out a dedicated feature branch:
+  - **First Step on `/opsx-propose`**: Before creating any new feature branch, the harness MUST ensure that the local `main` branch is checked out and updated with the latest remote changes (`git checkout main && git pull origin main`):
     ```bash
+    git checkout main && git pull origin main
     git checkout -b feat/<nome_spec>
     ```
-    This ensures complete isolation and allows immediate rollback if anything deviates from expectations.
+    This guarantees that the feature branch branches from the freshest codebase, prevents branch divergence, and allows immediate rollback if anything deviates from expectations.
   - **Automatic PO/QA Review upon Implementation Completion**:
-    Immediately upon finishing all tasks in `/openspec-apply-change` (or `/opsx-apply`), the harness MUST automatically execute the `feature-qa-reviewer` skill (or subagent with `role: "PO/QA Reviewer"`) to rigorously evaluate requirements, child usability (6+), Minecraft UX, and Bedrock `.mcpack` compliance.
+    Immediately upon finishing all tasks in `/openspec-apply-change` (or `/opsx-apply`), the harness MUST automatically execute the `feature-qa-reviewer` skill in High Effort Mode (`role: "PO/QA Reviewer"` with `flash (High)`) to rigorously evaluate requirements, child usability (6+), Minecraft UX, and Bedrock `.mcpack` compliance.
     - **Bounded Loop Remediation (Anti-Infinite Loop Protection)**:
       In case defects or rejections are detected, enter a bounded remediation loop using Loop Engineering:
       1. Maximum 3 iterations (`max_attempts = 3`).
@@ -104,7 +107,41 @@ To guarantee the safety and integrity of the host machine and execution environm
 
 ---
 
-## 4. Token Conservation & Proactive Skill Creation
+## 4. Fast, Safe & Token-Economical I/O Directives
+To accelerate file operations and prevent latency or token waste:
+- **Surgical Reading via Targeted Slices**:
+  - Always read specific line slices (`StartLine` / `EndLine`, typically 30–60 lines) instead of loading entire files.
+  - Locate line numbers first using quick `grep -n "symbol"` before reading slices.
+  - Never re-read unchanged files already in conversational context; trust previous tool results and git diffs.
+  - Exclude noise folders (`.git`, `bin`, `.venv`, `vendor/`) from all search operations.
+- **Surgical Writing via Contiguous Block Replacement**:
+  - For existing files, always use `replace_file_content` targeting the smallest unique contiguous block.
+  - Avoid `write_to_file` overwrites on multi-line files to prevent massive token payloads and harness roundtrip lag.
+  - Batch cohesive changes within the same function into a single block replacement rather than multiple single-line calls.
+- **Responsive Command Execution**:
+  - Use bounded wait times (`WaitMsBeforeAsync: 3000` to `5000` ms) for synchronous Go commands to avoid task backgrounding.
+  - Run compact, targeted tests (`go test -run TestX ./internal/...` or `./scripts/test-compact.sh`) during iterative work.
+
+### Token-Economical Command Catalog
+Always prefer concise, flag-optimized commands over verbose defaults:
+
+| Operation | Verbose Form (AVOID) | Economical Alternative (USE) | Token Savings |
+|---|---|---|---|
+| **Git Status** | `git status` | `git status -s` | ~80% (1 line per file) |
+| **Git Log** | `git log -n 5` | `git log -n 3 --oneline` | ~75% (hash + title only) |
+| **Git Diff Check** | `git diff` | `git diff --stat` (or `git diff -U2 <file>`) | ~85% (summary diff) |
+| **Current Branch** | `git branch` | `git branch --show-current` | ~80% (clean single word) |
+| **Testing** | `go test -v ./...` | `./scripts/test-compact.sh` (or `go test ./internal/...`) | ~90% (silent on pass) |
+| **Code Search** | `grep -rn "term" .` | `grep -rn --exclude-dir={.git,bin,.venv,vendor} -m 10 "term" <dir>` | ~85% (bounds results) |
+| **File Match List** | `grep -rn "term" <dir>` | `grep -l "term" <dir>/*` | ~75% (paths only) |
+| **Symbol Location** | Reading full file | `grep -n "symbol" <file>` | Pinpoints lines for slicing |
+| **File Listing** | `ls -la` / `find .` | `ls -1 <dir>` / `find <dir> -maxdepth 2` | ~70% (no noise) |
+| **File Length** | Reading full file | `wc -l <file>` | ~95% (single number) |
+| **File Preview** | Reading whole file | `head -n 25 <file>` / `tail -n 25 <file>` | ~80% (bounded peek) |
+
+---
+
+## 5. Token Conservation & Proactive Skill Creation
 - **Proactive Skill Proposal**: Whenever you identify a repetitive, multi-step, or verbose workflow where creating a specialized **SKILL** (`.agents/skills/<name>/SKILL.md`) would conserve context window tokens through progressive disclosure, you MUST:
   1. Clearly explain the workflow opportunity and the token savings benefit.
   2. Propose the name, scope, and structure of the recommended SKILL.
@@ -116,7 +153,7 @@ To guarantee the safety and integrity of the host machine and execution environm
 
 ---
 
-## 5. Environment Tooling & Runtimes (Zero Search / Token Preservation)
+## 6. Environment Tooling & Runtimes (Zero Search / Token Preservation)
 
 To completely eliminate token waste and prevent search loops (`which`, `find /`, `whereis`), all harnesses must strictly observe the pre-configured runtime environments:
 

@@ -29,11 +29,12 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
 
 1. **Explore / Propose**:
    - For brainstorming or exploring ideas: run the explore workflow (`/opsx:explore` on Claude Code, `/openspec-explore` on Antigravity).
-   - **MANDATORY FIRST STEP (Branch Isolation)**: The very first command executed upon triggering the propose workflow (`/opsx:propose` on Claude Code, `/openspec-propose` on Antigravity) MUST be creating and checking out a dedicated feature branch:
+   - **MANDATORY PRE-REQUISITE & BRANCH ISOLATION**: Before creating any new feature branch, the harness MUST ensure that the local `main` branch is checked out and updated with the latest remote changes to avoid branch divergence:
      ```bash
+     git checkout main && git pull origin main
      git checkout -b feat/<nome_spec>
      ```
-     This ensures complete sandbox isolation so that if anything deviates or fails, changes can be rolled back without impacting `main`.
+     This ensures that the feature branch branches from the most up-to-date codebase and maintains complete sandbox isolation so that if anything deviates or fails, changes can be rolled back without impacting `main`.
 2. **Review Planning Artifacts**:
    - Ensure `proposal.md`, `specs/`, `design.md`, and `tasks.md` are coherent and validated (`openspec validate <change-name>`).
 3. **Implementation (`/opsx:apply` on Claude Code, `/openspec-apply-change` on Antigravity)**:
@@ -111,11 +112,43 @@ To guarantee safe, efficient, and bounded execution cycles:
 - **Born Modularized ("Nascem Otimizadas")**: All new and refactored application files in `cmd/`, `internal/`, and `internal/web/static/js/` SHALL NOT exceed 300 lines or 15 KB in size. Keep frontend code in discrete, cohesive ES6 modules with single architectural concerns and JSDoc documentation.
 - **Vendor Isolation**: Third-party libraries (such as Three.js or QRCode) MUST reside in `internal/web/static/vendor/` and are excluded from AI context reads.
 - **Targeted Test Execution & Compact Runner**: Run targeted tests (e.g., `go test -v -run TestSpecific ./internal/...`) while iterating. Prefer the compact test runner `./scripts/test-compact.sh` for multi-package runs to preserve tokens (silent on PASS, concise diffs on FAIL).
-- **Subagent Offloading**: Repetitive research, verbose test repair loops, and code investigations SHALL be offloaded to subagents so parent conversations receive only concise summaries.
+- **Subagent Offloading & High-Effort Model Standardization**: Repetitive research, verbose test repair loops, code investigations, and parallel waves SHALL be offloaded to subagents so parent conversations receive only concise summaries. All subagent dispatches and skills across both Antigravity and Claude Code MUST strictly use **`flash` (Antigravity)** and **`sonnet` (Claude Code) in High Effort Mode** (`.agents/skills/model-selection/SKILL.md`). Low-tier models (`flash_lite`, `haiku`) and heavy tiers (`pro`, `opus`) are strictly prohibited.
 - **Token Guardian Skill**: Use the `token-guardian` skill (`.agents/skills/token-guardian/SKILL.md`) to inspect and enforce file size budgets before committing.
 - **Context Hygiene**: Do not dump binary files, large images, or massive directory trees into the context.
 - **Concise Communication**: Keep outputs structured, actionable, and focused on code changes and verification results.
 - **Proactive Skill Suggestion & Autonomy Provisioning**: Whenever a recurring, multi-step, or verbose workflow is identified that could save context tokens via progressive disclosure, proactively suggest creating a new SKILL. The proposal MUST explicitly list the authorizations and permissions needed for the skill to operate autonomously. Once approved by the user, immediately provision those permissions into the command safety gate (`.agents/scripts/command-gate.py`) and project documentation to avoid repetitive permission prompts.
+
+### Fast, Safe & Token-Economical Reading & Writing (I/O Optimization)
+To eliminate latency, avoid slow roundtrips, and minimize token burn during file operations:
+- **Surgical Reading via Line Slices**:
+  - NEVER dump whole files unless strictly necessary (< 100 lines). Always specify `StartLine` and `EndLine` (typically 30–60 lines surrounding the target symbol/function).
+  - Locate line numbers rapidly using targeted `grep -n "symbol"` before reading slices.
+  - Zero redundant reads: never re-read an unchanged file already present in the active conversation context.
+  - Exclude noise directories: always exclude `.git`, `bin`, `.venv`, and `vendor/` from searches (`--exclude-dir={.git,bin,.venv,vendor}`).
+- **Surgical Writing via Contiguous Block Replacement**:
+  - NEVER overwrite an existing multi-line file with `write_to_file`. Always use `replace_file_content` targeting the specific contiguous block to replace.
+  - Batch cohesive changes: edit related lines in a single replacement block rather than executing multiple sequential single-line roundtrips.
+  - Keep `TargetContent` unique and concise (including proper leading whitespace) to guarantee 100% first-pass edit success.
+- **Fast, Responsive Command Execution**:
+  - Keep tool wait timeouts bounded and responsive (`WaitMsBeforeAsync: 3000` to `5000` ms) for synchronous Go commands to avoid unnecessary backgrounding.
+  - Run compact, targeted tests (`go test -run TestX ./internal/...` or `./scripts/test-compact.sh`) during iteration; save full 7-phase regression runs for phase completion.
+
+#### Token-Economical Command Catalog
+Always prefer concise, flag-optimized commands over verbose defaults:
+
+| Operation | Verbose Form (AVOID) | Economical Alternative (USE) | Token Savings |
+|---|---|---|---|
+| **Git Status** | `git status` | `git status -s` | ~80% (1 line per file) |
+| **Git Log** | `git log -n 5` | `git log -n 3 --oneline` | ~75% (hash + title only) |
+| **Git Diff Check** | `git diff` | `git diff --stat` (or `git diff -U2 <file>`) | ~85% (summary diff) |
+| **Current Branch** | `git branch` | `git branch --show-current` | ~80% (clean single word) |
+| **Testing** | `go test -v ./...` | `./scripts/test-compact.sh` (or `go test ./internal/...`) | ~90% (silent on pass) |
+| **Code Search** | `grep -rn "term" .` | `grep -rn --exclude-dir={.git,bin,.venv,vendor} -m 10 "term" <dir>` | ~85% (bounds results) |
+| **File Match List** | `grep -rn "term" <dir>` | `grep -l "term" <dir>/*` | ~75% (paths only) |
+| **Symbol Location** | Reading full file | `grep -n "symbol" <file>` | Pinpoints lines for slicing |
+| **File Listing** | `ls -la` / `find .` | `ls -1 <dir>` / `find <dir> -maxdepth 2` | ~70% (no noise) |
+| **File Length** | Reading full file | `wc -l <file>` | ~95% (single number) |
+| **File Preview** | Reading whole file | `head -n 25 <file>` / `tail -n 25 <file>` | ~80% (bounded peek) |
 
 ### Safe Autonomy Boundaries
 
@@ -127,7 +160,7 @@ To guarantee safe, efficient, and bounded execution cycles:
   - **Python & uv**: `uv ...` (e.g. `uv venv .venv`, `uv pip ...`), `python3 ...` (e.g. script runs, `.venv/bin/python ...`).
   - **Browser Automation**: `google-chrome ...` (e.g. `google-chrome --headless=new ...`).
   - **OpenSpec**: `openspec ...`
-  - **Git & GitHub Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status`.
+  - **Git & GitHub Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git pull origin main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status`.
   - **Inspections**: `ls`, `cat`, `head`, `tail`, `grep`, `find`, `stat`, `unzip -l`, `unzip -p`.
   - **Targeted Cleanup**: `rm -rf bin/`, `rm -rf files/*.mcpack`.
 
