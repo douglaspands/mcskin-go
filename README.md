@@ -63,15 +63,20 @@ O editor foi desenvolvido com foco total em ergonomia infantil, garantindo que m
 
 <p align="center">
   <img src="docs/screenshots/editor-3d-redesign-desktop.jpg" alt="Editor 3D com layout imersivo sem rolagem, dock de ferramentas e barra superior" width="760"><br>
-  <sub><b>Editor 3D Imersivo</b>: tudo cabe na tela sem rolagem vertical, com dock inferior de fácil alcance, cores vivas e controles de visualização simplificados.</sub>
+  <sub><b>Editor 3D Imersivo</b>: tudo cabe na tela sem rolagem vertical, com dock inferior de fácil alcance, cores vivas, QR Code de conexão e controles de visualização simplificados.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/editor-nova-skin-modal.jpg" alt="Modal Nova Skin com opções Steve, Alex e Boneco em Branco" width="400">
+  <img src="docs/screenshots/editor-2d-folha-grade.jpg" alt="Editor 2D com folha de textura desdobrada e grade suave" width="460">
   &nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="docs/screenshots/editor-mobile-drawer.jpg" alt="Menu de navegação em gaveta deslizante no celular" width="260">
+  <img src="docs/screenshots/editor-mobile-drawer.jpg" alt="Menu de navegação em gaveta deslizante no celular" width="230">
 </p>
-<p align="center"><sub><b>Esquerda</b>: modal "Nova Skin" para começar de Steve (4px), Alex (3px) ou Boneco em Branco. <b>Direita</b>: menu lateral em gaveta deslizante otimizado para celulares e tablets.</sub></p>
+<p align="center"><sub><b>Esquerda</b>: modo 2D desdobrado com grade de precisão para alcançar partes escondidas. <b>Direita</b>: navegação móvel em gaveta deslizante no celular/tablet.</sub></p>
+
+<p align="center">
+  <img src="docs/screenshots/editor-nova-skin-modal.jpg" alt="Modal Nova Skin com opções Steve, Alex e Boneco em Branco" width="360"><br>
+  <sub><b>Modal Nova Skin</b>: ponto de partida intuitivo para Steve Clássico (4px), Alex Slim (3px) ou Skin em Branco.</sub>
+</p>
 
 ### Destaques Pensados para os Pequenos:
 
@@ -91,8 +96,8 @@ O editor foi desenvolvido com foco total em ergonomia infantil, garantindo que m
 Se a criança já tiver uma imagem de skin pronta no computador ou gerada por inteligência artificial, não é necessário desenhar do zero:
 
 <p align="center">
-  <img src="docs/screenshots/conversor-skin.png" alt="Tela do Conversor de Skin com Dropzone e QR Code" width="560"><br>
-  <sub><b>Conversor Rápido</b>: arraste o arquivo PNG ou imagem de IA, escolha o nome do pacote e escaneie o QR Code no tablet para instalar no Minecraft Bedrock.</sub>
+  <img src="docs/screenshots/conversor-skin.png" alt="Tela do Conversor de Skin com Dropzone e QR Code" width="720"><br>
+  <sub><b>Conversor Rápido</b>: arraste o arquivo PNG ou imagem de IA, defina o nome do pacote e escaneie o QR Code no tablet para instalar no Minecraft Bedrock.</sub>
 </p>
 
 ---
