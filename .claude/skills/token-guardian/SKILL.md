@@ -54,10 +54,30 @@ When verifying code or running test suites during iterative development:
 
 ---
 
-## 5. Token Guardian Verification Checklist
+## 5. Fast, Safe & Token-Economical I/O Protocol
+
+To eliminate latency and maximize token efficiency during file operations:
+- **Surgical Reading via Line Slices**:
+  - Always read specific line slices (`StartLine`/`EndLine`, 30–60 lines) instead of loading entire files.
+  - Locate line numbers first using quick `grep -n "symbol"` before reading slices.
+  - Never re-read unchanged files already in conversational context; trust previous tool results and git diffs.
+  - Exclude noise folders (`.git`, `bin`, `.venv`, `vendor/`) from all search operations (`--exclude-dir={.git,bin,.venv,vendor}`).
+- **Surgical Writing via Contiguous Block Replacement**:
+  - For existing files, always use `replace_file_content` targeting the smallest unique contiguous block.
+  - Avoid `write_to_file` overwrites on multi-line files to prevent massive token payloads and roundtrip lag.
+  - Batch cohesive changes within the same function into a single block replacement rather than multiple single-line calls.
+- **Responsive Command Execution**:
+  - Use bounded wait times (`WaitMsBeforeAsync: 3000` to `5000` ms) for synchronous Go commands to avoid task backgrounding.
+  - Run compact, targeted tests (`go test -run TestX ./internal/...` or `./scripts/test-compact.sh`) during iterative work.
+
+---
+
+## 6. Token Guardian Verification Checklist
 
 Before marking any task complete or archiving a change (`/opsx-archive`):
 1. [ ] Check file line counts: `wc -l internal/web/static/js/*.js` (all < 300 lines).
 2. [ ] Check vendor isolation: no minified vendor files outside `static/vendor/`.
 3. [ ] Run compact tests: `./scripts/test-compact.sh` (outputs `PASS: all packages OK`).
 4. [ ] Ensure no monolithic files exist in the changes.
+5. [ ] Ensure surgical reads were used (line slices instead of full dumps).
+6. [ ] Ensure surgical writes were used (contiguous replace instead of full overwrites).

@@ -107,7 +107,24 @@ To guarantee the safety and integrity of the host machine and execution environm
 
 ---
 
-## 4. Token Conservation & Proactive Skill Creation
+## 4. Fast, Safe & Token-Economical I/O Directives
+To accelerate file operations and prevent latency or token waste:
+- **Surgical Reading via Targeted Slices**:
+  - Always read specific line slices (`StartLine` / `EndLine`, typically 30–60 lines) instead of loading entire files.
+  - Locate line numbers first using quick `grep -n "symbol"` before reading slices.
+  - Never re-read unchanged files already in conversational context; trust previous tool results and git diffs.
+  - Exclude noise folders (`.git`, `bin`, `.venv`, `vendor/`) from all search operations.
+- **Surgical Writing via Contiguous Block Replacement**:
+  - For existing files, always use `replace_file_content` targeting the smallest unique contiguous block.
+  - Avoid `write_to_file` overwrites on multi-line files to prevent massive token payloads and harness roundtrip lag.
+  - Batch cohesive changes within the same function into a single block replacement rather than multiple single-line calls.
+- **Responsive Command Execution**:
+  - Use bounded wait times (`WaitMsBeforeAsync: 3000` to `5000` ms) for synchronous Go commands to avoid task backgrounding.
+  - Run compact, targeted tests (`go test -run TestX ./internal/...` or `./scripts/test-compact.sh`) during iterative work.
+
+---
+
+## 5. Token Conservation & Proactive Skill Creation
 - **Proactive Skill Proposal**: Whenever you identify a repetitive, multi-step, or verbose workflow where creating a specialized **SKILL** (`.agents/skills/<name>/SKILL.md`) would conserve context window tokens through progressive disclosure, you MUST:
   1. Clearly explain the workflow opportunity and the token savings benefit.
   2. Propose the name, scope, and structure of the recommended SKILL.
@@ -119,7 +136,7 @@ To guarantee the safety and integrity of the host machine and execution environm
 
 ---
 
-## 5. Environment Tooling & Runtimes (Zero Search / Token Preservation)
+## 6. Environment Tooling & Runtimes (Zero Search / Token Preservation)
 
 To completely eliminate token waste and prevent search loops (`which`, `find /`, `whereis`), all harnesses must strictly observe the pre-configured runtime environments:
 

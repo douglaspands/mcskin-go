@@ -118,6 +118,21 @@ To guarantee safe, efficient, and bounded execution cycles:
 - **Concise Communication**: Keep outputs structured, actionable, and focused on code changes and verification results.
 - **Proactive Skill Suggestion & Autonomy Provisioning**: Whenever a recurring, multi-step, or verbose workflow is identified that could save context tokens via progressive disclosure, proactively suggest creating a new SKILL. The proposal MUST explicitly list the authorizations and permissions needed for the skill to operate autonomously. Once approved by the user, immediately provision those permissions into the command safety gate (`.agents/scripts/command-gate.py`) and project documentation to avoid repetitive permission prompts.
 
+### Fast, Safe & Token-Economical Reading & Writing (I/O Optimization)
+To eliminate latency, avoid slow roundtrips, and minimize token burn during file operations:
+- **Surgical Reading via Line Slices**:
+  - NEVER dump whole files unless strictly necessary (< 100 lines). Always specify `StartLine` and `EndLine` (typically 30–60 lines surrounding the target symbol/function).
+  - Locate line numbers rapidly using targeted `grep -n "symbol"` before reading slices.
+  - Zero redundant reads: never re-read an unchanged file already present in the active conversation context.
+  - Exclude noise directories: always exclude `.git`, `bin`, `.venv`, and `vendor/` from searches (`--exclude-dir={.git,bin,.venv,vendor}`).
+- **Surgical Writing via Contiguous Block Replacement**:
+  - NEVER overwrite an existing multi-line file with `write_to_file`. Always use `replace_file_content` targeting the specific contiguous block to replace.
+  - Batch cohesive changes: edit related lines in a single replacement block rather than executing multiple sequential single-line roundtrips.
+  - Keep `TargetContent` unique and concise (including proper leading whitespace) to guarantee 100% first-pass edit success.
+- **Fast, Responsive Command Execution**:
+  - Keep tool wait timeouts bounded and responsive (`WaitMsBeforeAsync: 3000` to `5000` ms) for synchronous Go commands to avoid unnecessary backgrounding.
+  - Run compact, targeted tests (`go test -run TestX ./internal/...` or `./scripts/test-compact.sh`) during iteration; save full 7-phase regression runs for phase completion.
+
 ### Safe Autonomy Boundaries
 
 - **Harmless & Auto-Allowed Commands (Tier 1)**:

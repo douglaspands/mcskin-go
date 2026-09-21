@@ -3,6 +3,7 @@
 Please strictly follow the rules and procedures defined in [AGENTS.md](AGENTS.md):
 - **Architecture**: Go standard library only (zero external dependencies), cross-platform Linux/Windows/macOS (Apple Silicon arm64), deterministic output. Browser-native ES6 modules only (no npm/bundlers).
 - **Token Economy & Modularity ("Nascem Otimizadas")**: All application files in `cmd/`, `internal/`, and `internal/web/static/js/` MUST stay under 300 lines and 15 KB. Third-party vendor libraries reside exclusively in `internal/web/static/vendor/`. Use `./scripts/test-compact.sh` for silent-on-success testing and the `token-guardian` skill to inspect file sizes. Offload verbose investigation loops to subagents.
+- **Fast, Safe & Economical I/O**: Read targeted line slices (`StartLine`/`EndLine`, 30–60 lines) instead of full files; find lines via `grep -n`; zero redundant re-reads of unchanged context files. Use surgical contiguous edits instead of full file rewrites. Keep command timeouts responsive (3000–5000ms).
 - **Methodology & TDD**: Strict Test-Driven Development (TDD). Tests must be verified failing (RED) before implementing code (GREEN).
 - **Unit Test Mocking**: All unit tests must be 100% mocked with zero external integration (use in-memory buffers/readers; no network or external process calls). Integration tests must be explicitly segregated.
 - **Host & Environment Security**: Strictly confined to workspace root. Zero privilege escalation (`sudo`/`su`). Air-gapped test runs. Bounded 30s execution timeouts.

@@ -76,6 +76,10 @@ To minimize token consumption and maximize response efficiency:
    - **Post-Approval Action**:
      - Implement the skill and its support scripts.
      - Immediately update `.agents/scripts/command-gate.py`, `GEMINI.md`, `AGENTS.md`, and this governance document to add the authorized commands to Tier 1 (Auto-Allowed), ensuring frictionless autonomous execution without repetitive permission requests.
+5. **Fast, Safe & Token-Economical I/O Protocol**:
+   - **Surgical Reading**: Read targeted line slices (`StartLine`/`EndLine`, 30–60 lines) instead of whole files. Locate line numbers via `grep -n` before reading slices. Never re-read unchanged files already in conversational context. Exclude `.git`, `bin`, `.venv`, and `vendor/` from searches.
+   - **Surgical Writing**: Use contiguous block replacement (`replace_file_content`) for edits on existing files; avoid whole-file overwrites. Batch cohesive changes in the same function into a single replacement block.
+   - **Responsive Command Execution**: Keep command timeouts bounded (3000–5000ms) for fast synchronous Go commands to eliminate unnecessary task backgrounding. Use compact test runs (`./scripts/test-compact.sh`).
 
 ---
 
