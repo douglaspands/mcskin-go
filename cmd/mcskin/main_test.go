@@ -278,4 +278,18 @@ func TestRun_NonWindowsNoArgs_ShowsUsage(t *testing.T) {
 	}
 }
 
+func TestWindowsManifest_ExistsAndValid(t *testing.T) {
+	data, err := os.ReadFile("manifest.xml")
+	if err != nil {
+		t.Fatalf("failed to read manifest.xml: %v", err)
+	}
+	content := string(data)
+	if !strings.Contains(content, `<requestedExecutionLevel level="asInvoker"`) {
+		t.Errorf("manifest.xml missing requestedExecutionLevel asInvoker")
+	}
+	if !strings.Contains(content, `<assemblyIdentity`) {
+		t.Errorf("manifest.xml missing assemblyIdentity")
+	}
+}
+
 

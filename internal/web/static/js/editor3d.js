@@ -5,7 +5,7 @@
 
 import { playSound } from "./fx.js";
 
-const GRID_OVERLAY_SCALE = 8;
+const GRID_OVERLAY_SCALE = 16;
 const ZOOM_3D_STEP = 4;
 const PAN_Y_STEP = 4;
 const PAN_Y_MIN = -10;
@@ -30,7 +30,7 @@ export function buildGridOverlayCanvas(textureCanvas, texW, texH) {
   gCtx.imageSmoothingEnabled = false;
   gCtx.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, gridCanvas.width, gridCanvas.height);
 
-  gCtx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+  gCtx.strokeStyle = "rgba(0, 0, 0, 0.10)";
   gCtx.lineWidth = 1;
   for (let gx = 0; gx <= texW; gx++) {
     const lx = gx * scale + 0.5;
@@ -83,7 +83,7 @@ export function set3DModel(model) {
  * @param {Function} options.getTouchMode - Returns 'paint' | 'rotate'.
  * @param {Function} options.getCurrentLayer - Returns 'base' | 'overlay'.
  */
-export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurrentLayer }) {
+export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchMode, getCurrentLayer }) {
   editor3DCanvas = document.getElementById("editor3DCanvas");
   if (!editor3DCanvas || !window.Skin3D) return;
 
@@ -198,6 +198,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
   const handlePointerStart = (e) => {
     if (isInteractiveEl(e.target)) return;
     isPointerDown = true;
+    if (onResetCoord) onResetCoord();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
     lastX = clientX;
@@ -244,6 +245,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, getTouchMode, getCurren
 
   const handlePointerEnd = () => {
     isPointerDown = false;
+    if (onResetCoord) onResetCoord();
     viewport3D?.setHoverPixel(null);
   };
 

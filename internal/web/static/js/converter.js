@@ -4,6 +4,7 @@
  */
 
 import { playSound, launchConfetti } from "./fx.js";
+import { processImageDimensions } from "./editor-file-loader.js";
 
 let selectedFile = null;
 let loadedImage = null;
@@ -170,21 +171,38 @@ export function initConverter() {
       const img = new Image();
       img.onload = () => {
         const { width: w, height: h } = img;
-        if ((w !== 64 || (h !== 64 && h !== 32)) && (w !== 128 || h !== 128)) {
+        const processed = processImageDimensions(img);
+        if (!processed) {
           showError(`Tamanho inválido (<strong>${w}x${h} pixels</strong>). Skins precisam ter <strong>64x64</strong>, <strong>64x32</strong> ou <strong>128x128</strong> pixels!`);
           return;
         }
-        selectedFile = file;
-        loadedImage = img;
+
+        const { canvas, targetW, targetH, isAI } = processed;
+        let finalImage = img;
+        if (isAI) {
+          finalImage = canvas;
+          canvas.toBlob((blob) => {
+            selectedFile = new File([blob], file.name, { type: "image/png" });
+            if (btnConvert) btnConvert.disabled = false;
+          }, "image/png");
+        } else {
+          selectedFile = file;
+          if (btnConvert) btnConvert.disabled = false;
+        }
+
+        loadedImage = finalImage;
         if (getEl("fileNameDisplay")) getEl("fileNameDisplay").textContent = file.name;
-        if (getEl("fileDimsDisplay")) getEl("fileDimsDisplay").textContent = `${w} x ${h} pixels (${h === 32 ? "Clássica Antiga" : "RGBA Válido"})`;
+        if (getEl("fileDimsDisplay")) {
+          getEl("fileDimsDisplay").textContent = isAI
+            ? `${w} × ${h} ➔ ${targetW} × ${targetH} pixels (Ajustado para Bedrock)`
+            : `${w} x ${h} pixels (${h === 32 ? "Clássica Antiga" : "RGBA Válido"})`;
+        }
         currentSkinName = sanitizeName(file.name.replace(/\.[^/.]+$/, ""));
         hasConfirmedSkinName = false;
         updateSkinNameDisplays(currentSkinName);
-        renderSkinCharacter(img, getActiveModel());
+        renderSkinCharacter(finalImage, getActiveModel());
         if (dropzone) dropzone.style.display = "none";
         if (previewBox) { previewBox.style.display = "flex"; previewBox.classList.add("active"); }
-        if (btnConvert) btnConvert.disabled = false;
         playSound("click");
       };
       img.src = e.target.result;

@@ -188,6 +188,12 @@
                 <button type="button" class="model-pill-item" id="tplAlex" title="Modelo Alex (Braços 3px)">👱 Alex</button>
               </div>
 
+              <!-- Modo de Visualização 3D vs 2D -->
+              <div class="view-mode-toggle-pill" id="viewModeToggleGroup">
+                <button type="button" class="view-mode-pill-item active" id="btnMode3D" title="Visualização 3D do Boneco">🧊 3D</button>
+                <button type="button" class="view-mode-pill-item" id="btnMode2D" title="Editor 2D Desdobrado">📜 2D</button>
+              </div>
+
               <button type="button" class="btn-toggle-grid" id="btnToggleGrid" title="Alternar grade de pixels">▦ Grade</button>
 
               <!-- Elementos auxiliares ocultos para integração de estado e testes -->
@@ -245,6 +251,11 @@
                 <canvas id="editor3DCanvas" width="480" height="640"></canvas>
               </div>
 
+              <!-- WRAPPER DO EDITOR 2D DESDOBRADO -->
+              <div class="editor-2d-wrapper" id="wrapper2D" style="display: none;">
+                <canvas id="editor2DCanvas" width="512" height="512"></canvas>
+              </div>
+
               <!-- GAVETA DE CORES -->
               <div class="color-bottom-sheet" id="colorBottomSheet">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -279,7 +290,7 @@
 
             <!-- DICA CONTEXTUAL DIRETAMENTE ACIMA DOS BOTÕES -->
             <div class="dock-hint-strip" id="dockHintStrip">
-              <span class="hint-icon" id="dockHintIcon">✏️</span>
+              <span class="hint-icon" id="dockHintIcon">🖌️</span>
               <span class="hint-text" id="dockHintText">Pincel: Toque no boneco para pintar pixels individuais com a cor ativa.</span>
               <span class="hint-badge" id="dockHintBadge">Ativo</span>
             </div>
@@ -287,7 +298,7 @@
             <!-- BARRA INFERIOR DE FERRAMENTAS -->
             <div class="editor-bottom-dock">
               <div class="dock-tool-item active" id="toolPencil" title="Pintar pixel por pixel">
-                <span class="tool-icon">✏️</span>
+                <span class="tool-icon">🖌️</span>
                 <span>Pincel</span>
               </div>
 
@@ -564,6 +575,26 @@
         </button>
         <button type="button" class="btn-minecraft-secondary btn-modal-cancel" id="btnCancelSkinName" style="flex: 1; padding: 8px;">
           Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CONFIRMAÇÃO DE REMOÇÃO DE FUNDO SÓLIDO (IA) -->
+  <div class="modal-backdrop" id="modalBgRemoval" style="display: none;">
+    <div class="modal-card">
+      <h3 style="color: var(--mc-gold); margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 6px;">
+        <span>🪄</span> Fundo Sólido Detectado
+      </h3>
+      <p style="color: #ccc; font-size: 0.85rem; margin: 8px 0 12px 0; text-align: center;" id="bgRemovalPromptText">
+        Detectamos um fundo sólido nesta imagem. Deseja tentar remover o fundo e deixá-lo transparente?
+      </p>
+      <div style="display: flex; gap: 8px; width: 100%;">
+        <button type="button" class="btn-minecraft-giant" id="btnConfirmBgRemoval" style="flex: 1; padding: 8px;">
+          ✔️ Sim, Remover Fundo
+        </button>
+        <button type="button" class="btn-minecraft-secondary btn-modal-cancel" id="btnCancelBgRemoval" style="flex: 1; padding: 8px;">
+          Manter Original
         </button>
       </div>
     </div>

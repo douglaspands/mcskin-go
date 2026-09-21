@@ -22,40 +22,45 @@ A maioria dos "criadores de skin" na internet são sites cheios de anúncios pis
 
 ## 🌐 Modo Web — Editor de Skins 3D e 2D no Navegador
 
-Este é o coração do projeto: um servidor web local ("CRIE SKINS LEGAIS") com um **editor de skins 3D e 2D completo**, redesenhado para caber inteiro na tela sem precisar rolar, com um menu lateral discreto e um "Nova Skin" que já sugere um ponto de partida.
+Este é o coração do projeto: um servidor web local ("CRIE SKINS LEGAIS") com um **editor de skins 3D e 2D completo**, projetado para caber inteiro na tela sem precisar de rolagem vertical, com navegação rápida, suporte a dispositivos móveis e importação inteligente de skins geradas por IA.
 
 ```bash
 # Inicia o servidor web na porta padrão (8080) e abre o navegador automaticamente
 ./bin/mcskin --web
 ```
 
-> No Windows, basta dar duplo clique em `mcskin.exe` sem nenhum argumento — o modo web já inicia sozinho.
+> No Windows, basta dar duplo clique em `mcskin.exe` sem nenhum argumento — o modo web inicia sozinho, com metadados de confiança nativos e sem requerer privilégios de administrador.
 
 <p align="center">
-  <img src="docs/screenshots/editor-3d-redesign-desktop.jpg" alt="Editor 3D redesenhado, com menu lateral e submenu de ações da skin" width="760"><br>
-  <sub>Editor 3D com o novo layout sem rolagem: menu lateral à direita, submenu com Nova Skin / Abrir / Salvar / Baixar .mcpack.</sub>
+  <img src="docs/screenshots/editor-3d-redesign-desktop.jpg" alt="Editor 3D com novo layout sem rolagem, dock de ferramentas e barra superior" width="760"><br>
+  <sub>Editor 3D com o layout imersivo sem rolagem: alternador 3D/2D no topo, controles de zoom, dock inferior com pincel, balde, substituição de cor e menu lateral rápido.</sub>
 </p>
 
 <p align="center">
-  <img src="docs/screenshots/editor-nova-skin-modal.jpg" alt="Modal Nova Skin com opções Steve, Alex e Tela em Branco" width="420">
-  &nbsp;&nbsp;
-  <img src="docs/screenshots/editor-mobile-drawer.jpg" alt="Menu de navegação em gaveta no celular" width="240">
+  <img src="docs/screenshots/editor-nova-skin-modal.jpg" alt="Modal Nova Skin com opções Steve, Alex e Boneco em Branco" width="400">
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="docs/screenshots/editor-mobile-drawer.jpg" alt="Menu de navegação em gaveta deslizante no celular" width="260">
 </p>
-<p align="center"><sub>Esquerda: modal "Nova Skin" para começar do Steve, do Alex ou de uma tela em branco. Direita: a mesma navegação em uma gaveta deslizante no celular.</sub></p>
+<p align="center"><sub>Esquerda: modal "Nova Skin" para começar de Steve (4px), Alex (3px) ou Boneco em Branco. Direita: navegação otimizada em gaveta no celular.</sub></p>
 
-- 🎨 **Criador de Skins 3D e 2D**: pinte diretamente sobre um boneco 3D interativo ou numa folha 2D desenrolada, sincronizados em tempo real.
-- 🧭 **Navegação sem rolagem**: tudo cabe na tela — menu lateral no desktop, gaveta deslizante no celular, e uma dica contextual que explica cada ferramenta ao passar o mouse ou tocar.
-- 🆕 **"Nova Skin" com presets**: comece do Steve (4px), do Alex (3px) ou de uma tela em branco, sem precisar caçar botões escondidos.
-- 📂 **Abrir uma skin existente**: carregue um PNG do próprio aparelho — o editor detecta automaticamente se é um modelo clássico ou fino pela transparência dos braços.
-- 🖥️ **Tela Cheia e Zoom de Precisão**: controles de zoom (botões, roda do mouse, pinça no toque) e um botão de tela cheia para aproveitar todo o espaço do aparelho.
-- 🔲 **Grade de Pixels**: liga/desliga linhas finas nas fronteiras de cada pixel, facilitando encontrar o pixel certo antes de pintar.
-- 📦 **Exportação Direta**: baixe a skin editada como PNG ou gere o `.mcpack` pronto para instalar, sem sair do navegador.
+- 🧊/📜 **Alternador 3D & 2D Integrado**: Alterne instantaneamente com um clique entre o boneco tridimensional interativo e a folha de textura desdobrada (2D), permitindo pintar partes escondidas ou dobraduras com precisão absoluta.
+- 🖌️ **Pintura Livre e Permissiva**: Pincel pixel a pixel, balde de preenchimento de face, substituição de cores iguais (recolor) e borracha — qualquer ferramenta tem permissão total para sobrescrever outra e pintar livremente sobre pixels existentes ou modelos em branco.
+- 🤖 **Importação Inteligente de Skins por IA**: Carregue imagens geradas por qualquer IA (DALL-E, Midjourney, Bing, ChatGPT, etc.) em qualquer resolução (≥ 1024px para 128x128 HD, < 1024px para 64x64, ou 2:1 para 64x32) com redimensionamento de alta fidelidade e preservação de nitidez de pixels.
+- 🪄 **Detecção & Remoção Automática de Fundo**: Identifica automaticamente se a imagem gerada por IA veio com fundo sólido e abre um modal com 1 clique para remover o fundo mantendo o boneco perfeitamente recortado.
+- 🔲 **Grade de Precisão Sutil**: Linhas de referência ultrafinas em 16x com sombra suave (`rgba(0, 0, 0, 0.10)`), permitindo visualizar os limites de cada pixel sem poluir visualmente a textura.
+- 🧭 **Navegação sem Rolagem**: Tudo cabe na tela — menu lateral no desktop, gaveta deslizante no celular, e dicas contextuais dinâmicas na barra de ferramentas.
+- 🆕 **"Nova Skin" com Presets Autênticos**: Comece do Steve (braços de 4px), da Alex (braços de 3px) ou de um Boneco em Branco pronto para pintar.
+- 🖥️ **Tela Cheia & Zoom Touch**: Zoom suave por botões, roda do mouse e gesto de pinça no celular, além de modo tela cheia para foco total.
+- 📦 **Exportação Direta**: Baixe o arquivo PNG editado ou gere o arquivo `.mcpack` pronto com 1 clique para instalar no Minecraft Bedrock.
 
-### 📦 Conversor Rápido (sem editar)
+### 📦 Conversor Rápido (sem precisar editar)
 
-Já tem uma skin pronta em PNG? A tela de Conversor gera o `.mcpack` na hora e mostra um QR Code para abrir a mesma tela direto no celular ou tablet, sem cabos.
+Já tem um PNG pronto da sua skin? A aba do Conversor empacota o `.mcpack` instantaneamente e exibe um QR Code local para você abrir e baixar direto no celular ou tablet na mesma rede Wi-Fi, sem necessidade de cabos.
 
-<img src="docs/screenshots/conversor-skin.png" alt="Tela do Conversor de Skin" width="420">
+<p align="center">
+  <img src="docs/screenshots/conversor-skin.png" alt="Tela do Conversor de Skin com Dropzone e QR Code" width="560"><br>
+  <sub>Tela do Conversor: arraste seu PNG ou imagem de IA, defina o nome do pacote e instale direto no Minecraft Bedrock.</sub>
+</p>
 
 ---
 

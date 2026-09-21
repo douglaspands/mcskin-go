@@ -13,6 +13,7 @@ import {
   syncTexture,
   paintPixel,
   pushUndo,
+  resetLastPaintedCoord,
   render2DSheet,
   textureCanvas,
   textureCtx
@@ -38,6 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     initEditor3D({
       onPaintPixel: (x, y) => paintPixel(x, y, { ...getToolState(), onPickColor: setColor }),
       onPushUndo: pushUndo,
+      onResetCoord: resetLastPaintedCoord,
       getTouchMode: () => getToolState().touchMode,
       getCurrentLayer: () => getToolState().currentLayer
     });
@@ -54,7 +56,7 @@ document.addEventListener("DOMContentLoaded", () => {
       onRender3D: () => getViewport3D()?.render(),
       onUploadTexture: (file) => {
         loadSkinFile(file)
-          .then(({ canvas, width, height, model }) => {
+          .then(({ canvas, width, height, model, isAI }) => {
             pushUndo();
             textureCanvas.width = width;
             textureCanvas.height = height;
@@ -65,7 +67,10 @@ document.addEventListener("DOMContentLoaded", () => {
             setModelType(model);
             getViewport3D()?.render();
             updateSkinNameDisplays(sanitizeName(file.name.replace(/\.[^/.]+$/, "")));
-            setDockHint(`✅ Skin carregada! Modelo: ${model === "slim" ? "Alex (fino)" : "Steve (clássico)"}.`, "📂", "Carregada");
+            const msg = isAI && width === 128
+              ? `✅ Imagem IA importada com sucesso em HD (128x128)! Modelo: ${model === "slim" ? "Alex" : "Steve"}.`
+              : `✅ Skin carregada! Modelo: ${model === "slim" ? "Alex (fino)" : "Steve (clássico)"}.`;
+            setDockHint(msg, "📂", "Carregada");
           })
           .catch((err) => setDockHint(`⚠️ ${err.message}`, "⚠️", "Erro"));
       }
