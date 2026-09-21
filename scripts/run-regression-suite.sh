@@ -3,6 +3,13 @@
 # run-regression-suite.sh
 # Bateria Completa de Testes Regressivos Acumulados (ARTS) para mcskin
 # Executa validação de ponta a ponta: Go, JS, Token Guardian, CLI, Bedrock e Web.
+#
+# Windows: this script is bash-only (uses BASH_SOURCE, `set -euo pipefail`).
+# Run it under Git Bash or WSL exactly as on Linux: `bash scripts/run-regression-suite.sh`.
+# Every command it invokes (go, node, npm, npx playwright) already runs natively
+# on Windows; only the orchestrating shell requires Git Bash/WSL. This has not
+# been executed on a live Windows machine from this environment - verify there
+# before relying on it in a Windows-only workflow.
 # ==============================================================================
 set -euo pipefail
 
@@ -45,13 +52,17 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# Fase 2: Qualidade Frontend & Sintaxe JavaScript
+# Fase 2: Qualidade Frontend, Sintaxe JavaScript & Testes Unitários JS
 # ------------------------------------------------------------------------------
-log_header "Fase 2/7: Sintaxe JavaScript (TC-GOV-03)"
-if node --check internal/web/static/js/*.js; then
-  log_step_pass "Sintaxe de todos os módulos JavaScript validada (node --check)"
+log_header "Fase 2/7: Sintaxe JavaScript & Testes Unitários (TC-GOV-03)"
+JS_OK=true
+for f in internal/web/static/js/*.js; do
+  node --check "$f" || JS_OK=false
+done
+if [ "$JS_OK" = true ] && node --test tests/*.test.js; then
+  log_step_pass "Sintaxe de todos os módulos JavaScript e testes unitários JS (node --test) validados"
 else
-  log_step_fail "Erro de sintaxe encontrado nos arquivos JavaScript"
+  log_step_fail "Erro de sintaxe ou falha nos testes unitários JavaScript"
 fi
 
 # ------------------------------------------------------------------------------
@@ -146,28 +157,13 @@ else
 fi
 
 # ------------------------------------------------------------------------------
-# Fase 7: Responsividade Web (Mobile, Tablet, Desktop) & Lousa 3D
+# Fase 7: Regressão Cumulativa Web (Playwright) - Comportamento, Visual & Inventário de Componentes
 # ------------------------------------------------------------------------------
-log_header "Fase 7/7: Responsividade e Palco 3D Web (TC-UI-01 a 09, TC-RSP-01 a 03)"
-UI_OK=true
-
-# Verifica marcações essenciais no HTML
-grep -q 'id="editor3DCanvas"' internal/web/static/index.html || UI_OK=false
-grep -q 'id="btnToggleGrid"' internal/web/static/index.html || UI_OK=false
-grep -q 'id="btnPanUp"' internal/web/static/index.html || UI_OK=false
-grep -q 'id="btnPanDown"' internal/web/static/index.html || UI_OK=false
-grep -q 'id="desktopSidebarMenu"' internal/web/static/index.html || UI_OK=false
-
-# Verifica regras canônicas de responsividade no CSS
-grep -q '@media (max-width: 640px)' internal/web/static/style.css || UI_OK=false
-grep -q '@media (min-width: 641px) and (max-width: 1023px)' internal/web/static/style.css || UI_OK=false
-grep -q '@media (min-width: 1024px)' internal/web/static/style.css || UI_OK=false
-grep -q '\.btn-toggle-grid\.active' internal/web/static/style.css || UI_OK=false
-
-if [ "$UI_OK" = true ]; then
-  log_step_pass "Invariantes de responsividade, lousa 3D e controles validados no frontend"
+log_header "Fase 7/7: Suite Regressiva Cumulativa Web (TC-UI-01 a 09, TC-RSP-01 a 03)"
+if npx playwright test --reporter=./tests/regression/reporters/compact-reporter.ts; then
+  log_step_pass "Suite regressiva cumulativa (comportamento, visual, inventário de componentes) aprovada"
 else
-  log_step_fail "Invariantes de responsividade ou controles ausentes no frontend"
+  log_step_fail "Regressão detectada na suite cumulativa Playwright (comportamento, visual ou inventário de componentes)"
 fi
 
 # ------------------------------------------------------------------------------

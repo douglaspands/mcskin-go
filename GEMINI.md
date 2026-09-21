@@ -50,7 +50,7 @@ The following commands are hard-blocked by project policy. You must NEVER propos
   - Unit tests MUST NOT have external integration. All external dependencies, filesystem I/O, or data streams must be mocked using in-memory representations (`io.Reader`, `bytes.Buffer`, mock structs).
   - Unit tests must NEVER touch the network, spawn external system processes, or write to persistent filesystem paths outside transient ephemeral test runners (`t.TempDir()`).
   - Integration tests must be strictly segregated from unit tests (e.g., dedicated integration test suites or files).
-- **Zero Dependencies**: Go standard library only.
+- **Zero Dependencies**: Go standard library only. Binds the production Go binary and the frontend served by the embedded web server; development/test tooling (e.g. a devDependency-only `package.json` for browser-driven regression testing) MAY declare external dependencies when they meaningfully improve quality or efficiency, provided they are never bundled into the production binary or served static assets.
 - **Cross-Platform**: Windows (`.exe`) and Linux paths (`filepath.ToSlash` for ZIP entries).
 - **Standardized High-Effort Execution (`flash` / `sonnet`)**:
   All subagents, task implementations, and skill executions (including `feature-qa-reviewer`) MUST strictly use **`flash` (Antigravity)** and **`sonnet` (Claude Code) in High Effort Mode** (high reasoning effort / thinking budget). The cheap tier (`flash_lite`, `haiku`) and heavy tier (`pro`, `opus`) are strictly prohibited per `.agents/skills/model-selection/SKILL.md`.

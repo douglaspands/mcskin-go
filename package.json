@@ -1,0 +1,13 @@
+{
+  "name": "mcskin-regression-tooling",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Dev/test-only tooling for mcskin's cumulative regression suite. Never bundled into the production binary or served frontend.",
+  "type": "module",
+  "scripts": {
+    "test:regression": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

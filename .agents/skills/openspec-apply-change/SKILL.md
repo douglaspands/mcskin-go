@@ -136,6 +136,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - If paused: explain why and wait for guidance
    - **Automatic PO/QA Validation Trigger (Mandatory Directive)**:
      When all tasks are complete (`state: "all_done"` or N/N tasks complete):
+     - **Regression Gate Precondition**: Run `./scripts/run-regression-suite.sh` and confirm it passes (all 7 phases, including the accumulated Playwright behavioral/visual/component-inventory suite) before proceeding to PO/QA. If it fails, treat this as a blocker: report and wait for guidance rather than invoking `/feature-qa-reviewer`.
      - **Immediately and automatically invoke the `/feature-qa-reviewer` skill in High Effort Mode** (Antigravity: `role: "PO/QA Reviewer"` with `flash (High)`; Claude Code: `subagent_type: "general-purpose"` with `sonnet (High)`) to validate functional requirements, child usability (6+), Minecraft UX, cross-platform binaries, and Bedrock `.mcpack` compliance.
      - **Bounded Loop Engineering (Defect Remediation)**:
         - If PO/QA issues an `APROVADO` verdict: Congratulate the user, commit implementation changes, and instruct the user to run `/openspec-archive-change` (or `/opsx-archive`). **Do NOT run archive automatically and do NOT prompt for PR/merge during the apply phase.**

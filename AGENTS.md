@@ -9,7 +9,7 @@ Welcome, AI Agent / Harness. This repository enforces strict architectural patte
 `mcskin` is a fast, lightweight, cross-platform command-line tool written in Go that transforms Minecraft PNG skin textures into ready-to-import Minecraft Bedrock `.mcpack` skin pack archives.
 
 ### Core Architectural Principles
-- **Zero External Dependencies**: Use Go standard library exclusively (`image/png`, `archive/zip`, `crypto/rand`, `encoding/json`, `path/filepath`). No third-party modules or runtime dependencies.
+- **Zero External Dependencies**: Use Go standard library exclusively (`image/png`, `archive/zip`, `crypto/rand`, `encoding/json`, `path/filepath`). No third-party modules or runtime dependencies. This boundary applies to the production Go binary and the frontend served by the embedded web server; development/test tooling (e.g. a devDependency-only `package.json` for browser-driven regression testing) MAY declare external dependencies when they meaningfully improve quality or efficiency, provided they are never bundled into the production binary or served static assets.
 - **Cross-Platform Compatibility**: Must run natively on both Linux (`amd64`) and Windows (`amd64`). Always use `filepath.ToSlash()` when writing ZIP/mcpack entry paths to ensure cross-platform Bedrock compatibility.
 - **Deterministic Output Placement**: The `.mcpack` output file must always be generated in the exact same directory as the input `.png`, matching its base filename (e.g., `path/to/skin.png` -> `path/to/skin.mcpack`).
 
