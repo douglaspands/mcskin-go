@@ -105,10 +105,20 @@ In both branches, never create the root as a side effect: do not run `openspec i
 6. **Implement tasks (loop until done or blocked)**
 
    For each pending task:
+   - **Read model annotation**: Check the task's `<!-- model: ... | signal: ... -->` comment in `tasks.md`. If present, use that model for any subagent dispatched for this task (the Claude Code half of the annotation is the short `Agent` tool `model` enum — `haiku`/`sonnet`/`opus`). If absent, apply the `model-selection` skill's Decision Table to derive the tier.
+   - **Log before starting**: Append one line to `.agents/model-log.md` before dispatching the task:
+     ```
+     | <YYYY-MM-DD> | <change-name>/<task-short-desc> | <model> | <signal> | pending |
+     ```
    - Show which task is being worked on
    - Make the code changes required
    - Keep changes minimal and focused
    - Mark task complete in the tasks file: `- [ ]` → `- [x]`
+   - **Update log outcome**: After the task completes, update the `pending` outcome in `.agents/model-log.md`:
+     - `ok` — completed successfully, model was appropriate
+     - `ok-overtier` — succeeded, but a cheaper tier would likely have worked
+     - `fail-undertier` — had to escalate to a higher model mid-task
+     - `fail-other` — failed for reasons unrelated to model capability
    - Continue to next task
 
    **Pause if:**
@@ -123,7 +133,15 @@ In both branches, never create the root as a side effect: do not run `openspec i
    Display:
    - Tasks completed this session
    - Overall progress: "N/M tasks complete"
-   - If all done: suggest archive
+   - **Automatic PO/QA Validation Trigger (Mandatory Directive)**: When all tasks are complete (`state: "all_done"` or N/N tasks complete), before suggesting archive:
+     - **Immediately and automatically run the PO/QA verification protocol** from `.agents/skills/feature-qa-reviewer/SKILL.md` (not a registered Claude Code `Skill` — read that file directly, or dispatch it via the `Agent` tool with `subagent_type: "general-purpose"` and `model: "opus"` per its own Claude Code dispatch note) to validate functional requirements, child usability (6+), Minecraft UX, cross-platform binaries, and Bedrock `.mcpack` compliance.
+     - **Bounded Loop Engineering (Defect Remediation)**:
+       - If PO/QA issues an `APROVADO` verdict: congratulate the user, commit implementation changes, and instruct the user to run `/opsx:archive`. **Do NOT run archive automatically and do NOT prompt for PR/merge during the apply phase.**
+       - If PO/QA returns `REPROVADO` or identifies defects/regressions: automatically request and apply adjustments using bounded Loop Engineering to prevent infinite loops:
+         1. **Iteration Cap**: Maximum **3 repair attempts** (`max_attempts = 3`).
+         2. **2-Strike Identical Failure Halting**: If the identical error or test failure recurs across 2 consecutive iterations without progress, **halt execution immediately** and ask the user for guidance.
+         3. **Scope Boundary Guard**: If fixing an issue requires expanding requirements beyond the active spec, halt and suggest `/opsx:update`.
+         4. **Regression Guard**: Run targeted tests (`go test -run ...`) and verify before re-evaluating with QA.
    - If paused: explain why and wait for guidance
 
 **Output During Implementation**
@@ -154,7 +172,12 @@ Working on task 4/7: <task description>
 - [x] Task 2
 ...
 
-All tasks complete! You can archive this change with `/opsx:archive`.
+### Automatic PO/QA Validation Triggered
+Running the PO/QA review protocol...
+[...PO/QA review report...]
+
+- If APROVADO: "All tasks and PO/QA review complete! You can archive this change with `/opsx:archive`."
+- If issues found: "Entering bounded repair loop (Attempt 1/3)..."
 ```
 
 **Output On Pause (Issue Encountered)**

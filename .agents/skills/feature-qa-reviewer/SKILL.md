@@ -29,24 +29,29 @@ This skill combines two complementary perspectives:
 
 ## 2. Review Protocol
 
-When this skill is executed (or delegated to a subagent with `role: "PO/QA Reviewer"`):
+When this skill is executed directly, or delegated to a subagent:
+- **Antigravity**: dispatch with `role: "PO/QA Reviewer"` and `model: pro`.
+- **Claude Code**: dispatch via the `Agent` tool with `subagent_type: "general-purpose"` and `model: "opus"` (see `.agents/skills/model-selection/SKILL.md`), passing this skill's file as context in the prompt since a fresh subagent starts with no memory of it.
 
 ### Step 1: Context Intake
 1. Read `openspec/changes/<active-change>/proposal.md`.
 2. Read delta specs in `openspec/changes/<active-change>/specs/`.
 3. Check `git log -n 5` and `git diff main...HEAD`.
 
-### Step 2: Verification Execution
-1. Run static analysis and full test suite:
-   ```bash
-   go vet ./...
-   go test -v ./...
-   ```
-2. Verify binaries compile:
-   ```bash
-   make build
-   ```
-3. Test sample skin conversion and verify with the Bedrock verifier skill:
+### Step 2: Accumulated Regression Execution (ARTS Mandate)
+Execute the complete automated regression suite covering all accumulated features, platforms, and invariants:
+```bash
+./scripts/run-regression-suite.sh
+```
+
+> [!CAUTION]
+> **Zero Regression Tolerance**: If any phase of `./scripts/run-regression-suite.sh` fails, the reviewer MUST reject the change (`STATUS: REPROVADO`). Consult the [Especificação de Testes Acumulados](references/accumulated-regression-spec.md) for domain details and diagnostic steps.
+
+For targeted checks during remediation or deep inspection:
+1. **Unit Tests & Static Analysis**: `go vet ./... && go test -count=1 ./...`
+2. **Frontend Quality & Token Guardian**: `node --check internal/web/static/js/*.js` and `./scripts/test-compact.sh`
+3. **Cross-Platform Compilation**: `make build` (Linux `bin/mcskin` and Windows `bin/mcskin.exe`)
+4. **Bedrock Pack Deep Inspection**:
    ```bash
    ./bin/mcskin files/argentino_pedro.png
    python3 .agents/skills/bedrock-skin-pack-verifier/scripts/verify-mcpack.py files/argentino_pedro.mcpack
@@ -58,7 +63,7 @@ When this skill is executed (or delegated to a subagent with `role: "PO/QA Revie
 Generate a formal report using the following structure:
 
 ```markdown
-# 📋 Parecer de Avaliação PO / QA
+# 📋 Parecer de Avaliação PO / QA & Regressivo Acumulado
 
 ## 1. Identificação
 - **Mudança Avaliada**: `<nome_da_mudanca>`
@@ -66,20 +71,31 @@ Generate a formal report using the following structure:
 - **Data/Hora**: `<timestamp>`
 
 ## 2. Checklist do Product Owner (PO)
-- [ ] Atendimento à solicitação original do usuário
+- [ ] Atendimento à solicitação original do usuário e proposal.md
 - [ ] Usabilidade infantil (6+ anos), linguagem acessível em português
 - [ ] Experiência visual autêntica Minecraft (responsiva para celular e tablet)
-- [ ] Funcionalidade de QR Code para Wi-Fi local
+- [ ] Funcionalidade de QR Code para Wi-Fi local e visualização no celular
 - [ ] Inicialização amigável no Windows (duplo clique / navegador automático)
 
 ## 3. Checklist de Quality Assurance (QA)
-- [ ] Compilação de binários nativos (Linux e Windows)
+- [ ] Compilação de binários nativos cruzada (Linux e Windows)
 - [ ] Cobertura de testes unitários 100% mockados (zero integração externa)
 - [ ] Conformidade de manifesto e pacote Bedrock (.mcpack)
 - [ ] Tratamento de casos de borda e mensagens de erro compreensíveis
 - [ ] Princípio de zero dependências externas respeitado
 
-## 4. Veredito Final
+## 4. Bateria Regressiva Acumulada (ARTS)
+*Referência: [.agents/skills/feature-qa-reviewer/references/accumulated-regression-spec.md](references/accumulated-regression-spec.md)*
+*Execução: `./scripts/run-regression-suite.sh`*
+
+- [ ] **Domínio 1: CLI & Conversão**: TC-CLI-01 a TC-CLI-06 (Steve, Alex, dimensões, `--slim`, colocação de arquivo)
+- [ ] **Domínio 2: Padrão Bedrock (.mcpack)**: TC-BED-01 a TC-BED-06 (manifest v2, UUIDv4 únicos, skins.json, en_US.lang)
+- [ ] **Domínio 3: Servidor Web & APIs**: TC-WEB-01 a TC-WEB-05 (rotas /, /api/convert, /api/network, /api/shutdown, MIME types)
+- [ ] **Domínio 4: Editor 3D & Lousa**: TC-UI-01 a TC-UI-09 (malha 3D, girar, subir/descer panY, grade de pixels, mannequin, cores, histórico)
+- [ ] **Domínio 5: Responsividade Multi-Dispositivo**: TC-RSP-01 a TC-RSP-03 (Mobile <=640px, Tablet 641-1023px, Desktop >=1024px)
+- [ ] **Domínio 6: Governança & Token Guardian**: TC-GOV-01 a TC-GOV-05 (arquivos < 300 linhas e < 15 KB, node --check, builds nativos)
+
+## 5. Veredito Final
 - **STATUS**: [ APROVADO | REPROVADO | APROVADO COM RESSALVAS ]
 - **Justificativa**: <resumo objetivo do parecer>
 - **Recomendações / Próximos Passos**: <orientações para o desenvolvedor ou aprovação para merge>

@@ -6,30 +6,28 @@
 import { playSound } from "./fx.js";
 
 export const mcColors = [
-  { name: "Grama", color: "#5da632" },
-  { name: "Terra", color: "#866043" },
-  { name: "Pedra", color: "#7d7d7d" },
-  { name: "Diamante", color: "#4deeea" },
-  { name: "Ouro", color: "#fecb00" },
-  { name: "Redstone", color: "#ff4757" },
-  { name: "Lápis-Lazúli", color: "#2f56b5" },
-  { name: "Carvão", color: "#222222" },
-  { name: "Slime", color: "#7cd332" },
-  { name: "Pele 1", color: "#f1c27d" },
-  { name: "Pele 2", color: "#d39a74" },
-  { name: "Pele 3", color: "#8d5524" },
-  { name: "Azul Olho", color: "#2980b9" },
-  { name: "Branco", color: "#ffffff" },
-  { name: "Preto", color: "#000000" },
-  { name: "Madeira", color: "#a0522d" },
-  { name: "Água", color: "#1e90ff" },
-  { name: "Lava", color: "#ff4500" }
+  { name: "Redstone", color: "#e74c3c" },
+  { name: "Diamante", color: "#3498db" },
+  { name: "Esmeralda", color: "#2ecc71" },
+  { name: "Ouro", color: "#f1c40f" },
+  { name: "Ametista", color: "#9b59b6" },
+  { name: "Neve", color: "#ffffff" },
+  { name: "Obsidiana", color: "#1b1b1b" },
+  { name: "Terra", color: "#795548" },
+  { name: "Cobre", color: "#e67e22" },
+  { name: "Prismarinho", color: "#1abc9c" }
 ];
 
-let currentColor = "#5da632";
+const LAYERS = ["base", "overlay"];
+const LAYER_META = {
+  base: { icon: "👕", label: "Base" },
+  overlay: { icon: "🧥", label: "3D" },
+};
+
+let currentColor = "#2ecc71";
 let currentTool = "pencil";
 let currentLayer = "base";
-let touchMode = "paint";
+let touchMode = "rotate";
 let isGlassMode = false;
 let currentModelType = "classic";
 
@@ -46,124 +44,114 @@ export const setColor = (hex) => {
   currentColor = hex;
   const picker = document.getElementById("customColorPicker");
   const box = document.getElementById("currentColorBox");
+  const swatch = document.getElementById("activeColorSwatch");
+  const labelHex = document.getElementById("labelHexCode");
   if (picker) picker.value = hex;
   if (box) box.style.background = hex;
+  if (swatch) swatch.style.background = hex;
+  if (labelHex) labelHex.textContent = hex;
+};
+
+/**
+ * Updates the current model type and syncs Steve/Alex template buttons.
+ * @param {'classic'|'slim'} model
+ */
+export const setModelType = (model) => {
+  currentModelType = model;
+  document.getElementById("tplSteve")?.classList.toggle("active", model === "classic");
+  document.getElementById("tplAlex")?.classList.toggle("active", model === "slim");
 };
 
 /**
  * Initializes palette swatches, tools, layer toggles, and template controls.
  */
 export function initPalette({ onLoadTemplate, onSetModel, onRender2D, onRender3D, onUploadTexture }) {
-  const grid = document.getElementById("paletteGrid");
-  if (grid) {
-    grid.innerHTML = "";
-    mcColors.forEach((item, idx) => {
-      const swatch = document.createElement("button");
-      swatch.type = "button";
-      swatch.className = `color-swatch${idx === 0 ? " active" : ""}`;
-      swatch.style.background = item.color;
-      swatch.title = item.name;
+  const colorSheet = document.getElementById("colorBottomSheet");
+
+  const bindSwatches = () => {
+    document.querySelectorAll(".swatch-btn, .color-swatch").forEach((swatch) => {
       swatch.addEventListener("click", () => {
-        document.querySelectorAll(".color-swatch").forEach((s) => s.classList.remove("active"));
-        swatch.classList.add("active");
-        setColor(item.color);
-        playSound("click");
+        const col = swatch.dataset.color || swatch.getAttribute("data-color");
+        if (col) {
+          document.querySelectorAll(".swatch-btn, .color-swatch").forEach((s) => s.classList.remove("active"));
+          swatch.classList.add("active");
+          setColor(col);
+          colorSheet?.classList.remove("open");
+          playSound("click");
+        }
       });
-      grid.appendChild(swatch);
     });
-  }
+  };
+  bindSwatches();
+  setColor(currentColor);
 
   document.getElementById("customColorPicker")?.addEventListener("input", (e) => {
-    currentColor = e.target.value;
-    const box = document.getElementById("currentColorBox");
-    if (box) box.style.background = currentColor;
-    document.querySelectorAll(".color-swatch").forEach((s) => s.classList.remove("active"));
+    setColor(e.target.value);
+    document.querySelectorAll(".swatch-btn, .color-swatch").forEach((s) => s.classList.remove("active"));
+  });
+  document.getElementById("customColorPicker")?.addEventListener("change", (e) => {
+    setColor(e.target.value);
+    colorSheet?.classList.remove("open");
   });
 
-  // Tools (Pencil, Bucket, Eraser, Pipette)
-  ["toolPencil", "toolBucket", "toolEraser", "toolPipette"].forEach((id) => {
+  document.getElementById("btnCloseColors")?.addEventListener("click", () => {
+    colorSheet?.classList.remove("open");
+    playSound("click");
+  });
+
+  // Tools (Pencil, Bucket, Recolor, Eraser)
+  const TOOL_IDS = ["toolPencil", "toolBucket", "toolRecolor", "toolEraser"];
+  TOOL_IDS.forEach((id) => {
     const btn = document.getElementById(id);
     btn?.addEventListener("click", () => {
-      ["toolPencil", "toolBucket", "toolEraser", "toolPipette"].forEach((i) => document.getElementById(i)?.classList.remove("active"));
+      TOOL_IDS.forEach((i) => document.getElementById(i)?.classList.remove("active"));
       btn.classList.add("active");
       currentTool = id.replace("tool", "").toLowerCase();
       playSound("click");
     });
   });
 
-  // Layers & Glass Mode
-  const btnBase = document.getElementById("btnLayerBase");
-  const btnOverlay = document.getElementById("btnLayerOverlay");
-  btnBase?.addEventListener("click", () => {
-    currentLayer = "base";
-    btnBase.classList.add("active");
-    btnOverlay?.classList.remove("active");
-    playSound("click");
-  });
-  btnOverlay?.addEventListener("click", () => {
-    currentLayer = "overlay";
-    btnOverlay.classList.add("active");
-    btnBase?.classList.remove("active");
-    playSound("click");
-  });
-  document.getElementById("chkGlassMode")?.addEventListener("change", (e) => {
-    isGlassMode = e.target.checked;
+  // Color Picker dock button opens/closes the color bottom sheet
+  document.getElementById("toolColorPicker")?.addEventListener("click", () => {
+    colorSheet?.classList.toggle("open");
     playSound("click");
   });
 
-  // Touch Mode (Paint vs Rotate)
-  const btnPaint = document.getElementById("btnTouchPaint");
-  const btnRotate = document.getElementById("btnTouchRotate");
+  // Touch Mode (Paint vs Rotate) — floating pill on the 3D stage
+  const stage3D = document.getElementById("stage3D");
+  const btnPaint = document.getElementById("btnTouchPaint") || document.getElementById("btnModePaint");
+  const btnRotate = document.getElementById("btnTouchRotate") || document.getElementById("btnModeRotate");
+
   btnPaint?.addEventListener("click", () => {
     touchMode = "paint";
     btnPaint.classList.add("active");
     btnRotate?.classList.remove("active");
+    if (stage3D) stage3D.className = "immersive-3d-stage mode-paint";
     playSound("click");
   });
+
   btnRotate?.addEventListener("click", () => {
     touchMode = "rotate";
     btnRotate.classList.add("active");
     btnPaint?.classList.remove("active");
-    playSound("click");
-  });
-
-  // View Mode (3D vs 2D)
-  const btn3D = document.getElementById("btnMode3D");
-  const btn2D = document.getElementById("btnMode2D");
-  const wrap3D = document.getElementById("wrapper3D");
-  const wrap2D = document.getElementById("wrapper2D");
-  btn3D?.addEventListener("click", () => {
-    btn3D.classList.add("active");
-    btn2D?.classList.remove("active");
-    if (wrap3D) wrap3D.style.display = "flex";
-    if (wrap2D) wrap2D.style.display = "none";
-    onRender3D();
-    playSound("click");
-  });
-  btn2D?.addEventListener("click", () => {
-    btn2D.classList.add("active");
-    btn3D?.classList.remove("active");
-    if (wrap2D) wrap2D.style.display = "flex";
-    if (wrap3D) wrap3D.style.display = "none";
-    onRender2D();
+    if (stage3D) stage3D.className = "immersive-3d-stage mode-rotate";
     playSound("click");
   });
 
   // Template Buttons (Steve, Alex, Blank)
   const setTpl = (btn, type, model) => {
-    document.querySelectorAll(".btn-template").forEach((b) => b.classList.remove("active"));
+    document.querySelectorAll(".model-pill-item").forEach((b) => b.classList.remove("active"));
     btn.classList.add("active");
     currentModelType = model;
     onSetModel(model);
     onLoadTemplate(type, model);
     playSound("click");
   };
+
   document.getElementById("tplSteve")?.addEventListener("click", (e) => setTpl(e.currentTarget, "steve", "classic"));
   document.getElementById("tplAlex")?.addEventListener("click", (e) => setTpl(e.currentTarget, "alex", "slim"));
-  document.getElementById("tplBlank")?.addEventListener("click", (e) => setTpl(e.currentTarget, "blank", currentModelType));
-
-  // New & Upload Skin
-  document.getElementById("btnNewSkin")?.addEventListener("click", () => {
+  document.getElementById("tplBlank")?.addEventListener("click", () => {
+    onSetModel(currentModelType);
     onLoadTemplate("blank", currentModelType);
     playSound("click");
   });

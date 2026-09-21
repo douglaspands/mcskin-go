@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
+	"mime"
 	"net/http"
 	"path/filepath"
 	"strings"
@@ -13,6 +14,15 @@ import (
 	"mcskin/internal/bedrock"
 	"mcskin/internal/converter"
 )
+
+func init() {
+	_ = mime.AddExtensionType(".js", "text/javascript; charset=utf-8")
+	_ = mime.AddExtensionType(".mjs", "text/javascript; charset=utf-8")
+	_ = mime.AddExtensionType(".css", "text/css; charset=utf-8")
+	_ = mime.AddExtensionType(".html", "text/html; charset=utf-8")
+	_ = mime.AddExtensionType(".png", "image/png")
+	_ = mime.AddExtensionType(".ico", "image/x-icon")
+}
 
 // Config holds configuration parameters for the web server.
 type Config struct {
@@ -34,12 +44,49 @@ func NewHandler(cfg Config) http.Handler {
 
 	// Static Assets & Web UI
 	if cfg.StaticFS != nil {
-		fileServer := http.FileServer(http.FS(cfg.StaticFS))
+		fileServer := enforceStaticMIMETypes(http.FileServer(http.FS(cfg.StaticFS)))
 		mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
+		// Dedicated favicon route: serves with explicit Content-Type image/png
+		mux.HandleFunc("/favicon.ico", handleFavicon(cfg.StaticFS))
 		mux.Handle("/", fileServer)
 	}
 
 	return mux
+}
+
+// enforceStaticMIMETypes guarantees valid Content-Type headers for web assets,
+// preventing Windows registry overrides (e.g. .js registered as text/plain).
+func enforceStaticMIMETypes(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		if strings.HasSuffix(path, ".js") {
+			w.Header().Set("Content-Type", "text/javascript; charset=utf-8")
+		} else if strings.HasSuffix(path, ".css") {
+			w.Header().Set("Content-Type", "text/css; charset=utf-8")
+		} else if strings.HasSuffix(path, ".html") || path == "/" {
+			w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		}
+		h.ServeHTTP(w, r)
+	})
+}
+
+// handleFavicon serves the application favicon with an explicit Content-Type of image/png.
+// This overrides the default MIME detection which would return image/vnd.microsoft.icon for .ico files.
+func handleFavicon(staticFS fs.FS) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodGet && r.Method != http.MethodHead {
+			http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+			return
+		}
+		data, err := fs.ReadFile(staticFS, "favicon.ico")
+		if err != nil {
+			http.NotFound(w, r)
+			return
+		}
+		w.Header().Set("Content-Type", "image/png")
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write(data)
+	}
 }
 
 func handleInfo(cfg Config) http.HandlerFunc {

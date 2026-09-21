@@ -33,3 +33,6 @@ Thumbs.db
 __pycache__/
 *.pyc
 
+# Local prototypes and scratch
+/var/
+

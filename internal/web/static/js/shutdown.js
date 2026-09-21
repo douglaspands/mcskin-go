@@ -4,21 +4,29 @@
  */
 
 /**
- * Initializes the discrete shutdown button and confirmation dialog.
+ * Initializes the discrete shutdown buttons and confirmation dialog.
  */
 export function initShutdown() {
-  const btnShutdown = document.getElementById("btnShutdownServer");
   const modal = document.getElementById("shutdownModal");
   const btnConfirm = document.getElementById("btnConfirmShutdown");
   const btnCancel = document.getElementById("btnCancelShutdown");
   const goodbyeOverlay = document.getElementById("goodbyeOverlay");
 
-  if (!btnShutdown || !modal || !btnConfirm || !btnCancel) return;
+  if (!modal || !btnConfirm || !btnCancel) return;
 
-  const showModal = () => { modal.style.display = "flex"; };
-  const hideModal = () => { modal.style.display = "none"; };
+  const showModal = () => {
+    modal.style.display = "flex";
+    modal.classList.add("open");
+  };
+  const hideModal = () => {
+    modal.style.display = "none";
+    modal.classList.remove("open");
+  };
 
-  btnShutdown.addEventListener("click", showModal);
+  ["btnShutdownServer", "btnSideShutdown", "drawerBtnShutdown"].forEach((id) => {
+    document.getElementById(id)?.addEventListener("click", showModal);
+  });
+
   btnCancel.addEventListener("click", hideModal);
 
   modal.addEventListener("click", (e) => {

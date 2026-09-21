@@ -39,7 +39,7 @@ export const redo = () => {
 };
 
 export function syncTexture() {
-  update3DTexture(gridEnabled ? buildGridOverlayCanvas(textureCanvas, texW, texH) : textureCanvas);
+  update3DTexture(gridEnabled ? buildGridOverlayCanvas(textureCanvas, texW, texH) : textureCanvas, texW, texH);
   render2DSheet();
 }
 /**
@@ -51,32 +51,44 @@ export function loadTemplate(type, modelType = "classic") {
   const fillBox = (x, y, w, h, col) => { textureCtx.fillStyle = col; textureCtx.fillRect(x, y, w, h); };
 
   if (type === "steve" || type === "alex") {
-    const skinTone = type === "alex" ? "#f1c27d" : "#d39a74", hair = type === "alex" ? "#d35400" : "#462c16";
-    const shirt = type === "alex" ? "#5da632" : "#0093a8", pants = type === "alex" ? "#4a3c31" : "#2e3e7e", shoes = "#404040";
+    const isAlex = type === "alex";
+    const skinTone = isAlex ? "#f1c27d" : "#d39a74", hair = isAlex ? "#d35400" : "#462c16";
+    const shirt = isAlex ? "#5da632" : "#0093a8", pants = isAlex ? "#4a3c31" : "#2e3e7e", shoes = "#404040";
+    const eyeColor = isAlex ? "#4aa338" : "#2980b9";
 
-    fillBox(8, 8, 8, 8, skinTone); fillBox(8, 0, 8, 8, hair); fillBox(16, 0, 8, 8, hair); // Neck bottom
+    // Head (top, chin/neck, sides, back, front)
+    fillBox(8, 0, 8, 8, hair); fillBox(16, 0, 8, 8, skinTone);
     fillBox(0, 8, 8, 8, hair); fillBox(16, 8, 8, 8, hair); fillBox(24, 8, 8, 8, hair);
-    fillBox(9, 12, 2, 1, "#ffffff"); fillBox(13, 12, 2, 1, "#ffffff"); fillBox(10, 12, 1, 1, "#2980b9"); fillBox(13, 12, 1, 1, "#2980b9"); fillBox(10, 14, 4, 1, "#7d3f28");
+    fillBox(8, 8, 8, 8, skinTone); fillBox(8, 8, 8, 2, hair); // Face with hair bangs
+    fillBox(9, 12, 2, 1, "#ffffff"); fillBox(13, 12, 2, 1, "#ffffff");
+    fillBox(10, 12, 1, 1, eyeColor); fillBox(13, 12, 1, 1, eyeColor);
+    fillBox(10, 14, 4, 1, isAlex ? "#c0392b" : "#7d3f28");
 
-    fillBox(20, 20, 8, 12, shirt); fillBox(32, 20, 8, 12, shirt); fillBox(16, 20, 4, 12, shirt);
-    fillBox(28, 20, 4, 12, shirt); fillBox(20, 16, 8, 4, shirt); fillBox(28, 16, 8, 4, shirt);
+    // Torso (all 6 faces) + neck cutout
+    fillBox(20, 16, 8, 4, shirt); fillBox(28, 16, 8, 4, shirt);
+    fillBox(16, 20, 4, 12, shirt); fillBox(20, 20, 8, 12, shirt); fillBox(28, 20, 4, 12, shirt); fillBox(32, 20, 8, 12, shirt);
+    fillBox(22, 20, 4, 2, skinTone); // Collar neck cutout
 
     const armW = modelType === "slim" ? 3 : 4;
-    fillBox(44, 16, armW, 4, shirt); // Right shoulder top
-    fillBox(44 + armW, 16, armW, 4, skinTone); fillBox(44, 20, armW, 4, shirt); fillBox(44, 24, armW, 8, skinTone);
-    fillBox(40, 20, 4, 12, skinTone); fillBox(44 + armW, 20, 4, 12, skinTone);
+    // Right arm: top/bottom, 4 sleeve faces (y=20..24), 4 skin faces (y=24..32)
+    fillBox(44, 16, armW, 4, shirt); fillBox(44 + armW, 16, armW, 4, skinTone);
+    fillBox(40, 20, 4, 4, shirt); fillBox(44, 20, armW, 4, shirt); fillBox(44 + armW, 20, 4, 4, shirt); fillBox(48 + armW, 20, armW, 4, shirt);
+    fillBox(40, 24, 4, 8, skinTone); fillBox(44, 24, armW, 8, skinTone); fillBox(44 + armW, 24, 4, 8, skinTone); fillBox(48 + armW, 24, armW, 8, skinTone);
 
-    fillBox(4, 16, 4, 4, pants); // Right leg top
-    fillBox(8, 16, 4, 4, shoes); // Right leg bottom / sole
-    fillBox(4, 20, 4, 10, pants); fillBox(12, 20, 4, 10, pants); fillBox(0, 20, 4, 10, pants); fillBox(8, 20, 4, 10, pants);
-    fillBox(0, 30, 4, 2, shoes); fillBox(4, 30, 4, 2, shoes); // Right leg shoe side
-    fillBox(8, 30, 4, 2, shoes); fillBox(12, 30, 4, 2, shoes); // Right leg shoe side
+    // Right leg: top, bottom sole, pants (y=20..30), shoes (y=30..32)
+    fillBox(4, 16, 4, 4, pants); fillBox(8, 16, 4, 4, shoes);
+    fillBox(0, 20, 4, 10, pants); fillBox(4, 20, 4, 10, pants); fillBox(8, 20, 4, 10, pants); fillBox(12, 20, 4, 10, pants);
+    fillBox(0, 30, 4, 2, shoes); fillBox(4, 30, 4, 2, shoes); fillBox(8, 30, 4, 2, shoes); fillBox(12, 30, 4, 2, shoes);
 
     if (texH >= 64) {
-      fillBox(36, 48, armW, 4, shirt); fillBox(36 + armW, 48, armW, 4, skinTone); fillBox(36, 52, armW, 4, shirt);
-      fillBox(36, 56, armW, 8, skinTone); fillBox(32, 52, 4, 12, skinTone); fillBox(40 + armW, 52, 4, 12, skinTone);
-      fillBox(20, 48, 4, 4, pants); fillBox(24, 48, 4, 4, shoes); fillBox(20, 52, 4, 10, pants); fillBox(28, 52, 4, 10, pants);
-      fillBox(16, 52, 4, 10, pants); fillBox(24, 52, 4, 10, pants);
+      // Left arm: top/bottom, 4 sleeve faces (y=52..56), 4 skin faces (y=56..64)
+      fillBox(36, 48, armW, 4, shirt); fillBox(36 + armW, 48, armW, 4, skinTone);
+      fillBox(32, 52, 4, 4, shirt); fillBox(36, 52, armW, 4, shirt); fillBox(36 + armW, 52, 4, 4, shirt); fillBox(40 + armW, 52, armW, 4, shirt);
+      fillBox(32, 56, 4, 8, skinTone); fillBox(36, 56, armW, 8, skinTone); fillBox(36 + armW, 56, 4, 8, skinTone); fillBox(40 + armW, 56, armW, 8, skinTone);
+
+      // Left leg: top, bottom sole, pants (y=52..62), shoes (y=62..64)
+      fillBox(20, 48, 4, 4, pants); fillBox(24, 48, 4, 4, shoes);
+      fillBox(16, 52, 4, 10, pants); fillBox(20, 52, 4, 10, pants); fillBox(24, 52, 4, 10, pants); fillBox(28, 52, 4, 10, pants);
       fillBox(16, 62, 4, 2, shoes); fillBox(20, 62, 4, 2, shoes); fillBox(24, 62, 4, 2, shoes); fillBox(28, 62, 4, 2, shoes);
     }
   }
@@ -95,6 +107,10 @@ export function paintPixel(px, py, { currentTool, currentColor, isGlassMode, onP
   }
   if (currentTool === "bucket") {
     floodFill(px, py, currentColor, isGlassMode ? 128 : 255);
+    syncTexture(); playSound("click"); return;
+  }
+  if (currentTool === "recolor") {
+    recolorAll(px, py, currentColor, isGlassMode ? 128 : 255);
     syncTexture(); playSound("click"); return;
   }
   if (lastPaintedCoord?.x === px && lastPaintedCoord?.y === py) return;
@@ -129,6 +145,27 @@ function floodFill(startX, startY, hexColor, fillA) {
       data[pIdx] = fillR; data[pIdx + 1] = fillG; data[pIdx + 2] = fillB; data[pIdx + 3] = fillA;
       if (x > 0) queue.push([x - 1, y]); if (x < texW - 1) queue.push([x + 1, y]);
       if (y > 0) queue.push([y - 1, y]); if (y < texH - 1) queue.push([y + 1, y]);
+    }
+  }
+  textureCtx.putImageData(imgData, 0, 0);
+}
+
+/**
+ * Replaces every pixel matching the color at (startX, startY) with the given
+ * color, anywhere in the texture — unlike floodFill, not limited to the
+ * contiguous region touching the starting pixel.
+ */
+function recolorAll(startX, startY, hexColor, fillA) {
+  const imgData = textureCtx.getImageData(0, 0, texW, texH), data = imgData.data;
+  const sIdx = (startY * texW + startX) * 4;
+  const sR = data[sIdx], sG = data[sIdx + 1], sB = data[sIdx + 2], sA = data[sIdx + 3];
+  if (sA < 10) return;
+  const hex = hexColor.replace("#", ""), num = parseInt(hex.length === 3 ? hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2] : hex, 16);
+  const fillR = (num >> 16) & 255, fillG = (num >> 8) & 255, fillB = num & 255;
+  if (sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
+  for (let i = 0; i < data.length; i += 4) {
+    if (data[i + 3] >= 10 && data[i] === sR && data[i + 1] === sG && data[i + 2] === sB) {
+      data[i] = fillR; data[i + 1] = fillG; data[i + 2] = fillB; data[i + 3] = fillA;
     }
   }
   textureCtx.putImageData(imgData, 0, 0);
@@ -179,40 +216,44 @@ export function render2DSheet() {
  */
 export function initEditor2D({ getToolState, onPickColor }) {
   const canvas = document.getElementById("editor2DCanvas");
-  if (!canvas) return;
+  if (canvas) {
+    const setZoom = (z) => {
+      zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, z));
+      const slider = document.getElementById("zoom2DSlider");
+      if (slider) slider.value = zoomFactor2D;
+      render2DSheet();
+    };
 
-  const setZoom = (z) => {
-    zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, z));
-    const slider = document.getElementById("zoom2DSlider");
-    if (slider) slider.value = zoomFactor2D;
-    render2DSheet();
-  };
+    document.getElementById("zoom2DSlider")?.addEventListener("input", (e) => setZoom(parseFloat(e.target.value)));
+    document.getElementById("btnZoom2DIn")?.addEventListener("click", () => { setZoom(zoomFactor2D + ZOOM_2D_STEP); playSound("click"); });
+    document.getElementById("btnZoom2DOut")?.addEventListener("click", () => { setZoom(zoomFactor2D - ZOOM_2D_STEP); playSound("click"); });
 
-  document.getElementById("zoom2DSlider")?.addEventListener("input", (e) => setZoom(parseFloat(e.target.value)));
-  document.getElementById("btnZoom2DIn")?.addEventListener("click", () => { setZoom(zoomFactor2D + ZOOM_2D_STEP); playSound("click"); });
-  document.getElementById("btnZoom2DOut")?.addEventListener("click", () => { setZoom(zoomFactor2D - ZOOM_2D_STEP); playSound("click"); });
+    let isDrawing = false;
+    const getCoord = (e) => {
+      const rect = canvas.getBoundingClientRect(), cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
+      return { x: Math.floor(((cx - rect.left) / rect.width) * texW), y: Math.floor(((cy - rect.top) / rect.height) * texH) };
+    };
+
+    const handleStart = (e) => { isDrawing = true; lastPaintedCoord = null; pushUndo(); const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); };
+    const handleMove = (e) => { if (isDrawing) { const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); } };
+    const handleEnd = () => { isDrawing = false; lastPaintedCoord = null; };
+
+    canvas.addEventListener("mousedown", handleStart); window.addEventListener("mousemove", handleMove); window.addEventListener("mouseup", handleEnd);
+    canvas.addEventListener("touchstart", (e) => { if (e.cancelable) e.preventDefault(); handleStart(e); }, { passive: false });
+    canvas.addEventListener("touchmove", (e) => { if (e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
+    canvas.addEventListener("touchend", handleEnd);
+  }
+
   document.getElementById("btnToggleGrid")?.addEventListener("click", () => {
     gridEnabled = !gridEnabled;
     document.getElementById("btnToggleGrid")?.classList.toggle("active", gridEnabled);
     syncTexture(); playSound("click");
   });
 
-  let isDrawing = false;
-  const getCoord = (e) => {
-    const rect = canvas.getBoundingClientRect(), cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
-    return { x: Math.floor(((cx - rect.left) / rect.width) * texW), y: Math.floor(((cy - rect.top) / rect.height) * texH) };
-  };
-
-  const handleStart = (e) => { isDrawing = true; lastPaintedCoord = null; pushUndo(); const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); };
-  const handleMove = (e) => { if (isDrawing) { const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); } };
-  const handleEnd = () => { isDrawing = false; lastPaintedCoord = null; };
-
-  canvas.addEventListener("mousedown", handleStart); window.addEventListener("mousemove", handleMove); window.addEventListener("mouseup", handleEnd);
-  canvas.addEventListener("touchstart", (e) => { if (e.cancelable) e.preventDefault(); handleStart(e); }, { passive: false });
-  canvas.addEventListener("touchmove", (e) => { if (e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
-  canvas.addEventListener("touchend", handleEnd);
   document.getElementById("btnUndo")?.addEventListener("click", undo);
   document.getElementById("btnRedo")?.addEventListener("click", redo);
+  document.getElementById("btnUndoIcon")?.addEventListener("click", undo);
+  document.getElementById("btnRedoIcon")?.addEventListener("click", redo);
 
   document.getElementById("btnDownloadPng")?.addEventListener("click", () => {
     promptSkinName((name) => {

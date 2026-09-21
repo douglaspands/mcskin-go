@@ -441,3 +441,114 @@ func TestEditorStaticAssets_JavaScriptLogic(t *testing.T) {
 }
 
 
+// TestFavicon_StatusOK verifies GET /favicon.ico returns HTTP 200.
+func TestFavicon_StatusOK(t *testing.T) {
+	faviconData := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A} // PNG magic bytes
+
+	staticFS := fstest.MapFS{
+		"index.html":         {Data: []byte("<h1>test</h1>")},
+		"favicon.ico":        {Data: faviconData},
+	}
+
+	handler := web.NewHandler(web.Config{
+		Port:     8080,
+		StaticFS: staticFS,
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Errorf("GET /favicon.ico: expected status 200, got %d", rec.Code)
+	}
+}
+
+// TestFavicon_ContentTypePNG verifies GET /favicon.ico returns Content-Type image/png.
+func TestFavicon_ContentTypePNG(t *testing.T) {
+	faviconData := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A} // PNG magic bytes
+
+	staticFS := fstest.MapFS{
+		"index.html":  {Data: []byte("<h1>test</h1>")},
+		"favicon.ico": {Data: faviconData},
+	}
+
+	handler := web.NewHandler(web.Config{
+		Port:     8080,
+		StaticFS: staticFS,
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	ct := rec.Header().Get("Content-Type")
+	if !strings.HasPrefix(ct, "image/png") {
+		t.Errorf("GET /favicon.ico: expected Content-Type image/png, got %q", ct)
+	}
+}
+
+// TestFavicon_NonEmptyBody verifies GET /favicon.ico returns a non-empty response body.
+func TestFavicon_NonEmptyBody(t *testing.T) {
+	faviconData := []byte{0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A} // PNG magic bytes
+
+	staticFS := fstest.MapFS{
+		"index.html":  {Data: []byte("<h1>test</h1>")},
+		"favicon.ico": {Data: faviconData},
+	}
+
+	handler := web.NewHandler(web.Config{
+		Port:     8080,
+		StaticFS: staticFS,
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/favicon.ico", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Body.Len() == 0 {
+		t.Error("GET /favicon.ico: expected non-empty response body")
+	}
+}
+
+// TestStaticMIMETypesEnforcement verifies that JavaScript and CSS assets served from /static/
+// are delivered with explicit MIME types, avoiding Windows registry conflicts.
+func TestStaticMIMETypesEnforcement(t *testing.T) {
+	staticFS := fstest.MapFS{
+		"js/app.js": {Data: []byte("console.log('mcskin');")},
+		"style.css": {Data: []byte("body { margin: 0; }")},
+	}
+
+	handler := web.NewHandler(web.Config{
+		Port:     8080,
+		StaticFS: staticFS,
+	})
+
+	// Test .js file
+	reqJS := httptest.NewRequest(http.MethodGet, "/static/js/app.js", nil)
+	recJS := httptest.NewRecorder()
+	handler.ServeHTTP(recJS, reqJS)
+
+	if recJS.Code != http.StatusOK {
+		t.Fatalf("GET /static/js/app.js: expected 200 OK, got %d", recJS.Code)
+	}
+	contentTypeJS := recJS.Header().Get("Content-Type")
+	if !strings.Contains(contentTypeJS, "javascript") {
+		t.Errorf("GET /static/js/app.js: expected Content-Type containing 'javascript', got %q", contentTypeJS)
+	}
+
+	// Test .css file
+	reqCSS := httptest.NewRequest(http.MethodGet, "/static/style.css", nil)
+	recCSS := httptest.NewRecorder()
+	handler.ServeHTTP(recCSS, reqCSS)
+
+	if recCSS.Code != http.StatusOK {
+		t.Fatalf("GET /static/style.css: expected 200 OK, got %d", recCSS.Code)
+	}
+	contentTypeCSS := recCSS.Header().Get("Content-Type")
+	if !strings.Contains(contentTypeCSS, "text/css") {
+		t.Errorf("GET /static/style.css: expected Content-Type containing 'text/css', got %q", contentTypeCSS)
+	}
+}
+
+
