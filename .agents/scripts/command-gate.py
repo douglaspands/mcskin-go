@@ -59,7 +59,7 @@ def evaluate_command(cmd: str):
         r'^openspec\s+',
         r'^git\s+(?:status|diff|log|show|branch|add|commit|rev-parse|check-ignore|checkout|pull|fetch|remote|merge\s+--squash|push\s+(?:-u\s+)?origin\s+feat/[a-zA-Z0-9_.-]+|push\s+origin\s+--delete\s+feat/[a-zA-Z0-9_.-]+|rm)\b',
         r'^gh\s+(?:pr\s+(?:create|view|list|status|merge)|auth\s+status)\b',
-        r'^(?:ls|cat|head|tail|grep|find|which|stat|file|unzip|mkdir|touch|echo|tar|zip|sha256sum|cp)\b',
+        r'^(?:ls|cat|head|tail|grep|find|which|stat|file|unzip|mkdir|touch|echo|tar|zip|sha256sum|cp|wc|diff)\b',
         r'^chmod\s+\+x\s+',
         r'^rm\s+-rf\s+(?:bin|dist|build-[a-zA-Z0-9_-]+|files/\*\.mcpack|/tmp/.*)\b',
         r'^rm\s+-f\s+files/[a-zA-Z0-9_.-]+\.mcpack\b',

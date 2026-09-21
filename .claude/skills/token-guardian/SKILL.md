@@ -69,6 +69,20 @@ To eliminate latency and maximize token efficiency during file operations:
 - **Responsive Command Execution**:
   - Use bounded wait times (`WaitMsBeforeAsync: 3000` to `5000` ms) for synchronous Go commands to avoid task backgrounding.
   - Run compact, targeted tests (`go test -run TestX ./internal/...` or `./scripts/test-compact.sh`) during iterative work.
+- **Token-Economical Command Catalog**: Always prefer low-overhead command flags that bound or summarize output:
+  | Operation | Verbose Form (AVOID) | Economical Alternative (USE) | Token Savings |
+  |---|---|---|---|
+  | **Git Status** | `git status` | `git status -s` | ~80% (1 line per file) |
+  | **Git Log** | `git log -n 5` | `git log -n 3 --oneline` | ~75% (hash + title only) |
+  | **Git Diff Check** | `git diff` | `git diff --stat` (or `git diff -U2 <file>`) | ~85% (summary diff) |
+  | **Current Branch** | `git branch` | `git branch --show-current` | ~80% (clean single word) |
+  | **Testing** | `go test -v ./...` | `./scripts/test-compact.sh` (or `go test ./internal/...`) | ~90% (silent on pass) |
+  | **Code Search** | `grep -rn "term" .` | `grep -rn --exclude-dir={.git,bin,.venv,vendor} -m 10 "term" <dir>` | ~85% (bounds results) |
+  | **File Match List** | `grep -rn "term" <dir>` | `grep -l "term" <dir>/*` | ~75% (paths only) |
+  | **Symbol Location** | Reading full file | `grep -n "symbol" <file>` | Pinpoints lines for slicing |
+  | **File Listing** | `ls -la` / `find .` | `ls -1 <dir>` / `find <dir> -maxdepth 2` | ~70% (no noise) |
+  | **File Length** | Reading full file | `wc -l <file>` | ~95% (single number) |
+  | **File Preview** | Reading whole file | `head -n 25 <file>` / `tail -n 25 <file>` | ~80% (bounded peek) |
 
 ---
 
@@ -81,3 +95,4 @@ Before marking any task complete or archiving a change (`/opsx-archive`):
 4. [ ] Ensure no monolithic files exist in the changes.
 5. [ ] Ensure surgical reads were used (line slices instead of full dumps).
 6. [ ] Ensure surgical writes were used (contiguous replace instead of full overwrites).
+7. [ ] Ensure token-economical command alternatives were used (`git status -s`, `git log -n 3 --oneline`, etc.).

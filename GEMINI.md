@@ -31,7 +31,7 @@ You are explicitly permitted and encouraged to autonomously execute harmless dev
   - `git checkout -b feat/...`, `git checkout main`, `git pull origin main`, `git merge --squash ...`, `git push origin feat/...`
   - `gh pr create ...`, `gh pr view ...`, `gh pr status`
 - **Inspections**:
-  - `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p`
+  - `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p`, `wc`, `diff`
 
 ### Destructive & Strictly Prohibited Commands (Tier 3)
 The following commands are hard-blocked by project policy. You must NEVER propose or execute them:
@@ -121,6 +121,23 @@ To accelerate file operations and prevent latency or token waste:
 - **Responsive Command Execution**:
   - Use bounded wait times (`WaitMsBeforeAsync: 3000` to `5000` ms) for synchronous Go commands to avoid task backgrounding.
   - Run compact, targeted tests (`go test -run TestX ./internal/...` or `./scripts/test-compact.sh`) during iterative work.
+
+### Token-Economical Command Catalog
+Always prefer concise, flag-optimized commands over verbose defaults:
+
+| Operation | Verbose Form (AVOID) | Economical Alternative (USE) | Token Savings |
+|---|---|---|---|
+| **Git Status** | `git status` | `git status -s` | ~80% (1 line per file) |
+| **Git Log** | `git log -n 5` | `git log -n 3 --oneline` | ~75% (hash + title only) |
+| **Git Diff Check** | `git diff` | `git diff --stat` (or `git diff -U2 <file>`) | ~85% (summary diff) |
+| **Current Branch** | `git branch` | `git branch --show-current` | ~80% (clean single word) |
+| **Testing** | `go test -v ./...` | `./scripts/test-compact.sh` (or `go test ./internal/...`) | ~90% (silent on pass) |
+| **Code Search** | `grep -rn "term" .` | `grep -rn --exclude-dir={.git,bin,.venv,vendor} -m 10 "term" <dir>` | ~85% (bounds results) |
+| **File Match List** | `grep -rn "term" <dir>` | `grep -l "term" <dir>/*` | ~75% (paths only) |
+| **Symbol Location** | Reading full file | `grep -n "symbol" <file>` | Pinpoints lines for slicing |
+| **File Listing** | `ls -la` / `find .` | `ls -1 <dir>` / `find <dir> -maxdepth 2` | ~70% (no noise) |
+| **File Length** | Reading full file | `wc -l <file>` | ~95% (single number) |
+| **File Preview** | Reading whole file | `head -n 25 <file>` / `tail -n 25 <file>` | ~80% (bounded peek) |
 
 ---
 
