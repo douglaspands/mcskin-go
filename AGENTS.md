@@ -161,7 +161,7 @@ Always prefer concise, flag-optimized commands over verbose defaults:
   - **Browser Automation**: `google-chrome ...` (e.g. `google-chrome --headless=new ...`).
   - **OpenSpec**: `openspec ...`
   - **Git & GitHub Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git pull origin main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status`.
-  - **Inspections**: `ls`, `cat`, `head`, `tail`, `grep`, `find`, `stat`, `unzip -l`, `unzip -p`.
+  - **Inspections**: `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p`, `wc`, `diff`.
   - **Targeted Cleanup**: `rm -rf bin/`, `rm -rf files/*.mcpack`.
 
 - **Destructive & Strictly Blocked Commands (Tier 3)**:

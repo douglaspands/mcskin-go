@@ -1,5 +1,9 @@
 # mcskin
 
+<p align="center">
+  <b>Português (Brasil)</b> • <a href="README.en.md">English</a> • <a href="README.es.md">Español</a>
+</p>
+
 > **Crie e instale skins do Minecraft Bedrock direto no navegador — sem propaganda, sem cadastro, 100% seguro para crianças.** Um editor 3D/2D e conversor que roda no computador de casa e conecta com celulares e tablets da mesma rede Wi-Fi via QR Code.
 
 [![Idade Recomendada](https://img.shields.io/badge/crian%C3%A7as-6%2B%20anos-orange.svg)]()

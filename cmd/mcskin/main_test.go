@@ -292,4 +292,41 @@ func TestWindowsManifest_ExistsAndValid(t *testing.T) {
 	}
 }
 
+func TestParseEnvBool(t *testing.T) {
+	testCases := []struct {
+		envVal   string
+		set      bool
+		defVal   bool
+		expected bool
+	}{
+		{"", false, true, true},
+		{"", false, false, false},
+		{"1", true, false, true},
+		{"true", true, false, true},
+		{"TRUE", true, false, true},
+		{"yes", true, false, true},
+		{"on", true, false, true},
+		{"0", true, true, false},
+		{"false", true, true, false},
+		{"FALSE", true, true, false},
+		{"no", true, true, false},
+		{"off", true, true, false},
+		{"unknown", true, true, true},
+		{"unknown", true, false, false},
+	}
+
+	for _, tc := range testCases {
+		key := "TEST_ENV_BOOL_GATING"
+		if tc.set {
+			t.Setenv(key, tc.envVal)
+		} else {
+			os.Unsetenv(key)
+		}
+		got := parseEnvBool(key, tc.defVal)
+		if got != tc.expected {
+			t.Errorf("parseEnvBool(%q, %v) [env=%q, set=%v] = %v; want %v", key, tc.defVal, tc.envVal, tc.set, got, tc.expected)
+		}
+	}
+}
+
 

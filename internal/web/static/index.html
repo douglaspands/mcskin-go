@@ -29,16 +29,13 @@
         </div>
 
         <nav class="header-tabs" id="headerTabsDesktop">
-          <button type="button" class="header-tab-btn" id="tabBtnConverter">📦 Conversor</button>
-          <button type="button" class="header-tab-btn active" id="tabBtnEditor">🎨 Criador 3D</button>
+          <button type="button" class="header-tab-btn" id="tabBtnConverter">📦 <span data-i18n="tab_converter">Conversor</span></button>
+          <button type="button" class="header-tab-btn active" id="tabBtnEditor">🎨 <span data-i18n="tab_editor">Criador 3D</span></button>
         </nav>
 
         <div class="header-right-actions">
-          <button type="button" class="btn-header-fullscreen" id="btnHeaderFullscreen" title="Tela Cheia">
-            ⛶
-          </button>
           <button type="button" class="btn-hamburger" id="btnHamburger">
-            <span>☰</span> <span id="btnMenuText">MENU</span>
+            <span>☰</span> <span id="btnMenuText" data-i18n="menu_title">MENU</span>
           </button>
         </div>
       </header>
@@ -64,8 +61,8 @@
                   <!-- Dropzone Interativa -->
                   <div class="dropzone" id="dropzone" title="Toque ou arraste uma skin PNG">
                     <div class="dropzone-icon">✨</div>
-                    <div class="dropzone-text">Toque para escolher imagem PNG</div>
-                    <div class="dropzone-hint">ou arraste o arquivo da skin aqui</div>
+                    <div class="dropzone-text" data-i18n="dropzone_text">Toque para escolher imagem PNG</div>
+                    <div class="dropzone-hint" data-i18n="dropzone_or">ou arraste o arquivo da skin aqui</div>
                     <div class="dropzone-specs">Dimensões: 64x64, 64x32 ou 128x128</div>
                     <input type="file" id="skinInput" accept="image/png" style="display: none;">
                   </div>
@@ -160,17 +157,17 @@
                 <div class="converter-quick-guide">
                   <div class="guide-item">
                     <span class="guide-num">1</span>
-                    <span>Envie o PNG</span>
+                    <span data-i18n="guide_step1">Envie o PNG</span>
                   </div>
                   <div class="guide-arrow">➜</div>
                   <div class="guide-item">
                     <span class="guide-num">2</span>
-                    <span>Gere o .mcpack</span>
+                    <span data-i18n="guide_step2">Gere o .mcpack</span>
                   </div>
                   <div class="guide-arrow">➜</div>
                   <div class="guide-item">
                     <span class="guide-num">3</span>
-                    <span>Abra no Jogo</span>
+                    <span data-i18n="guide_step3">Abra no Jogo</span>
                   </div>
                 </div>
               </div>
@@ -218,16 +215,16 @@
               <!-- Pílula Central Flutuante: Modo Girar vs Pintar -->
               <div class="floating-mode-pill">
                 <button type="button" class="mode-pill-btn active" id="btnTouchRotate">
-                  <span>🖐️</span> <span>Girar</span>
+                  <span>🖐️</span> <span data-i18n="btn_rotate">Girar</span>
                 </button>
                 <button type="button" class="mode-pill-btn" id="btnTouchPaint">
-                  <span>🖌️</span> <span>Pintar</span>
+                  <span>🖌️</span> <span data-i18n="btn_paint">Pintar</span>
                 </button>
               </div>
 
               <!-- 1. BONEQUINHO 2D FLUTUANTE (MANNEQUIN DE FOCO) -->
               <div class="mannequin-widget" id="mannequinWidget" title="Toque nas partes para focar a câmera no boneco 3D">
-                <div class="mannequin-label">Focar</div>
+                <div class="mannequin-label" data-i18n="focus_label">Focar</div>
                 <div class="mannequin-doll">
                   <div class="mannequin-part mannequin-head" id="mqHead" data-mannequin-part="head" title="Focar Cabeça"></div>
                   <div class="mannequin-row">
@@ -244,13 +241,13 @@
 
               <!-- 2. CONTROLES DISCRETOS NA LOUSA (SUBIR, DESCER E ZOOM JUNTOS) -->
               <div class="zoom-vertical-controls" id="zoom3DVerticalControls">
-                <button type="button" class="btn-hud-discreet" id="btnZoom3DIn" title="Aumentar Zoom">🔍+</button>
-                <button type="button" class="btn-hud-discreet" id="btnZoom3DOut" title="Diminuir Zoom">🔍−</button>
+                <button type="button" class="btn-hud-discreet" id="btnZoom3DIn" title="Aumentar Zoom" data-i18n-attr="title:btn_zoom_in">🔍+</button>
+                <button type="button" class="btn-hud-discreet" id="btnZoom3DOut" title="Diminuir Zoom" data-i18n-attr="title:btn_zoom_out">🔍−</button>
                 <div class="hud-divider"></div>
-                <button type="button" class="btn-hud-discreet" id="btnPanUp" title="Subir o boneco (ver pernas/pés)">▲</button>
-                <button type="button" class="btn-hud-discreet" id="btnPanDown" title="Descer o boneco (ver cabeça)">▼</button>
+                <button type="button" class="btn-hud-discreet" id="btnPanUp" title="Subir o boneco (ver pernas/pés)" data-i18n-attr="title:hint_pan_up">▲</button>
+                <button type="button" class="btn-hud-discreet" id="btnPanDown" title="Descer o boneco (ver cabeça)" data-i18n-attr="title:hint_pan_down">▼</button>
                 <div class="hud-divider"></div>
-                <button type="button" class="btn-hud-discreet" id="btnZoom3DReset" title="Recentrar posição e zoom">⟲</button>
+                <button type="button" class="btn-hud-discreet" id="btnZoom3DReset" title="Recentrar posição e zoom" data-i18n-attr="title:hint_zoom_reset">⟲</button>
               </div>
 
               <!-- O PERSONAGEM 3D INTERATIVO (BONECO DO 3D REAL COM THREE.JS MANTIDO!) -->
@@ -261,6 +258,14 @@
               <!-- WRAPPER DO EDITOR 2D DESDOBRADO -->
               <div class="editor-2d-wrapper" id="wrapper2D" style="display: none;">
                 <canvas id="editor2DCanvas" width="512" height="512"></canvas>
+              </div>
+
+              <!-- CONTROLES DE ZOOM NO EDITOR 2D -->
+              <div class="zoom-vertical-controls" id="zoom2DVerticalControls" style="display: none;">
+                <button type="button" class="btn-hud-discreet" id="btnZoom2DIn" title="Aproximar folha 2D" data-i18n-attr="title:hint_zoom_2d_in">🔍+</button>
+                <button type="button" class="btn-hud-discreet" id="btnZoom2DOut" title="Afastar folha 2D" data-i18n-attr="title:hint_zoom_2d_out">🔍−</button>
+                <div class="hud-divider"></div>
+                <button type="button" class="btn-hud-discreet" id="btnZoom2DReset" title="Recentrar e restaurar escala 1x" data-i18n-attr="title:hint_zoom_2d_reset">⟲</button>
               </div>
 
               <!-- GAVETA DE CORES -->
@@ -298,35 +303,35 @@
             <!-- DICA CONTEXTUAL DIRETAMENTE ACIMA DOS BOTÕES -->
             <div class="dock-hint-strip" id="dockHintStrip">
               <span class="hint-icon" id="dockHintIcon">🖌️</span>
-              <span class="hint-text" id="dockHintText">Pincel: Toque no boneco para pintar pixels individuais com a cor ativa.</span>
+              <span class="hint-text" id="dockHintText" data-i18n="hint_default">Pincel: Toque no boneco para pintar pixels individuais com a cor ativa.</span>
               <span class="hint-badge" id="dockHintBadge">Ativo</span>
             </div>
 
             <!-- BARRA INFERIOR DE FERRAMENTAS -->
             <div class="editor-bottom-dock">
-              <div class="dock-tool-item active" id="toolPencil" title="Pintar pixel por pixel">
+              <div class="dock-tool-item active" id="toolPencil" title="Pintar pixel por pixel" data-i18n-attr="title:hint_pencil">
                 <span class="tool-icon">🖌️</span>
-                <span>Pincel</span>
+                <span data-i18n="tool_pencil">Pincel</span>
               </div>
 
-              <div class="dock-tool-item" id="toolBucket" title="Preencher face inteira">
+              <div class="dock-tool-item" id="toolBucket" title="Preencher face inteira" data-i18n-attr="title:hint_bucket">
                 <span class="tool-icon">🪣</span>
-                <span>Balde</span>
+                <span data-i18n="tool_bucket">Balde</span>
               </div>
 
-              <div class="dock-tool-item" id="toolRecolor" title="Substituir todas as cores iguais">
+              <div class="dock-tool-item" id="toolRecolor" title="Substituir todas as cores iguais" data-i18n-attr="title:hint_recolor">
                 <span class="tool-icon">🔄</span>
-                <span>Trocar</span>
+                <span data-i18n="tool_recolor">Trocar</span>
               </div>
 
-              <div class="dock-tool-item" id="toolEraser" title="Apagar pixels">
+              <div class="dock-tool-item" id="toolEraser" title="Apagar pixels" data-i18n-attr="title:hint_eraser">
                 <span class="tool-icon">🧹</span>
-                <span>Apagar</span>
+                <span data-i18n="tool_eraser">Apagar</span>
               </div>
 
-              <div class="dock-tool-item" id="toolColorPicker" title="Escolher cor">
+              <div class="dock-tool-item" id="toolColorPicker" title="Escolher cor" data-i18n-attr="title:hint_color_picker">
                 <div class="active-color-swatch" id="activeColorSwatch"></div>
-                <span>Cores</span>
+                <span data-i18n="tool_colors">Cores</span>
               </div>
             </div>
 
@@ -341,11 +346,20 @@
             <button type="button" class="btn-action-icon" id="btnCollapseDesktopSidebar" title="Ocultar Painel Lateral">▶</button>
           </div>
 
+          <div class="drawer-lang-selector-group">
+            <div class="drawer-section-title" data-i18n="lang_select_title">🌐 Idioma:</div>
+            <div class="lang-segmented-control" role="group" aria-label="Language">
+              <button type="button" class="btn-lang-segment" data-lang-btn="pt-BR">PT</button>
+              <button type="button" class="btn-lang-segment" data-lang-btn="en">EN</button>
+              <button type="button" class="btn-lang-segment" data-lang-btn="es">ES</button>
+            </div>
+          </div>
+
           <div>
-            <div class="drawer-section-title">Navegação:</div>
-            <button type="button" class="drawer-nav-item" id="sideBtnConv">📦 Conversor de Skin</button>
+            <div class="drawer-section-title" data-i18n="nav_section_title">Navegação:</div>
+            <button type="button" class="drawer-nav-item" id="sideBtnConv">📦 <span data-i18n="tab_converter">Conversor de Skin</span></button>
             <button type="button" class="drawer-nav-item active" id="sideBtnEdit" style="justify-content: space-between;">
-              <span style="display: flex; align-items: center; gap: 8px;">🎨 Criador de Skins 3D</span>
+              <span style="display: flex; align-items: center; gap: 8px;">🎨 <span data-i18n="tab_editor">Criador de Skins 3D</span></span>
               <span class="nav-arrow" id="sideNavArrow">▾</span>
             </button>
 
@@ -354,42 +368,42 @@
               <button type="button" class="submenu-item-btn" id="sideBtnNewSkin" title="Começar uma nova skin do zero">
                 <span class="sub-icon">📄</span>
                 <div class="sub-text">
-                  <div class="sub-title">Nova Skin</div>
-                  <div class="sub-desc">Steve, Alex ou em branco</div>
+                  <div class="sub-title" data-i18n="new_skin">Nova Skin</div>
+                  <div class="sub-desc" data-i18n="new_skin_desc">Steve, Alex ou em branco</div>
                 </div>
               </button>
 
               <button type="button" class="submenu-item-btn" id="sideBtnOpenSkin" title="Abrir arquivo PNG do computador ou celular">
                 <span class="sub-icon">📂</span>
                 <div class="sub-text">
-                  <div class="sub-title">Abrir / Upload PNG</div>
-                  <div class="sub-desc">Continuar editando skin</div>
+                  <div class="sub-title" data-i18n="open_skin">Abrir / Upload PNG</div>
+                  <div class="sub-desc" data-i18n="open_skin_desc">Continuar editando skin</div>
                 </div>
               </button>
 
               <button type="button" class="submenu-item-btn" id="sideBtnSavePng" title="Exportar imagem PNG da skin">
                 <span class="sub-icon">💾</span>
                 <div class="sub-text">
-                  <div class="sub-title">Salvar Imagem PNG</div>
-                  <div class="sub-desc">Textura 64x64 transparente</div>
+                  <div class="sub-title" data-i18n="save_png">Salvar Imagem PNG</div>
+                  <div class="sub-desc" data-i18n="save_png_desc">Textura 64x64 transparente</div>
                 </div>
               </button>
 
               <button type="button" class="submenu-item-btn btn-mcpack-highlight" id="sideBtnDownloadMcpack" title="Gerar pacote Bedrock pronto para o jogo">
                 <span class="sub-icon">⚡</span>
                 <div class="sub-text">
-                  <div class="sub-title">Baixar .mcpack</div>
-                  <div class="sub-desc">Instalar direto no Bedrock</div>
+                  <div class="sub-title" data-i18n="download_mcpack">Baixar .mcpack</div>
+                  <div class="sub-desc" data-i18n="download_mcpack_desc">Instalar direto no Bedrock</div>
                 </div>
               </button>
             </div>
           </div>
 
           <div>
-            <div class="drawer-section-title">📱 Conectar no Celular:</div>
+            <div class="drawer-section-title" data-i18n="connect_device">📱 Conectar no Celular:</div>
             <div class="drawer-wifi-card">
               <div class="drawer-wifi-header">
-                <span>📶 Celular / Wi-Fi</span>
+                <span data-i18n="wifi_header">📶 Celular / Wi-Fi</span>
                 <span class="wifi-status-badge">🟢 Online</span>
               </div>
               <div class="drawer-qr-preview" id="sideQrPreview" title="Clique para ampliar o QR Code">
@@ -398,14 +412,15 @@
               <div class="wifi-ip-container">
                 <div class="wifi-ip-box" id="sideWifiIp">http://localhost:8080</div>
                 <button type="button" class="btn-wifi-copy" id="btnCopyIpSide" title="Copiar endereço IP">
-                  <span class="copy-icon-glyph">📋</span> <span class="copy-text-label">Copiar Endereço IP</span>
+                  <span class="copy-icon-glyph">📋</span> <span class="copy-text-label" data-i18n="copy_ip">Copiar Endereço IP</span>
                 </button>
               </div>
             </div>
           </div>
 
           <div style="margin-top: auto;">
-            <button type="button" class="btn-drawer-shutdown" id="btnSideShutdown">🛑 Desligar Servidor</button>
+            <button type="button" class="btn-drawer-fullscreen" id="btnSideFullscreen">⛶ <span data-i18n="fullscreen">Tela Cheia</span></button>
+            <button type="button" class="btn-drawer-shutdown" id="btnSideShutdown">🛑 <span data-i18n="shutdown">Desligar Servidor</span></button>
           </div>
         </aside>
 
@@ -420,11 +435,20 @@
         </div>
 
         <div class="drawer-body">
+          <div class="drawer-lang-selector-group">
+            <div class="drawer-section-title" data-i18n="lang_select_title">🌐 Idioma:</div>
+            <div class="lang-segmented-control" role="group" aria-label="Language">
+              <button type="button" class="btn-lang-segment" data-lang-btn="pt-BR">PT</button>
+              <button type="button" class="btn-lang-segment" data-lang-btn="en">EN</button>
+              <button type="button" class="btn-lang-segment" data-lang-btn="es">ES</button>
+            </div>
+          </div>
+
           <div>
-            <div class="drawer-section-title">Navegação:</div>
-            <button type="button" class="drawer-nav-item" id="drawerItemConv">📦 Conversor de Skin</button>
+            <div class="drawer-section-title" data-i18n="nav_section_title">Navegação:</div>
+            <button type="button" class="drawer-nav-item" id="drawerItemConv">📦 <span data-i18n="tab_converter">Conversor de Skin</span></button>
             <button type="button" class="drawer-nav-item active" id="drawerItemEdit" style="justify-content: space-between;">
-              <span style="display: flex; align-items: center; gap: 8px;">🎨 Criador 3D</span>
+              <span style="display: flex; align-items: center; gap: 8px;">🎨 <span data-i18n="tab_editor">Criador 3D</span></span>
               <span class="nav-arrow" id="drawerNavArrow">▾</span>
             </button>
 
@@ -433,42 +457,42 @@
               <button type="button" class="submenu-item-btn" id="drawerBtnNewSkin" title="Começar uma nova skin do zero">
                 <span class="sub-icon">📄</span>
                 <div class="sub-text">
-                  <div class="sub-title">Nova Skin</div>
-                  <div class="sub-desc">Steve, Alex ou em branco</div>
+                  <div class="sub-title" data-i18n="new_skin">Nova Skin</div>
+                  <div class="sub-desc" data-i18n="new_skin_desc">Steve, Alex ou em branco</div>
                 </div>
               </button>
 
               <button type="button" class="submenu-item-btn" id="drawerBtnOpenSkin" title="Abrir arquivo PNG do seu aparelho">
                 <span class="sub-icon">📂</span>
                 <div class="sub-text">
-                  <div class="sub-title">Abrir / Upload PNG</div>
-                  <div class="sub-desc">Carregar imagem para editar</div>
+                  <div class="sub-title" data-i18n="open_skin">Abrir / Upload PNG</div>
+                  <div class="sub-desc" data-i18n="open_skin_desc">Carregar imagem para editar</div>
                 </div>
               </button>
 
               <button type="button" class="submenu-item-btn" id="drawerBtnSavePng" title="Exportar imagem PNG da skin">
                 <span class="sub-icon">💾</span>
                 <div class="sub-text">
-                  <div class="sub-title">Salvar Imagem PNG</div>
-                  <div class="sub-desc">Download 64x64 RGBA</div>
+                  <div class="sub-title" data-i18n="save_png">Salvar Imagem PNG</div>
+                  <div class="sub-desc" data-i18n="save_png_desc">Download 64x64 RGBA</div>
                 </div>
               </button>
 
               <button type="button" class="submenu-item-btn btn-mcpack-highlight" id="drawerBtnDownloadMcpack" title="Gerar pacote Bedrock pronto para o jogo">
                 <span class="sub-icon">⚡</span>
                 <div class="sub-text">
-                  <div class="sub-title">Baixar .mcpack</div>
-                  <div class="sub-desc">Instalar no Bedrock</div>
+                  <div class="sub-title" data-i18n="download_mcpack">Baixar .mcpack</div>
+                  <div class="sub-desc" data-i18n="download_mcpack_desc">Instalar no Bedrock</div>
                 </div>
               </button>
             </div>
           </div>
 
           <div>
-            <div class="drawer-section-title">📱 Conectar outro aparelho:</div>
+            <div class="drawer-section-title" data-i18n="connect_device">📱 Conectar outro aparelho:</div>
             <div class="drawer-wifi-card">
               <div class="drawer-wifi-header">
-                <span>📶 Celular / Wi-Fi</span>
+                <span data-i18n="wifi_header">📶 Celular / Wi-Fi</span>
                 <span class="wifi-status-badge">🟢 Online</span>
               </div>
               <div class="drawer-qr-preview" id="drawerQrPreview" title="Toque para ampliar o QR Code">
@@ -477,16 +501,17 @@
               <div class="wifi-ip-container">
                 <div class="wifi-ip-box" id="drawerWifiIp">http://localhost:8080</div>
                 <button type="button" class="btn-wifi-copy" id="btnCopyIpDrawer" title="Copiar endereço IP">
-                  <span class="copy-icon-glyph">📋</span> <span class="copy-text-label">Copiar Endereço IP</span>
+                  <span class="copy-icon-glyph">📋</span> <span class="copy-text-label" data-i18n="copy_ip">Copiar Endereço IP</span>
                 </button>
               </div>
-              <button type="button" class="drawer-btn-qr" id="drawerBtnQrModal">🔍 Ampliar QR Code</button>
+              <button type="button" class="drawer-btn-qr" id="drawerBtnQrModal" data-i18n="expand_qr">🔍 Ampliar QR Code</button>
             </div>
           </div>
         </div>
 
         <div class="drawer-footer">
-          <button type="button" class="btn-drawer-shutdown" id="drawerBtnShutdown">🛑 Desligar Servidor</button>
+          <button type="button" class="btn-drawer-fullscreen" id="btnHeaderFullscreen">⛶ <span data-i18n="fullscreen">Tela Cheia</span></button>
+          <button type="button" class="btn-drawer-shutdown" id="drawerBtnShutdown">🛑 <span data-i18n="shutdown">Desligar Servidor</span></button>
         </div>
       </div>
 
@@ -508,11 +533,11 @@
   <!-- MODAL DESLIGAMENTO -->
   <div class="modal-backdrop" id="shutdownModal" style="display: none;">
     <div class="modal-card" style="border-color: var(--mc-redstone);">
-      <h3 style="color: var(--mc-redstone); display: flex; align-items: center; gap: 6px;">🛑 Desligar Servidor</h3>
-      <p style="color: #ccc; font-size: 0.85rem; margin: 10px 0;">Deseja realmente encerrar o servidor?</p>
+      <h3 style="color: var(--mc-redstone); display: flex; align-items: center; gap: 6px;">🛑 <span data-i18n="shutdown_title">Desligar Servidor</span></h3>
+      <p style="color: #ccc; font-size: 0.85rem; margin: 10px 0;" data-i18n="shutdown_confirm">Deseja realmente encerrar o servidor?</p>
       <div style="display: flex; gap: 8px; width: 100%;">
-        <button type="button" class="btn-minecraft-giant" style="background: #e74c3c; flex: 1; padding: 8px;" id="btnConfirmShutdown">Sim, Desligar</button>
-        <button type="button" class="btn-minecraft-secondary btn-modal-cancel" style="flex: 1; padding: 8px;" id="btnCancelShutdown">Cancelar</button>
+        <button type="button" class="btn-minecraft-giant" style="background: #e74c3c; flex: 1; padding: 8px;" id="btnConfirmShutdown" data-i18n="shutdown_ok">Sim, Desligar</button>
+        <button type="button" class="btn-minecraft-secondary btn-modal-cancel" style="flex: 1; padding: 8px;" id="btnCancelShutdown" data-i18n="shutdown_cancel">Cancelar</button>
       </div>
     </div>
   </div>
@@ -522,12 +547,12 @@
     <div class="modal-card">
       <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
         <h3 style="color: var(--mc-gold); margin: 0; font-size: 1.05rem; display: flex; align-items: center; gap: 6px;">
-          <span>📄</span> Iniciar Nova Skin
+          <span>📄</span> <span data-i18n="modal_new_skin_title">Iniciar Nova Skin</span>
         </h3>
         <button type="button" class="btn-action-icon" id="btnCloseNewModal">✖</button>
       </div>
 
-      <p style="color: #ccc; font-size: 0.8rem; margin: 4px 0 10px 0; text-align: center;">
+      <p style="color: #ccc; font-size: 0.8rem; margin: 4px 0 10px 0; text-align: center;" data-i18n="modal_new_skin_desc">
         Escolha o ponto de partida para a sua nova criação:
       </p>
 
@@ -535,7 +560,7 @@
         <button type="button" class="drawer-nav-item btn-preset-option" id="btnNewSteve" data-preset="steve">
           <span style="font-size: 1.3rem;">👤</span>
           <div style="text-align: left;">
-            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;">Steve Clássico</div>
+            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;" data-i18n="model_steve">Steve Clássico</div>
             <div style="font-size: 0.7rem; color: #aaa;">Braços padrão de 4 pixels</div>
           </div>
         </button>
@@ -543,7 +568,7 @@
         <button type="button" class="drawer-nav-item btn-preset-option" id="btnNewAlex" data-preset="alex">
           <span style="font-size: 1.3rem;">👱</span>
           <div style="text-align: left;">
-            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;">Alex Slim</div>
+            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;" data-i18n="model_alex">Alex Slim</div>
             <div style="font-size: 0.7rem; color: #aaa;">Braços finos de 3 pixels</div>
           </div>
         </button>
@@ -551,13 +576,13 @@
         <button type="button" class="drawer-nav-item btn-preset-option" id="btnNewBlank" data-preset="blank">
           <span style="font-size: 1.3rem;">⬜</span>
           <div style="text-align: left;">
-            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;">Skin em Branco (Limpa)</div>
-            <div style="font-size: 0.7rem; color: #aaa;">Comece a pintar do zero absoluto</div>
+            <div style="font-size: 0.85rem; font-weight: 900; color: #fff;" data-i18n="blank_skin">Skin em Branco (Limpa)</div>
+            <div style="font-size: 0.7rem; color: #aaa;" data-i18n="blank_desc">Comece a pintar do zero absoluto</div>
           </div>
         </button>
       </div>
 
-      <button type="button" class="btn-minecraft-secondary btn-modal-cancel" id="btnCancelNewModal" style="width: 100%; margin-top: 4px;">Cancelar</button>
+      <button type="button" class="btn-minecraft-secondary btn-modal-cancel" id="btnCancelNewModal" style="width: 100%; margin-top: 4px;" data-i18n="shutdown_cancel">Cancelar</button>
     </div>
   </div>
 
@@ -624,9 +649,8 @@
   <div class="goodbye-overlay" id="goodbyeOverlay" style="display: none;">
     <div class="goodbye-card">
       <div class="goodbye-icon">⛏️</div>
-      <h2>Servidor Desligado com Sucesso!</h2>
-      <p>Obrigado por usar o <strong>mcskin</strong>. Até a próxima aventura!</p>
-      <p class="goodbye-hint">Você já pode fechar esta aba com segurança.</p>
+      <h2 data-i18n="shutdown_goodbye_title">Servidor Desligado com Sucesso!</h2>
+      <p data-i18n="shutdown_goodbye_desc">O servidor mcskin foi desligado com sucesso. Você pode fechar esta aba com segurança.</p>
     </div>
   </div>
 

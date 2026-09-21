@@ -3,47 +3,50 @@
  * @description Manages 2D pixel editor, UV texture templates, zoom controls, and undo/redo history.
  */
 
-import { playSound, launchConfetti } from "./fx.js";
+import { playSound } from "./fx.js";
 import { buildGridOverlayCanvas, update3DTexture } from "./editor3d.js";
-import { promptSkinName } from "./converter.js";
+import { bindEditorExports } from "./editor-exporter.js";
 
 export const textureCanvas = document.createElement("canvas");
 export const textureCtx = textureCanvas.getContext("2d", { willReadFrequently: true });
 export let texW = 64, texH = 64;
 textureCanvas.width = texW; textureCanvas.height = texH;
 
-const BASE_2D_CANVAS_SIZE = 512, MIN_ZOOM_2D = 1, MAX_ZOOM_2D = 4, ZOOM_2D_STEP = 0.5;
-let zoomFactor2D = 1;
+const BASE_2D_CANVAS_SIZE = 512, MIN_ZOOM_2D = 1, MAX_ZOOM_2D = 4, ZOOM_2D_STEP = 0.25;
+let zoomFactor2D = 1, panX = 0, panY = 0;
 export let gridEnabled = false;
+
+export function update2DTransform() {
+  const canvas = document.getElementById("editor2DCanvas");
+  if (!canvas) return;
+  if (zoomFactor2D <= 1) { panX = 0; panY = 0; }
+  canvas.style.transform = `translate(${Math.round(panX)}px, ${Math.round(panY)}px) scale(${zoomFactor2D})`;
+}
+export function reset2DView() { zoomFactor2D = 1; panX = 0; panY = 0; update2DTransform(); }
 
 const MAX_UNDO = 20, undoStack = [], redoStack = [];
 let lastPaintedCoord = null;
 
 export function setTextureResolution(w, h) {
   if (texW === w && texH === h && textureCanvas.width === w && textureCanvas.height === h) return;
-  texW = w; texH = h;
-  textureCanvas.width = w; textureCanvas.height = h;
-  undoStack.length = 0; redoStack.length = 0;
-  lastPaintedCoord = null;
+  texW = w; texH = h; textureCanvas.width = w; textureCanvas.height = h;
+  undoStack.length = 0; redoStack.length = 0; lastPaintedCoord = null;
   syncTexture();
 }
 
 export const pushUndo = () => {
-  redoStack.length = 0;
-  undoStack.push(textureCtx.getImageData(0, 0, texW, texH));
+  redoStack.length = 0; undoStack.push(textureCtx.getImageData(0, 0, texW, texH));
   if (undoStack.length > MAX_UNDO) undoStack.shift();
 };
 export const undo = () => {
   if (!undoStack.length) return;
   redoStack.push(textureCtx.getImageData(0, 0, texW, texH));
-  textureCtx.putImageData(undoStack.pop(), 0, 0);
-  syncTexture(); playSound("click");
+  textureCtx.putImageData(undoStack.pop(), 0, 0); syncTexture(); playSound("click");
 };
 export const redo = () => {
   if (!redoStack.length) return;
   undoStack.push(textureCtx.getImageData(0, 0, texW, texH));
-  textureCtx.putImageData(redoStack.pop(), 0, 0);
-  syncTexture(); playSound("click");
+  textureCtx.putImageData(redoStack.pop(), 0, 0); syncTexture(); playSound("click");
 };
 
 export function syncTexture() {
@@ -58,29 +61,22 @@ export function loadTemplate(type, modelType = "classic") {
   const fb = (x, y, w, h, col) => { textureCtx.fillStyle = col; textureCtx.fillRect(x * s, y * s, w * s, h * s); };
   const isBlank = type === "blank", isAlex = type === "alex";
   if (type === "steve" || isAlex || isBlank) {
-    const skinTone = isBlank ? "#fff" : (isAlex ? "#f1c27d" : "#d39a74"), hair = isBlank ? "#fff" : (isAlex ? "#d35400" : "#462c16");
-    const shirt = isBlank ? "#fff" : (isAlex ? "#5da632" : "#0093a8"), pants = isBlank ? "#fff" : (isAlex ? "#4a3c31" : "#2e3e7e"), shoes = isBlank ? "#fff" : "#404040";
-    const eyeColor = isBlank ? "#fff" : (isAlex ? "#4aa338" : "#2980b9");
-
+    const skinTone = isBlank ? "#fff" : (isAlex ? "#f1c27d" : "#d39a74"), hair = isBlank ? "#fff" : (isAlex ? "#d35400" : "#462c16"),
+      shirt = isBlank ? "#fff" : (isAlex ? "#5da632" : "#0093a8"), pants = isBlank ? "#fff" : (isAlex ? "#4a3c31" : "#2e3e7e"),
+      shoes = isBlank ? "#fff" : "#404040", eyeColor = isBlank ? "#fff" : (isAlex ? "#4aa338" : "#2980b9"), armW = modelType === "slim" ? 3 : 4;
     fb(8, 0, 8, 8, hair); fb(16, 0, 8, 8, skinTone); fb(0, 8, 32, 8, hair); fb(8, 8, 8, 8, skinTone); fb(8, 8, 8, 2, hair);
     fb(9, 12, 2, 1, "#fff"); fb(13, 12, 2, 1, "#fff"); fb(10, 12, 1, 1, eyeColor); fb(13, 12, 1, 1, eyeColor); fb(10, 14, 4, 1, isBlank ? "#fff" : (isAlex ? "#c0392b" : "#7d3f28"));
     fb(20, 16, 16, 4, shirt); fb(16, 20, 24, 12, shirt); fb(22, 20, 4, 2, skinTone);
-
-    const armW = modelType === "slim" ? 3 : 4;
     fb(44, 16, armW, 4, shirt); fb(44 + armW, 16, armW, 4, skinTone);
     fb(40, 20, 4, 4, shirt); fb(44, 20, armW, 4, shirt); fb(44 + armW, 20, 4, 4, shirt); fb(48 + armW, 20, armW, 4, shirt);
     fb(40, 24, 4, 8, skinTone); fb(44, 24, armW, 8, skinTone); fb(44 + armW, 24, 4, 8, skinTone); fb(48 + armW, 24, armW, 8, skinTone);
-
-    fb(4, 16, 4, 4, pants); fb(8, 16, 4, 4, shoes);
-    fb(0, 20, 16, 10, pants);
+    fb(4, 16, 4, 4, pants); fb(8, 16, 4, 4, shoes); fb(0, 20, 16, 10, pants);
     fb(0, 30, 4, 2, shoes); fb(4, 30, 4, 2, shoes); fb(8, 30, 4, 2, shoes); fb(12, 30, 4, 2, shoes);
-
     if (texH >= 64) {
       fb(36, 48, armW, 4, shirt); fb(36 + armW, 48, armW, 4, skinTone);
       fb(32, 52, 4, 4, shirt); fb(36, 52, armW, 4, shirt); fb(36 + armW, 52, 4, 4, shirt); fb(40 + armW, 52, armW, 4, shirt);
       fb(32, 56, 4, 8, skinTone); fb(36, 56, armW, 8, skinTone); fb(36 + armW, 56, 4, 8, skinTone); fb(40 + armW, 56, armW, 8, skinTone);
-      fb(20, 48, 4, 4, pants); fb(24, 48, 4, 4, shoes);
-      fb(16, 52, 16, 10, pants); fb(16, 62, 16, 2, shoes);
+      fb(20, 48, 4, 4, pants); fb(24, 48, 4, 4, shoes); fb(16, 52, 16, 10, pants); fb(16, 62, 16, 2, shoes);
     }
   }
   syncTexture();
@@ -110,18 +106,14 @@ export function paintPixel(px, py, { currentTool, currentColor, isGlassMode, onP
   }
   if (currentTool === "bucket") {
     floodFill(px, py, currentColor, isGlassMode ? 128 : 255);
-    lastPaintedCoord = null;
-    syncTexture(); playSound("click"); return;
+    lastPaintedCoord = null; syncTexture(); playSound("click"); return;
   }
   if (currentTool === "recolor") {
     recolorAll(px, py, currentColor, isGlassMode ? 128 : 255);
-    lastPaintedCoord = null;
-    syncTexture(); playSound("click"); return;
+    lastPaintedCoord = null; syncTexture(); playSound("click"); return;
   }
-  if (lastPaintedCoord?.x === px && lastPaintedCoord?.y === py &&
-      lastPaintedCoord?.tool === currentTool &&
-      lastPaintedCoord?.color === currentColor &&
-      lastPaintedCoord?.glass === isGlassMode) return;
+  const lp = lastPaintedCoord;
+  if (lp?.x === px && lp?.y === py && lp?.tool === currentTool && lp?.color === currentColor && lp?.glass === isGlassMode) return;
   lastPaintedCoord = { x: px, y: py, tool: currentTool, color: currentColor, glass: isGlassMode };
 
   if (currentTool === "eraser") {
@@ -193,8 +185,8 @@ function recolorAll(startX, startY, hexColor, fillA) {
 export function render2DSheet() {
   const canvas = document.getElementById("editor2DCanvas");
   if (!canvas) return;
-  const ctx = canvas.getContext("2d"), scale = (BASE_2D_CANVAS_SIZE / texW) * zoomFactor2D;
-  const cW = Math.round(texW * scale), cH = Math.round(texH * scale);
+  const ctx = canvas.getContext("2d"), scale = BASE_2D_CANVAS_SIZE / texW;
+  const cW = BASE_2D_CANVAS_SIZE, cH = Math.round(texH * scale);
   if (canvas.width !== cW || canvas.height !== cH) { canvas.width = cW; canvas.height = cH; }
   ctx.clearRect(0, 0, cW, cH); ctx.imageSmoothingEnabled = false;
 
@@ -203,13 +195,14 @@ export function render2DSheet() {
       ctx.fillStyle = ((x + y) % 2 === 0) ? "#1f1f1f" : "#282828"; ctx.fillRect(x * scale, y * scale, scale, scale);
     }
   }
-  ctx.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, cW, texH * scale);
+  ctx.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, cW, cH);
 
   if (gridEnabled) {
     ctx.strokeStyle = "rgba(0, 0, 0, 0.10)"; ctx.lineWidth = 1;
-    for (let gx = 0; gx <= texW; gx++) { const lx = Math.round(gx * scale) + 0.5; ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, texH * scale); ctx.stroke(); }
+    for (let gx = 0; gx <= texW; gx++) { const lx = Math.round(gx * scale) + 0.5; ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, cH); ctx.stroke(); }
     for (let gy = 0; gy <= texH; gy++) { const ly = Math.round(gy * scale) + 0.5; ctx.beginPath(); ctx.moveTo(0, ly); ctx.lineTo(cW, ly); ctx.stroke(); }
   }
+  update2DTransform();
 }
 
 /**
@@ -220,17 +213,25 @@ export function initEditor2D({ getToolState, onPickColor }) {
   const canvas = document.getElementById("editor2DCanvas");
   if (canvas) {
     const setZoom = (z) => {
-      zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, z));
+      zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, Math.round(z * 100) / 100));
       const s = document.getElementById("zoom2DSlider"); if (s) s.value = zoomFactor2D;
-      render2DSheet();
+      update2DTransform();
     };
     on("zoom2DSlider", "input", (e) => setZoom(parseFloat(e.target.value)));
     on("btnZoom2DIn", "click", () => { setZoom(zoomFactor2D + ZOOM_2D_STEP); playSound("click"); });
     on("btnZoom2DOut", "click", () => { setZoom(zoomFactor2D - ZOOM_2D_STEP); playSound("click"); });
+    on("btnZoom2DReset", "click", () => { reset2DView(); playSound("click"); });
 
-    let isDrawing = false;
+    const wrapper = document.getElementById("wrapper2D");
+    wrapper?.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      setZoom(zoomFactor2D + (e.deltaY < 0 ? ZOOM_2D_STEP : -ZOOM_2D_STEP));
+    }, { passive: false });
+
+    let isDrawing = false, isPanning = false, panStartX = 0, panStartY = 0, startPanX = 0, startPanY = 0;
     const getCoord = (e) => {
-      const rect = canvas.getBoundingClientRect(), cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.touches ? e.touches[0].clientX : e.clientX, cy = e.touches ? e.touches[0].clientY : e.clientY;
       return { x: Math.floor(((cx - rect.left) / rect.width) * texW), y: Math.floor(((cy - rect.top) / rect.height) * texH) };
     };
 
@@ -238,10 +239,51 @@ export function initEditor2D({ getToolState, onPickColor }) {
     const handleMove = (e) => { if (isDrawing) { const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); } };
     const handleEnd = () => { isDrawing = false; lastPaintedCoord = null; };
 
-    canvas.addEventListener("mousedown", handleStart); window.addEventListener("mousemove", handleMove); window.addEventListener("mouseup", handleEnd);
-    canvas.addEventListener("touchstart", (e) => { if (e.cancelable) e.preventDefault(); handleStart(e); }, { passive: false });
-    canvas.addEventListener("touchmove", (e) => { if (e.cancelable) e.preventDefault(); handleMove(e); }, { passive: false });
-    canvas.addEventListener("touchend", handleEnd);
+    canvas.addEventListener("mousedown", (e) => {
+      if (e.button === 1 || e.button === 2 || e.shiftKey || e.altKey) {
+        isPanning = true; panStartX = e.clientX; panStartY = e.clientY; startPanX = panX; startPanY = panY; e.preventDefault(); return;
+      }
+      handleStart(e);
+    });
+    window.addEventListener("mousemove", (e) => {
+      if (isPanning) { panX = startPanX + (e.clientX - panStartX); panY = startPanY + (e.clientY - panStartY); update2DTransform(); return; }
+      handleMove(e);
+    });
+    window.addEventListener("mouseup", (e) => { if (isPanning) { isPanning = false; return; } handleEnd(); });
+    canvas.addEventListener("contextmenu", (e) => { if (zoomFactor2D > 1) e.preventDefault(); });
+
+    let touchMode2D = "none", initDist = 0, initMidX = 0, initMidY = 0, initZ = 1, initPX = 0, initPY = 0;
+    canvas.addEventListener("touchstart", (e) => {
+      if (e.cancelable) e.preventDefault();
+      if (e.touches.length === 1) {
+        touchMode2D = "draw"; handleStart(e);
+      } else if (e.touches.length >= 2) {
+        touchMode2D = "gesture"; isDrawing = false; lastPaintedCoord = null;
+        const [t0, t1] = e.touches;
+        initDist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY) || 1;
+        initMidX = (t0.clientX + t1.clientX) / 2; initMidY = (t0.clientY + t1.clientY) / 2;
+        initZ = zoomFactor2D; initPX = panX; initPY = panY;
+      }
+    }, { passive: false });
+
+    canvas.addEventListener("touchmove", (e) => {
+      if (e.cancelable) e.preventDefault();
+      if (e.touches.length === 1 && touchMode2D === "draw") {
+        handleMove(e);
+      } else if (e.touches.length >= 2 && touchMode2D === "gesture") {
+        const [t0, t1] = e.touches;
+        const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY) || 1;
+        zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, Math.round((initZ * (dist / initDist)) * 100) / 100));
+        panX = initPX + ((t0.clientX + t1.clientX) / 2 - initMidX);
+        panY = initPY + ((t0.clientY + t1.clientY) / 2 - initMidY);
+        update2DTransform();
+      }
+    }, { passive: false });
+
+    canvas.addEventListener("touchend", (e) => {
+      if (e.touches.length === 0) { touchMode2D = "none"; handleEnd(); }
+      else if (e.touches.length === 1) { touchMode2D = "none"; }
+    });
   }
   on("btnToggleGrid", "click", () => {
     gridEnabled = !gridEnabled;
@@ -251,46 +293,5 @@ export function initEditor2D({ getToolState, onPickColor }) {
   ["btnUndo", "btnUndoIcon"].forEach((id) => on(id, "click", undo));
   ["btnRedo", "btnRedoIcon"].forEach((id) => on(id, "click", redo));
 
-  const getExportCanvas = (targetRes) => {
-    if (targetRes >= texW) return textureCanvas; // never upsample
-    const c = document.createElement("canvas"); c.width = c.height = targetRes;
-    const ctx = c.getContext("2d"); ctx.imageSmoothingEnabled = true; ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(textureCanvas, 0, 0, targetRes, targetRes);
-    return c;
-  };
-
-  document.getElementById("btnDownloadPng")?.addEventListener("click", () => {
-    promptSkinName((name, resChoice) => {
-      const exportCanvas = getExportCanvas(resChoice);
-      const a = document.createElement("a");
-      a.href = exportCanvas.toDataURL("image/png"); a.download = `${name}.png`;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); playSound("click");
-    }, { isHD: texW === 128 });
-  });
-
-  document.getElementById("btnEditorConvert")?.addEventListener("click", () => {
-    promptSkinName((name, resChoice) => {
-      const btn = document.getElementById("btnEditorConvert");
-      if (btn) { btn.disabled = true; btn.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>"; }
-      playSound("click");
-      const exportCanvas = getExportCanvas(resChoice);
-      exportCanvas.toBlob((blob) => {
-        if (!blob) { if (btn) { btn.disabled = false; btn.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>"; } return; }
-        const fd = new FormData();
-        fd.append("skin", blob, `${name}.png`); fd.append("name", name); fd.append("model", getToolState().currentModelType);
-        fetch("/api/convert", { method: "POST", body: fd })
-          .then((r) => r.ok ? r.blob() : r.json().then((e) => { throw new Error(e.error || "Erro"); }))
-          .then((b) => {
-            const url = URL.createObjectURL(b), a = document.createElement("a");
-            a.href = url; a.download = `${name}.mcpack`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            playSound("success"); launchConfetti();
-            const banner = document.getElementById("editorSuccessBanner"), msg = document.getElementById("editorSuccessMsg");
-            if (banner && msg) { msg.innerHTML = `Seu pacote <strong>${name}.mcpack</strong> foi baixado com sucesso!`; banner.style.display = "block"; }
-          })
-          .catch((err) => alert(err.message))
-          .finally(() => { if (btn) { btn.disabled = false; btn.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK! ⚡</span>"; } });
-      }, "image/png");
-    }, { isHD: texW === 128 });
-  });
+  bindEditorExports({ textureCanvas, getTexW: () => texW, getToolState });
 }

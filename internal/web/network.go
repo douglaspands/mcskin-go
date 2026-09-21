@@ -11,10 +11,12 @@ type AddrsProviderFunc func() ([]net.Addr, error)
 
 // ServerInfo contains details about server port and access URLs.
 type ServerInfo struct {
-	Port         int      `json:"port"`
-	LocalURL     string   `json:"localUrl"`
-	NetworkURLs  []string `json:"networkUrls"`
-	PreferredURL string   `json:"preferredUrl"`
+	Port           int      `json:"port"`
+	LocalURL       string   `json:"localUrl"`
+	NetworkURLs    []string `json:"networkUrls"`
+	PreferredURL   string   `json:"preferredUrl"`
+	EnableQR       bool     `json:"enableQr"`
+	EnableShutdown bool     `json:"enableShutdown"`
 }
 
 // FilterLANIPv4 extracts non-loopback, non-link-local IPv4 addresses from network interfaces.
@@ -80,9 +82,11 @@ func ResolveServerInfo(port int, provider AddrsProviderFunc) ServerInfo {
 	}
 
 	return ServerInfo{
-		Port:         port,
-		LocalURL:     localURL,
-		NetworkURLs:  networkURLs,
-		PreferredURL: preferredURL,
+		Port:           port,
+		LocalURL:       localURL,
+		NetworkURLs:    networkURLs,
+		PreferredURL:   preferredURL,
+		EnableQR:       true,
+		EnableShutdown: true,
 	}
 }

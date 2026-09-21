@@ -5,6 +5,7 @@
 
 import { initShutdown } from "./shutdown.js";
 import { initNetwork } from "./network.js";
+import { initI18n, setLanguage } from "./i18n.js";
 import { initConverter, updateSkinNameDisplays, sanitizeName } from "./converter.js";
 import { initEditor3D, set3DModel, getViewport3D } from "./editor3d.js";
 import {
@@ -26,11 +27,22 @@ import { initEditorMenu } from "./editor-menu.js";
 import { loadSkinFile } from "./editor-file-loader.js";
 
 document.addEventListener("DOMContentLoaded", () => {
+  initI18n();
   initShutdown();
   initNetwork();
   initConverter();
   initEditorMenu();
   initEditorLayout({ getViewport3D });
+
+  document.querySelectorAll("[data-lang-btn]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const lang = btn.dataset.langBtn;
+      if (lang) {
+        setLanguage(lang);
+        playSound("click");
+      }
+    });
+  });
 
   let editorInitialized = false;
   const initEditor = () => {

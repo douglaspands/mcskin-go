@@ -55,6 +55,26 @@
 | 2026-09-21 | skills-flash-sonnet-high-effort/task-3.1-token-and-openspec-validation | gemini-3.8-flash (High) | CLI validation and linting | ok |
 | 2026-09-21 | skills-flash-sonnet-high-effort/task-3.2-run-regression-suite | gemini-3.8-flash (High) | automated regression suite | ok |
 | 2026-09-21 | skills-flash-sonnet-high-effort/task-3.3-feature-qa-reviewer | gemini-3.8-flash (High) | adversarial PO/QA evaluation | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-1.1-backend-unit-tests | gemini-3.8-flash (High) | unit test writing with mocked HTTP requests | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-2.1-i18n-module | gemini-3.8-flash (High) | standalone ES6 translation module | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-6.1-readme-pt-br | gemini-3.8-flash (High) | Markdown documentation update | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-6.2-readme-en | gemini-3.8-flash (High) | English Markdown translation and writing | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-6.3-readme-es | gemini-3.8-flash (High) | Spanish Markdown translation and writing | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-1.2-backend-green | gemini-3.8-flash (High) | Go server and network handler logic | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-1.3-cli-env-vars | gemini-3.8-flash (High) | CLI flag and env var parsing | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-2.2-i18n-app-wiring | gemini-3.8-flash (High) | app initialization integration | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-3.1-2d-zoom-hud | gemini-3.8-flash (High) | HTML markup and CSS layout for 2D HUD | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-4.1-3d-hybrid-touch | gemini-3.8-flash (High) | touch event gesture disambiguation in 3D | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-1.4-go-test-compact | gemini-3.8-flash (High) | test runner verification | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-2.3-html-i18n-controls | gemini-3.8-flash (High) | HTML markup and declarative i18n bindings | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-2.4-js-message-i18n | gemini-3.8-flash (High) | frontend JavaScript message internationalization | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-3.2-editor2d-zoom-pan | gemini-3.8-flash (High) | 2D canvas transformation and gesture handling | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-3.3-palette-zoom-sync | gemini-3.8-flash (High) | view mode switching integration | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-4.2-3d-gesture-verification | gemini-3.8-flash (High) | manual/automated gesture verification | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-5.1-fullscreen-relocate | gemini-3.8-flash (High) | DOM repositioning and CSS styling | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-5.2-feature-gating-js | gemini-3.8-flash (High) | client-side feature toggle visibility logic | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-7.1-token-guardian-audit | gemini-3.8-flash (High) | token guardian file size inspection | ok |
+| 2026-09-21 | editor-i18n-zoom-controls/task-7.2-run-regression-suite | gemini-3.8-flash (High) | full test runner execution | ok |
 
 
 

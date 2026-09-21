@@ -41,9 +41,11 @@ func TestHandleInfo(t *testing.T) {
 	}
 
 	handler := web.NewHandler(web.Config{
-		Port:          8080,
-		AddrsProvider: mockProvider,
-		StaticFS:      fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("<h1>CRIE SKINS LEGAIS</h1>")}},
+		Port:           8080,
+		AddrsProvider:  mockProvider,
+		StaticFS:       fstest.MapFS{"index.html": &fstest.MapFile{Data: []byte("<h1>CRIE SKINS LEGAIS</h1>")}},
+		EnableQR:       true,
+		EnableShutdown: true,
 	})
 
 	req := httptest.NewRequest(http.MethodGet, "/api/info", nil)
@@ -68,6 +70,46 @@ func TestHandleInfo(t *testing.T) {
 	}
 	if len(info.NetworkURLs) != 1 || info.NetworkURLs[0] != "http://192.168.1.25:8080" {
 		t.Errorf("expected networkUrl http://192.168.1.25:8080, got %v", info.NetworkURLs)
+	}
+	if !info.EnableQR {
+		t.Errorf("expected enableQr true, got false")
+	}
+	if !info.EnableShutdown {
+		t.Errorf("expected enableShutdown true, got false")
+	}
+}
+
+func TestHandleInfo_CustomFlags(t *testing.T) {
+	handler := web.NewHandler(web.Config{
+		Port:           9090,
+		EnableQR:       false,
+		EnableShutdown: false,
+	})
+
+	req := httptest.NewRequest(http.MethodGet, "/api/info", nil)
+	rec := httptest.NewRecorder()
+	handler.ServeHTTP(rec, req)
+
+	if rec.Code != http.StatusOK {
+		t.Fatalf("expected status 200, got %d", rec.Code)
+	}
+
+	var info struct {
+		Port           int      `json:"port"`
+		LocalURL       string   `json:"localUrl"`
+		NetworkURLs    []string `json:"networkUrls"`
+		EnableQR       bool     `json:"enableQr"`
+		EnableShutdown bool     `json:"enableShutdown"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &info); err != nil {
+		t.Fatalf("failed to decode JSON: %v", err)
+	}
+
+	if info.EnableQR != false {
+		t.Errorf("expected EnableQR false, got %v", info.EnableQR)
+	}
+	if info.EnableShutdown != false {
+		t.Errorf("expected EnableShutdown false, got %v", info.EnableShutdown)
 	}
 }
 

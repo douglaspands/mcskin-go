@@ -5,6 +5,7 @@
 
 import { playSound, launchConfetti } from "./fx.js";
 import { processImageDimensions, downsampleImage } from "./editor-file-loader.js";
+import { t } from "./i18n.js";
 
 let selectedFile = null, loadedImage = null, currentSkinName = "";
 let currentUploadImage = null, currentUploadFile = null, converterTargetRes = 128;
@@ -265,7 +266,7 @@ export function initConverter() {
   btnConvert?.addEventListener("click", () => {
     if (!selectedFile) return;
     const finalName = sanitizeName(nameField?.value || currentSkinName || selectedFile.name.replace(/\.[^/.]+$/, ""));
-    btnConvert.disabled = true; btnConvert.innerHTML = "<span>⏳ CRIANDO PACOTE...</span>";
+    btnConvert.disabled = true; btnConvert.innerHTML = `<span>⏳ ${t("converting")}</span>`;
     hideErrors();
     const suc = getEl("successBanner"); if (suc) { suc.style.display = "none"; suc.classList.remove("active"); }
 
@@ -275,7 +276,7 @@ export function initConverter() {
     formData.append("model", getActiveModel());
 
     fetch("/api/convert", { method: "POST", body: formData })
-      .then((res) => res.ok ? res.blob() : res.json().then((d) => { throw new Error(d.error || "Erro ao gerar arquivo"); }))
+      .then((res) => res.ok ? res.blob() : res.json().then((d) => { throw new Error(d.error || t("convert_error")); }))
       .then((blob) => {
         playSound("success"); launchConfetti();
         const cleanName = finalName + ".mcpack", blobUrl = URL.createObjectURL(blob);
@@ -285,11 +286,11 @@ export function initConverter() {
         const fallback = getEl("downloadFallbackBtn");
         if (fallback) { fallback.href = blobUrl; fallback.download = cleanName; }
         if (suc) { suc.style.display = "flex"; suc.classList.add("active"); }
-        btnConvert.disabled = false; btnConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK ⚡</span>";
+        btnConvert.disabled = false; btnConvert.innerHTML = `<span>⚡ ${t("btn_convert")} ⚡</span>`;
       })
       .catch((err) => {
         showError(err.message);
-        btnConvert.disabled = false; btnConvert.innerHTML = "<span>⚡ CRIAR PACOTE .MCPACK ⚡</span>";
+        btnConvert.disabled = false; btnConvert.innerHTML = `<span>⚡ ${t("btn_convert")} ⚡</span>`;
       });
   });
 }

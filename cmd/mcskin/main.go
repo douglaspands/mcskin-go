@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strings"
 	"time"
 
 	"mcskin/internal/bedrock"
@@ -28,6 +29,21 @@ func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
 }
 
+func parseEnvBool(key string, defaultVal bool) bool {
+	val, ok := os.LookupEnv(key)
+	if !ok || val == "" {
+		return defaultVal
+	}
+	switch strings.ToLower(strings.TrimSpace(val)) {
+	case "1", "true", "yes", "on":
+		return true
+	case "0", "false", "no", "off":
+		return false
+	default:
+		return defaultVal
+	}
+}
+
 func defaultWebServerRunner(port int, openBrowser bool, stdout, stderr io.Writer) int {
 	staticFS, err := web.GetStaticFS()
 	if err != nil {
@@ -35,12 +51,17 @@ func defaultWebServerRunner(port int, openBrowser bool, stdout, stderr io.Writer
 		return 1
 	}
 
+	enableQR := parseEnvBool("MCSKIN_ENABLE_QR", true)
+	enableShutdown := parseEnvBool("MCSKIN_ENABLE_SHUTDOWN", true)
+
 	addr := fmt.Sprintf(":%d", port)
 	srv := &http.Server{Addr: addr}
 
 	cfg := web.Config{
-		Port:     port,
-		StaticFS: staticFS,
+		Port:           port,
+		StaticFS:       staticFS,
+		EnableQR:       enableQR,
+		EnableShutdown: enableShutdown,
 		ShutdownTrigger: func() error {
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()

@@ -25,6 +25,11 @@ func handleShutdown(cfg Config) http.HandlerFunc {
 			return
 		}
 
+		if !cfg.EnableShutdown {
+			writeJSONError(w, http.StatusForbidden, "O desligamento do servidor está desativado")
+			return
+		}
+
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		_ = json.NewEncoder(w).Encode(ShutdownResponse{

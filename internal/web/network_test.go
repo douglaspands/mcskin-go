@@ -77,4 +77,10 @@ func TestResolveServerInfo(t *testing.T) {
 	if info.PreferredURL != "http://192.168.0.42:8080" {
 		t.Errorf("expected preferred URL http://192.168.0.42:8080, got %s", info.PreferredURL)
 	}
+	if !info.EnableQR {
+		t.Errorf("expected default EnableQR to be true")
+	}
+	if !info.EnableShutdown {
+		t.Errorf("expected default EnableShutdown to be true")
+	}
 }
