@@ -105,7 +105,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 6. **Implement tasks (loop until done or blocked)**
 
    For each pending task:
-    - **Read model annotation**: Check the task's `<!-- model: ... | signal: ... -->` comment in `tasks.md`. If present, use that model for any subagent dispatched for this task. If absent, apply `model-selection` skill Decision Table to derive the tier.
+    - **Read model annotation**: Check the task's `<!-- model: ... | signal: ... -->` comment in `tasks.md`. If present, use that model for any subagent dispatched for this task. All subagents must be dispatched in **High Effort Mode** (`flash` on Antigravity, `sonnet` on Claude Code). If absent, apply `model-selection` skill (standardized on `flash (High)` / `sonnet (High)`).
     - **Log before starting**: Append one line to `.agents/model-log.md` before dispatching the task:
       ```
       | <YYYY-MM-DD> | <change-name>/<task-short-desc> | <model> | <signal> | pending |
@@ -136,7 +136,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - If paused: explain why and wait for guidance
    - **Automatic PO/QA Validation Trigger (Mandatory Directive)**:
      When all tasks are complete (`state: "all_done"` or N/N tasks complete):
-     - **Immediately and automatically invoke the `/feature-qa-reviewer` skill** (or execute the PO/QA verification protocol) to validate functional requirements, child usability (6+), Minecraft UX, cross-platform binaries, and Bedrock `.mcpack` compliance.
+     - **Immediately and automatically invoke the `/feature-qa-reviewer` skill in High Effort Mode** (Antigravity: `role: "PO/QA Reviewer"` with `flash (High)`; Claude Code: `subagent_type: "general-purpose"` with `sonnet (High)`) to validate functional requirements, child usability (6+), Minecraft UX, cross-platform binaries, and Bedrock `.mcpack` compliance.
      - **Bounded Loop Engineering (Defect Remediation)**:
         - If PO/QA issues an `APROVADO` verdict: Congratulate the user, commit implementation changes, and instruct the user to run `/openspec-archive-change` (or `/opsx-archive`). **Do NOT run archive automatically and do NOT prompt for PR/merge during the apply phase.**
        - If PO/QA returns `REPROVADO` or identifies defects/regressions:

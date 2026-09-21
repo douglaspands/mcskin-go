@@ -29,9 +29,10 @@ This skill combines two complementary perspectives:
 
 ## 2. Review Protocol
 
-When this skill is executed directly, or delegated to a subagent:
-- **Antigravity**: dispatch with `role: "PO/QA Reviewer"` and `model: flash`.
-- **Claude Code**: dispatch via the `Agent` tool with `subagent_type: "general-purpose"` and `model: "sonnet"` (see `.agents/skills/model-selection/SKILL.md`), passing this skill's file as context in the prompt since a fresh subagent starts with no memory of it.
+When this skill is executed directly or delegated to a subagent, it MUST run in **High Effort Mode** to ensure deep reasoning and thorough adversarial scrutiny:
+- **Antigravity**: dispatch with `role: "PO/QA Reviewer"` and `model: flash` in High Effort mode.
+- **Claude Code**: dispatch via the `Agent` tool with `subagent_type: "general-purpose"` and `model: "sonnet"` in High Effort mode (`/config` Effort Level → High in interactive sessions), passing this skill's file as context in the prompt since a fresh subagent starts with no memory of it.
+- **Deep Reasoning Mandate**: The adversarial persona must actively scrutinize functional requirements, child usability (6+), edge cases, cross-platform compilation, and Bedrock specification compliance without rushing or performing superficial reviews.
 
 ### Step 1: Context Intake
 1. Read `openspec/changes/<active-change>/proposal.md`.

@@ -105,7 +105,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
 6. **Implement tasks (loop until done or blocked)**
 
    For each pending task:
-   - **Read model annotation**: Check the task's `<!-- model: ... | signal: ... -->` comment in `tasks.md`. If present, use that model for any subagent dispatched for this task (the Claude Code half of the annotation is the short `Agent` tool `model` enum — `haiku`/`sonnet`/`opus`). If absent, apply the `model-selection` skill's Decision Table to derive the tier.
+   - **Read model annotation**: Check the task's `<!-- model: ... | signal: ... -->` comment in `tasks.md`. If present, use that model for any subagent dispatched for this task (all subagents must run in **High Effort Mode** with `model: "sonnet"`). If absent, apply the `model-selection` skill's Decision Table to derive the tier (standardized on `sonnet (High)`).
    - **Log before starting**: Append one line to `.agents/model-log.md` before dispatching the task:
      ```
      | <YYYY-MM-DD> | <change-name>/<task-short-desc> | <model> | <signal> | pending |
@@ -134,7 +134,7 @@ In both branches, never create the root as a side effect: do not run `openspec i
    - Tasks completed this session
    - Overall progress: "N/M tasks complete"
    - **Automatic PO/QA Validation Trigger (Mandatory Directive)**: When all tasks are complete (`state: "all_done"` or N/N tasks complete), before suggesting archive:
-     - **Immediately and automatically run the PO/QA verification protocol** from `.agents/skills/feature-qa-reviewer/SKILL.md` (not a registered Claude Code `Skill` — read that file directly, or dispatch it via the `Agent` tool with `subagent_type: "general-purpose"` and `model: "opus"` per its own Claude Code dispatch note) to validate functional requirements, child usability (6+), Minecraft UX, cross-platform binaries, and Bedrock `.mcpack` compliance.
+     - **Immediately and automatically run the PO/QA verification protocol** from `.claude/skills/feature-qa-reviewer/SKILL.md` in **High Effort Mode** (dispatch via the `Agent` tool with `subagent_type: "general-purpose"` and `model: "sonnet"` in High Effort mode per its Claude Code dispatch note) to validate functional requirements, child usability (6+), Minecraft UX, cross-platform binaries, and Bedrock `.mcpack` compliance.
      - **Bounded Loop Engineering (Defect Remediation)**:
        - If PO/QA issues an `APROVADO` verdict: congratulate the user, commit implementation changes, and instruct the user to run `/opsx:archive`. **Do NOT run archive automatically and do NOT prompt for PR/merge during the apply phase.**
        - If PO/QA returns `REPROVADO` or identifies defects/regressions: automatically request and apply adjustments using bounded Loop Engineering to prevent infinite loops:

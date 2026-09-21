@@ -67,9 +67,9 @@ When reporting changes to the user, use this compact format — **never paste th
 ## Subagent Offloading Rule
 
 If a prototype requires **generating 3+ variations** of the same screen:
-- Offload generation of each variation to a subagent.
-  - **Antigravity**: a `research` subagent.
-  - **Claude Code**: the `Agent` tool with `subagent_type: "general-purpose"` (or `"fork"` if the variation needs this conversation's context) and an explicit `model` per `.agents/skills/model-selection/SKILL.md` (`flash` tier → `sonnet`).
+- Offload generation of each variation to a subagent in **High Effort Mode**:
+  - **Antigravity**: a `research` or `self` subagent dispatched with `model: flash` in High Effort mode.
+  - **Claude Code**: the `Agent` tool with `subagent_type: "general-purpose"` (or `"fork"` if the variation needs this conversation's context) and explicit `model: "sonnet"` in High Effort mode per `.agents/skills/model-selection/SKILL.md`.
 - Receive only the final diff summary per variation.
 - Never generate all variations inline in the parent conversation.
 

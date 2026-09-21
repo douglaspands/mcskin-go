@@ -52,6 +52,8 @@ The following commands are hard-blocked by project policy. You must NEVER propos
   - Integration tests must be strictly segregated from unit tests (e.g., dedicated integration test suites or files).
 - **Zero Dependencies**: Go standard library only.
 - **Cross-Platform**: Windows (`.exe`) and Linux paths (`filepath.ToSlash` for ZIP entries).
+- **Standardized High-Effort Execution (`flash` / `sonnet`)**:
+  All subagents, task implementations, and skill executions (including `feature-qa-reviewer`) MUST strictly use **`flash` (Antigravity)** and **`sonnet` (Claude Code) in High Effort Mode** (high reasoning effort / thinking budget). The cheap tier (`flash_lite`, `haiku`) and heavy tier (`pro`, `opus`) are strictly prohibited per `.agents/skills/model-selection/SKILL.md`.
 - **OpenSpec Branching & Squash Merge Protocol**:
   - **First Step on `/opsx-propose`**: The absolute first command executed MUST be creating and checking out a dedicated feature branch:
     ```bash
@@ -59,7 +61,7 @@ The following commands are hard-blocked by project policy. You must NEVER propos
     ```
     This ensures complete isolation and allows immediate rollback if anything deviates from expectations.
   - **Automatic PO/QA Review upon Implementation Completion**:
-    Immediately upon finishing all tasks in `/openspec-apply-change` (or `/opsx-apply`), the harness MUST automatically execute the `feature-qa-reviewer` skill (or subagent with `role: "PO/QA Reviewer"`) to rigorously evaluate requirements, child usability (6+), Minecraft UX, and Bedrock `.mcpack` compliance.
+    Immediately upon finishing all tasks in `/openspec-apply-change` (or `/opsx-apply`), the harness MUST automatically execute the `feature-qa-reviewer` skill in High Effort Mode (`role: "PO/QA Reviewer"` with `flash (High)`) to rigorously evaluate requirements, child usability (6+), Minecraft UX, and Bedrock `.mcpack` compliance.
     - **Bounded Loop Remediation (Anti-Infinite Loop Protection)**:
       In case defects or rejections are detected, enter a bounded remediation loop using Loop Engineering:
       1. Maximum 3 iterations (`max_attempts = 3`).

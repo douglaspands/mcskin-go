@@ -47,6 +47,22 @@
 | 2026-09-21 | melhorar-readme-foco-web-infantil/task-2.1-validacao-links-imagens | gemini-3.8-flash | read-only verification | ok |
 | 2026-09-21 | melhorar-readme-foco-web-infantil/task-2.2-suite-testes | gemini-3.8-flash | script run verification | ok |
 | 2026-09-21 | melhorar-readme-foco-web-infantil/task-2.3-feature-qa-reviewer | gemini-3.8-flash | QA evaluation | ok |
+| 2026-09-21 | skills-flash-sonnet-high-effort/task-1.1-model-selection-skill | gemini-3.8-flash (High) | 1-file skill governance specification | ok |
+| 2026-09-21 | skills-flash-sonnet-high-effort/task-1.2-feature-qa-reviewer-skill | gemini-3.8-flash (High) | 1-file skill protocol update | ok |
+| 2026-09-21 | skills-flash-sonnet-high-effort/task-1.3-workflow-skills-alignment | gemini-3.8-flash (High) | 3-file skill alignment | ok |
+| 2026-09-21 | skills-flash-sonnet-high-effort/task-2.1-mirror-claude-skills | gemini-3.8-flash (High) | multi-file synchronization | ok |
+| 2026-09-21 | skills-flash-sonnet-high-effort/task-2.2-docs-guidelines-update | gemini-3.8-flash (High) | documentation governance | ok |
+| 2026-09-21 | skills-flash-sonnet-high-effort/task-3.1-token-and-openspec-validation | gemini-3.8-flash (High) | CLI validation and linting | ok |
+| 2026-09-21 | skills-flash-sonnet-high-effort/task-3.2-run-regression-suite | gemini-3.8-flash (High) | automated regression suite | ok |
+| 2026-09-21 | skills-flash-sonnet-high-effort/task-3.3-feature-qa-reviewer | gemini-3.8-flash (High) | adversarial PO/QA evaluation | ok |
+
+
+
+
+
+
+
+
 
 
 
