@@ -68,7 +68,7 @@ export function setViewMode(mode, { onRender2D, onRender3D } = {}) {
   if (is2D) {
     if (charWorld) charWorld.style.display = "none";
     if (mannequin) mannequin.style.display = "none";
-    if (touchPill) touchPill.style.display = "none";
+    if (touchPill) touchPill.style.display = "flex";
     if (zoomControls) zoomControls.style.display = "none";
     if (zoom2DControls) zoom2DControls.style.display = "flex";
     if (wrapper2D) wrapper2D.style.display = "flex";
@@ -78,7 +78,7 @@ export function setViewMode(mode, { onRender2D, onRender3D } = {}) {
     if (zoom2DControls) zoom2DControls.style.display = "none";
     if (charWorld) charWorld.style.display = "";
     if (mannequin) mannequin.style.display = "";
-    if (touchPill) touchPill.style.display = "";
+    if (touchPill) touchPill.style.display = "flex";
     if (zoomControls) zoomControls.style.display = "";
     if (onRender3D) onRender3D();
   }

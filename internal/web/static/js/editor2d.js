@@ -1,7 +1,4 @@
-/**
- * @file editor2d.js
- * @description Manages 2D pixel editor, UV texture templates, zoom controls, and undo/redo history.
- */
+// 2D pixel editor, UV texture templates, zoom controls, undo/redo history
 
 import { playSound } from "./fx.js";
 import { buildGridOverlayCanvas, update3DTexture } from "./editor3d.js";
@@ -19,7 +16,6 @@ export let gridEnabled = false;
 export function update2DTransform() {
   const canvas = document.getElementById("editor2DCanvas");
   if (!canvas) return;
-  if (zoomFactor2D <= 1) { panX = 0; panY = 0; }
   canvas.style.transform = `translate(${Math.round(panX)}px, ${Math.round(panY)}px) scale(${zoomFactor2D})`;
 }
 export function reset2DView() { zoomFactor2D = 1; panX = 0; panY = 0; update2DTransform(); }
@@ -94,9 +90,6 @@ const parseHex = (hex) => {
   return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
 };
 
-/**
- * Paints or erases a single pixel on the texture.
- */
 export function paintPixel(px, py, { currentTool, currentColor, isGlassMode, onPickColor }) {
   if (px < 0 || px >= texW || py < 0 || py >= texH) return;
   if (currentTool === "pipette") {
@@ -128,17 +121,10 @@ export function paintPixel(px, py, { currentTool, currentColor, isGlassMode, onP
 }
 
 function floodFill(startX, startY, hexColor, fillA) {
-  const [fillR, fillG, fillB] = parseHex(hexColor);
-  const imgData = textureCtx.getImageData(0, 0, texW, texH), data = imgData.data;
-  const sIdx = (startY * texW + startX) * 4;
-  const sR = data[sIdx], sG = data[sIdx + 1], sB = data[sIdx + 2], sA = data[sIdx + 3];
-  const isTargetTransparent = sA < 10;
-  if (!isTargetTransparent && sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
-
-  const matches = (pIdx, x, y) => isTargetTransparent
-    ? (data[pIdx + 3] < 10 && isBaseUV(x, y))
-    : (data[pIdx + 3] >= 10 && data[pIdx] === sR && data[pIdx + 1] === sG && data[pIdx + 2] === sB);
-
+  const [fillR, fillG, fillB] = parseHex(hexColor), imgData = textureCtx.getImageData(0, 0, texW, texH), data = imgData.data;
+  const sIdx = (startY * texW + startX) * 4, sR = data[sIdx], sG = data[sIdx + 1], sB = data[sIdx + 2], sA = data[sIdx + 3], isTrans = sA < 10;
+  if (!isTrans && sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
+  const matches = (pIdx, x, y) => isTrans ? (data[pIdx + 3] < 10 && isBaseUV(x, y)) : (data[pIdx + 3] >= 10 && data[pIdx] === sR && data[pIdx + 1] === sG && data[pIdx + 2] === sB);
   const queue = [[startX, startY]], visited = new Uint8Array(texW * texH);
   while (queue.length > 0) {
     const [x, y] = queue.pop(), idx = y * texW + x;
@@ -154,27 +140,14 @@ function floodFill(startX, startY, hexColor, fillA) {
   textureCtx.putImageData(imgData, 0, 0);
 }
 
-/**
- * Replaces every pixel matching the color at (startX, startY) with the given color.
- * Supports replacing transparent / blank pixels with solid colors like white.
- */
 function recolorAll(startX, startY, hexColor, fillA) {
-  const [fillR, fillG, fillB] = parseHex(hexColor);
-  const imgData = textureCtx.getImageData(0, 0, texW, texH), data = imgData.data;
-  const sIdx = (startY * texW + startX) * 4;
-  const sR = data[sIdx], sG = data[sIdx + 1], sB = data[sIdx + 2], sA = data[sIdx + 3];
-  const isTargetTransparent = sA < 10;
-  if (!isTargetTransparent && sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
-
+  const [fillR, fillG, fillB] = parseHex(hexColor), imgData = textureCtx.getImageData(0, 0, texW, texH), data = imgData.data;
+  const sIdx = (startY * texW + startX) * 4, sR = data[sIdx], sG = data[sIdx + 1], sB = data[sIdx + 2], sA = data[sIdx + 3], isTrans = sA < 10;
+  if (!isTrans && sR === fillR && sG === fillG && sB === fillB && sA === fillA) return;
   for (let i = 0; i < data.length; i += 4) {
     const pIdx = i / 4, px = pIdx % texW, py = (pIdx / texW) | 0;
-    if (isTargetTransparent) {
-      if (data[i + 3] < 10 && isBaseUV(px, py)) {
-        data[i] = fillR; data[i + 1] = fillG; data[i + 2] = fillB; data[i + 3] = fillA;
-      }
-    } else if (data[i + 3] >= 10 && data[i] === sR && data[i + 1] === sG && data[i + 2] === sB) {
-      data[i] = fillR; data[i + 1] = fillG; data[i + 2] = fillB; data[i + 3] = fillA;
-    }
+    const match = isTrans ? (data[i + 3] < 10 && isBaseUV(px, py)) : (data[i + 3] >= 10 && data[i] === sR && data[i + 1] === sG && data[i + 2] === sB);
+    if (match) { data[i] = fillR; data[i + 1] = fillG; data[i + 2] = fillB; data[i + 3] = fillA; }
   }
   textureCtx.putImageData(imgData, 0, 0);
 }
@@ -191,12 +164,9 @@ export function render2DSheet() {
   ctx.clearRect(0, 0, cW, cH); ctx.imageSmoothingEnabled = false;
 
   for (let y = 0; y < texH; y++) {
-    for (let x = 0; x < texW; x++) {
-      ctx.fillStyle = ((x + y) % 2 === 0) ? "#1f1f1f" : "#282828"; ctx.fillRect(x * scale, y * scale, scale, scale);
-    }
+    for (let x = 0; x < texW; x++) { ctx.fillStyle = ((x + y) % 2 === 0) ? "#1f1f1f" : "#282828"; ctx.fillRect(x * scale, y * scale, scale, scale); }
   }
   ctx.drawImage(textureCanvas, 0, 0, texW, texH, 0, 0, cW, cH);
-
   if (gridEnabled) {
     ctx.strokeStyle = "rgba(0, 0, 0, 0.10)"; ctx.lineWidth = 1;
     for (let gx = 0; gx <= texW; gx++) { const lx = Math.round(gx * scale) + 0.5; ctx.beginPath(); ctx.moveTo(lx, 0); ctx.lineTo(lx, cH); ctx.stroke(); }
@@ -205,9 +175,6 @@ export function render2DSheet() {
   update2DTransform();
 }
 
-/**
- * Initializes 2D canvas drawing events, zoom controls, and export handlers.
- */
 export function initEditor2D({ getToolState, onPickColor }) {
   const on = (id, evt, fn) => document.getElementById(id)?.addEventListener(evt, fn);
   const canvas = document.getElementById("editor2DCanvas");
@@ -224,7 +191,7 @@ export function initEditor2D({ getToolState, onPickColor }) {
 
     const wrapper = document.getElementById("wrapper2D");
     wrapper?.addEventListener("wheel", (e) => {
-      e.preventDefault();
+      e.stopPropagation(); e.preventDefault();
       setZoom(zoomFactor2D + (e.deltaY < 0 ? ZOOM_2D_STEP : -ZOOM_2D_STEP));
     }, { passive: false });
 
@@ -238,25 +205,34 @@ export function initEditor2D({ getToolState, onPickColor }) {
     const handleStart = (e) => { isDrawing = true; lastPaintedCoord = null; pushUndo(); const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); };
     const handleMove = (e) => { if (isDrawing) { const { x, y } = getCoord(e); paintPixel(x, y, { ...getToolState(), onPickColor }); } };
     const handleEnd = () => { isDrawing = false; lastPaintedCoord = null; };
+    const startPan = (cx, cy) => { isPanning = true; panStartX = cx; panStartY = cy; startPanX = panX; startPanY = panY; };
 
     canvas.addEventListener("mousedown", (e) => {
-      if (e.button === 1 || e.button === 2 || e.shiftKey || e.altKey) {
-        isPanning = true; panStartX = e.clientX; panStartY = e.clientY; startPanX = panX; startPanY = panY; e.preventDefault(); return;
+      e.stopPropagation();
+      const isRotate = getToolState().touchMode === "rotate";
+      if (isRotate || e.button === 1 || e.button === 2 || e.shiftKey || e.altKey) {
+        startPan(e.clientX, e.clientY); e.preventDefault(); return;
       }
       handleStart(e);
     });
+    wrapper?.addEventListener("mousedown", (e) => {
+      if (e.target !== canvas) { e.stopPropagation(); startPan(e.clientX, e.clientY); }
+    });
+
     window.addEventListener("mousemove", (e) => {
       if (isPanning) { panX = startPanX + (e.clientX - panStartX); panY = startPanY + (e.clientY - panStartY); update2DTransform(); return; }
       handleMove(e);
     });
-    window.addEventListener("mouseup", (e) => { if (isPanning) { isPanning = false; return; } handleEnd(); });
-    canvas.addEventListener("contextmenu", (e) => { if (zoomFactor2D > 1) e.preventDefault(); });
+    window.addEventListener("mouseup", () => { isPanning = false; handleEnd(); });
+    canvas.addEventListener("contextmenu", (e) => { e.stopPropagation(); e.preventDefault(); });
 
     let touchMode2D = "none", initDist = 0, initMidX = 0, initMidY = 0, initZ = 1, initPX = 0, initPY = 0;
     canvas.addEventListener("touchstart", (e) => {
-      if (e.cancelable) e.preventDefault();
+      e.stopPropagation(); if (e.cancelable) e.preventDefault();
+      const isRotate = getToolState().touchMode === "rotate";
       if (e.touches.length === 1) {
-        touchMode2D = "draw"; handleStart(e);
+        if (isRotate) { touchMode2D = "pan"; startPan(e.touches[0].clientX, e.touches[0].clientY); }
+        else { touchMode2D = "draw"; handleStart(e); }
       } else if (e.touches.length >= 2) {
         touchMode2D = "gesture"; isDrawing = false; lastPaintedCoord = null;
         const [t0, t1] = e.touches;
@@ -266,24 +242,39 @@ export function initEditor2D({ getToolState, onPickColor }) {
       }
     }, { passive: false });
 
-    canvas.addEventListener("touchmove", (e) => {
-      if (e.cancelable) e.preventDefault();
-      if (e.touches.length === 1 && touchMode2D === "draw") {
-        handleMove(e);
+    wrapper?.addEventListener("touchstart", (e) => {
+      if (e.target !== canvas) {
+        e.stopPropagation();
+        if (e.touches.length === 1) { touchMode2D = "pan"; startPan(e.touches[0].clientX, e.touches[0].clientY); }
+      }
+    }, { passive: false });
+
+    const handleTouchMove = (e) => {
+      e.stopPropagation(); if (e.cancelable) e.preventDefault();
+      if (e.touches.length === 1) {
+        if (touchMode2D === "pan") {
+          panX = startPanX + (e.touches[0].clientX - panStartX);
+          panY = startPanY + (e.touches[0].clientY - panStartY);
+          update2DTransform();
+        } else if (touchMode2D === "draw") handleMove(e);
       } else if (e.touches.length >= 2 && touchMode2D === "gesture") {
-        const [t0, t1] = e.touches;
-        const dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY) || 1;
+        const [t0, t1] = e.touches, dist = Math.hypot(t1.clientX - t0.clientX, t1.clientY - t0.clientY) || 1;
         zoomFactor2D = Math.max(MIN_ZOOM_2D, Math.min(MAX_ZOOM_2D, Math.round((initZ * (dist / initDist)) * 100) / 100));
         panX = initPX + ((t0.clientX + t1.clientX) / 2 - initMidX);
         panY = initPY + ((t0.clientY + t1.clientY) / 2 - initMidY);
         update2DTransform();
       }
-    }, { passive: false });
+    };
+    canvas.addEventListener("touchmove", handleTouchMove, { passive: false });
+    wrapper?.addEventListener("touchmove", (e) => { if (e.target !== canvas) handleTouchMove(e); }, { passive: false });
 
-    canvas.addEventListener("touchend", (e) => {
-      if (e.touches.length === 0) { touchMode2D = "none"; handleEnd(); }
-      else if (e.touches.length === 1) { touchMode2D = "none"; }
-    });
+    const handleTouchEnd = (e) => {
+      e.stopPropagation();
+      if (e.touches.length === 0) { touchMode2D = "none"; isPanning = false; handleEnd(); }
+      else if (e.touches.length === 1 && touchMode2D === "gesture") { touchMode2D = "none"; }
+    };
+    canvas.addEventListener("touchend", handleTouchEnd);
+    wrapper?.addEventListener("touchend", (e) => { if (e.target !== canvas) handleTouchEnd(e); });
   }
   on("btnToggleGrid", "click", () => {
     gridEnabled = !gridEnabled;

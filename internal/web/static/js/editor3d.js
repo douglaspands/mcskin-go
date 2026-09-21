@@ -159,16 +159,16 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
   stage3D?.addEventListener("contextmenu", (e) => e.preventDefault());
   editor3DCanvas.addEventListener("contextmenu", (e) => e.preventDefault());
 
-  const isInteractiveEl = (t) => t?.closest?.("button, .mannequin-widget, .zoom-vertical-controls, .floating-mode-pill, .color-bottom-sheet, .viewport-2d-box");
+  const is3DActive = () => document.getElementById("characterWorld")?.style.display !== "none";
+  const isInteractiveEl = (t) => t?.closest?.("button, .mannequin-widget, .zoom-vertical-controls, .floating-mode-pill, .color-bottom-sheet, .viewport-2d-box, .editor-2d-wrapper, #wrapper2D, #editor2DCanvas");
 
   const getDistance = (touches) => {
-    const dx = touches[0].clientX - touches[1].clientX;
-    const dy = touches[0].clientY - touches[1].clientY;
+    const dx = touches[0].clientX - touches[1].clientX, dy = touches[0].clientY - touches[1].clientY;
     return Math.sqrt(dx * dx + dy * dy);
   };
 
   const onWheel = (e) => {
-    if (isInteractiveEl(e.target)) return;
+    if (!is3DActive() || isInteractiveEl(e.target)) return;
     e.preventDefault();
     if (viewport3D) setZoom(viewport3D.zoom + (e.deltaY > 0 ? ZOOM_3D_STEP * 0.6 : -ZOOM_3D_STEP * 0.6));
   };
@@ -182,7 +182,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
   };
 
   const handlePointerStart = (e) => {
-    if (isInteractiveEl(e.target)) return;
+    if (!is3DActive() || isInteractiveEl(e.target)) return;
     isPointerDown = true;
     if (onResetCoord) onResetCoord();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -200,7 +200,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
   };
 
   const handlePointerMove = (e) => {
-    if (!isPointerDown) return;
+    if (!is3DActive() || !isPointerDown) return;
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
 
@@ -238,14 +238,14 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
   window.addEventListener("mouseup", handlePointerEnd);
 
   editor3DCanvas.addEventListener("mousemove", (e) => {
-    if (isPointerDown || !viewport3D) return;
+    if (!is3DActive() || isPointerDown || !viewport3D) return;
     const hit = scaleHit(viewport3D.pickPixel(e.clientX, e.clientY, getCurrentLayer() === "overlay"));
     viewport3D.setHoverPixel(hit);
   });
   editor3DCanvas.addEventListener("mouseleave", () => { viewport3D?.setHoverPixel(null); });
 
   const onTouchStart = (e) => {
-    if (isInteractiveEl(e.target)) return;
+    if (!is3DActive() || isInteractiveEl(e.target)) return;
     if (e.cancelable) e.preventDefault();
     if (e.touches.length === 2) {
       isPointerDown = false;
@@ -263,6 +263,7 @@ export function initEditor3D({ onPaintPixel, onPushUndo, onResetCoord, getTouchM
 
   editor3DCanvas.addEventListener("touchmove", (e) => {
     if (e.cancelable) e.preventDefault();
+    if (!is3DActive()) return;
     if (e.touches.length === 2 && viewport3D) {
       if (pinchStartDist && pinchStartZoom !== null) {
         const newDist = getDistance(e.touches);

@@ -1397,6 +1397,20 @@
       will-change: transform;
     }
 
+    .immersive-3d-stage.mode-rotate #editor2DCanvas,
+    .immersive-3d-stage.mode-rotate #wrapper2D {
+      cursor: grab;
+    }
+
+    .immersive-3d-stage.mode-rotate #editor2DCanvas:active,
+    .immersive-3d-stage.mode-rotate #wrapper2D:active {
+      cursor: grabbing;
+    }
+
+    .immersive-3d-stage.mode-paint #editor2DCanvas {
+      cursor: crosshair;
+    }
+
     /* O Personagem 3D */
     .character-viewport-world {
       position: absolute;
