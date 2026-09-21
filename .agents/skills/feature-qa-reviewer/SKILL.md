@@ -30,8 +30,8 @@ This skill combines two complementary perspectives:
 ## 2. Review Protocol
 
 When this skill is executed directly, or delegated to a subagent:
-- **Antigravity**: dispatch with `role: "PO/QA Reviewer"` and `model: pro`.
-- **Claude Code**: dispatch via the `Agent` tool with `subagent_type: "general-purpose"` and `model: "opus"` (see `.agents/skills/model-selection/SKILL.md`), passing this skill's file as context in the prompt since a fresh subagent starts with no memory of it.
+- **Antigravity**: dispatch with `role: "PO/QA Reviewer"` and `model: flash`.
+- **Claude Code**: dispatch via the `Agent` tool with `subagent_type: "general-purpose"` and `model: "sonnet"` (see `.agents/skills/model-selection/SKILL.md`), passing this skill's file as context in the prompt since a fresh subagent starts with no memory of it.
 
 ### Step 1: Context Intake
 1. Read `openspec/changes/<active-change>/proposal.md`.

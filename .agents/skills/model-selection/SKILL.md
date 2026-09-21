@@ -73,10 +73,10 @@ Match the task to the **first row** whose signals apply.
 | **Standard implementation** | prose spec, 2–4 files, requires test authoring | `flash` | Needs multi-step judgment |
 | **Review (small diff)** | < 100 lines changed, mechanical check | `flash` | Diff is the context |
 | **Integration task** | multi-file coordination, interface contracts, pattern matching | `flash` | Cross-file reasoning |
-| **Review (complex diff)** | concurrency, security, cross-package, subtle behavior | `pro` | Subtle failure modes |
-| **Debugging (unknown root cause)** | non-obvious failure, multi-system interaction | `pro` | Hypothesis + exploration |
+| **Review (complex diff)** | concurrency, security, cross-package, subtle behavior | `flash` | Subtle failure modes |
+| **Debugging (unknown root cause)** | non-obvious failure, multi-system interaction | `flash` | Hypothesis + exploration |
 | **Architecture / design** | new package, API design, spec authoring, `opsx-propose` | `pro` | Deep judgment required |
-| **Final branch review** | whole-branch diff before merge | `pro` | Broadest scope |
+| **Final branch review** | whole-branch diff before merge | `flash` | Broadest scope |
 | **Fix-loop escalation (round 4–5)** | same implementer failed 3× | tier above previous | Fresh eyes + capability bump |
 
 > [!TIP]
@@ -136,10 +136,10 @@ Does the task require test authoring or multi-file coordination?
 
 Does the task require design judgment, root-cause investigation,
             or reviewing a complex diff?
-  └── YES → pro
+  └── YES → flash
 
 Is this a fix-loop round ≥ 4?
-  └── YES → one tier above whoever got stuck (pro)
+  └── YES → one tier above whoever got stuck (flash)
 ```
 
 ---
@@ -150,7 +150,7 @@ Assignments calibrated for this project's common task types:
 
 | mcskin Task | Model |
 |---|---|
-| `opsx-explore` brainstorming | `pro` |
+| `opsx-explore` brainstorming | `flash` |
 | `opsx-propose` (spec + design + tasks) | `pro` |
 | Write Go unit test (mocked, single package) | `flash` |
 | Implement Go function from complete spec | `flash` |
@@ -159,11 +159,11 @@ Assignments calibrated for this project's common task types:
 | Web UI: add HTML/CSS panel from scaffold | `flash` |
 | Web UI: new JS module from prose brief | `flash` |
 | Web UI prototype generation (multi-file) | `flash` |
-| `feature-qa-reviewer` (PO/QA eval) | `pro` |
+| `feature-qa-reviewer` (PO/QA eval) | `flash` |
 | `bedrock-skin-pack-verifier` (script run) | `flash` |
 | Fix-loop remediation (rounds 1–3) | same as implementer |
 | Fix-loop remediation (rounds 4–5) | one tier up |
-| Final branch review (`opsx-archive`) | `pro` |
+| Final branch review (`opsx-archive`) | `flash` |
 | Research / codebase exploration | `flash` |
 
 ---
