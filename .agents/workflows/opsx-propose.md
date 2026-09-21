@@ -44,12 +44,13 @@ In both branches, never create the root as a side effect: do not run `openspec i
 
    **IMPORTANT**: Do NOT proceed without understanding what the user wants to build.
 
-   **MANDATORY FIRST COMMAND (Branch Isolation)**:
-   Immediately upon determining the change name `<name>`, create and switch to the isolated feature branch:
+   **MANDATORY FIRST COMMANDS (Sync Main & Branch Isolation)**:
+   Immediately upon determining the change name `<name>`, ensure `main` is checked out and updated from remote, then create and switch to the isolated feature branch:
    ```bash
+   git checkout main && git pull origin main
    git checkout -b feat/<name>
    ```
-   This ensures that all subsequent planning, files, or changes are strictly isolated from `main` and can be reverted immediately if needed.
+   This ensures that the feature branch branches from the most up-to-date codebase, preventing branch divergence, while maintaining complete sandbox isolation so that all subsequent planning and edits can be rolled back without impacting `main`.
 
    If the request contains ambiguity that would materially affect scope, externally observable behavior, compatibility, or acceptance criteria, ask the user before creating the change. For minor details, make a reasonable assumption and record it in the planning artifacts.
 

@@ -28,7 +28,7 @@ You are explicitly permitted and encouraged to autonomously execute harmless dev
   - `google-chrome ...` (e.g. `google-chrome --headless=new ...`)
 - **Git & GitHub (safe inspection & PR workflow)**:
   - `git status`, `git diff`, `git log`, `git show`, `git branch`, `git add`, `git commit`
-  - `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`
+  - `git checkout -b feat/...`, `git checkout main`, `git pull origin main`, `git merge --squash ...`, `git push origin feat/...`
   - `gh pr create ...`, `gh pr view ...`, `gh pr status`
 - **Inspections**:
   - `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p`
@@ -55,11 +55,12 @@ The following commands are hard-blocked by project policy. You must NEVER propos
 - **Standardized High-Effort Execution (`flash` / `sonnet`)**:
   All subagents, task implementations, and skill executions (including `feature-qa-reviewer`) MUST strictly use **`flash` (Antigravity)** and **`sonnet` (Claude Code) in High Effort Mode** (high reasoning effort / thinking budget). The cheap tier (`flash_lite`, `haiku`) and heavy tier (`pro`, `opus`) are strictly prohibited per `.agents/skills/model-selection/SKILL.md`.
 - **OpenSpec Branching & Squash Merge Protocol**:
-  - **First Step on `/opsx-propose`**: The absolute first command executed MUST be creating and checking out a dedicated feature branch:
+  - **First Step on `/opsx-propose`**: Before creating any new feature branch, the harness MUST ensure that the local `main` branch is checked out and updated with the latest remote changes (`git checkout main && git pull origin main`):
     ```bash
+    git checkout main && git pull origin main
     git checkout -b feat/<nome_spec>
     ```
-    This ensures complete isolation and allows immediate rollback if anything deviates from expectations.
+    This guarantees that the feature branch branches from the freshest codebase, prevents branch divergence, and allows immediate rollback if anything deviates from expectations.
   - **Automatic PO/QA Review upon Implementation Completion**:
     Immediately upon finishing all tasks in `/openspec-apply-change` (or `/opsx-apply`), the harness MUST automatically execute the `feature-qa-reviewer` skill in High Effort Mode (`role: "PO/QA Reviewer"` with `flash (High)`) to rigorously evaluate requirements, child usability (6+), Minecraft UX, and Bedrock `.mcpack` compliance.
     - **Bounded Loop Remediation (Anti-Infinite Loop Protection)**:

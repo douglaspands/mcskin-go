@@ -25,7 +25,7 @@ stateDiagram-v2
 
 | State | Prerequisites | Exit Condition | Invariants |
 | :--- | :--- | :--- | :--- |
-| **SpecPlanning** | Trigger `/opsx-propose`, branch `feat/<nome_spec>` created | Planning artifacts validated by `openspec validate` | **First Command Invariant**: The very first action upon `/opsx-propose` MUST be `git checkout -b feat/<nome_spec>` for rollback isolation. No direct edits on `main`. |
+| **SpecPlanning** | Trigger `/opsx-propose`, branch `feat/<nome_spec>` created | Planning artifacts validated by `openspec validate` | **First Command Invariant**: Before creating any feature branch, the harness MUST checkout `main` and execute `git pull origin main`, then `git checkout -b feat/<nome_spec>` for rollback isolation. No direct edits on `main`. |
 | **RedTesting** | Plan complete, task selected | Test suite authored and verified failing | Tests must fail due to missing implementation, not syntax errors. All unit tests must be 100% mocked with zero integration |
 | **GreenImplementation** | Verified failing test | Test suite passes | Implement only the minimal code necessary to satisfy tests |
 | **Verification** | All tasks in `/openspec-apply-change` complete | Full suite `go test ./...` and `go build ./...` succeed | **Automatic Trigger**: Automatically transitions to `POQAReview` immediately upon completing implementation tasks |
@@ -89,7 +89,7 @@ Commands are categorized into 3 permission tiers, enforced both via prompt rules
 | **Build & Test** | `make`, `make test`, `make build`, `make build-linux`, `make build-windows`, `make lint`, `make clean` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **Local Binary** | `./bin/mcskin ...`, `./bin/png-to-mcpack ...` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **OpenSpec** | `openspec ...` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
-| **Safe Git & GitHub** | `git status`, `git diff`, `git log`, `git show`, `git branch`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
+| **Safe Git & GitHub** | `git status`, `git diff`, `git log`, `git show`, `git branch`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git pull origin main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **Inspection** | `ls`, `cat`, `head`, `tail`, `grep`, `find`, `which`, `stat`, `file`, `unzip -l`, `unzip -p` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **Artifact Cleanup**| `rm -rf bin/`, `rm -rf files/*.mcpack` | **Tier 1 (Auto-Allowed)** | Allowed autonomously |
 | **Unrecognized** | External network tools, arbitrary scripts | **Tier 2 (Ask User)** | Requires user approval |

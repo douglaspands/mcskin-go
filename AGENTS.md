@@ -29,11 +29,12 @@ Every new feature, modification, or refactor must follow the OpenSpec specificat
 
 1. **Explore / Propose**:
    - For brainstorming or exploring ideas: run the explore workflow (`/opsx:explore` on Claude Code, `/openspec-explore` on Antigravity).
-   - **MANDATORY FIRST STEP (Branch Isolation)**: The very first command executed upon triggering the propose workflow (`/opsx:propose` on Claude Code, `/openspec-propose` on Antigravity) MUST be creating and checking out a dedicated feature branch:
+   - **MANDATORY PRE-REQUISITE & BRANCH ISOLATION**: Before creating any new feature branch, the harness MUST ensure that the local `main` branch is checked out and updated with the latest remote changes to avoid branch divergence:
      ```bash
+     git checkout main && git pull origin main
      git checkout -b feat/<nome_spec>
      ```
-     This ensures complete sandbox isolation so that if anything deviates or fails, changes can be rolled back without impacting `main`.
+     This ensures that the feature branch branches from the most up-to-date codebase and maintains complete sandbox isolation so that if anything deviates or fails, changes can be rolled back without impacting `main`.
 2. **Review Planning Artifacts**:
    - Ensure `proposal.md`, `specs/`, `design.md`, and `tasks.md` are coherent and validated (`openspec validate <change-name>`).
 3. **Implementation (`/opsx:apply` on Claude Code, `/openspec-apply-change` on Antigravity)**:
@@ -127,7 +128,7 @@ To guarantee safe, efficient, and bounded execution cycles:
   - **Python & uv**: `uv ...` (e.g. `uv venv .venv`, `uv pip ...`), `python3 ...` (e.g. script runs, `.venv/bin/python ...`).
   - **Browser Automation**: `google-chrome ...` (e.g. `google-chrome --headless=new ...`).
   - **OpenSpec**: `openspec ...`
-  - **Git & GitHub Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status`.
+  - **Git & GitHub Operations**: `git status`, `git diff`, `git log`, `git show`, `git add`, `git commit`, `git checkout -b feat/...`, `git checkout main`, `git pull origin main`, `git merge --squash ...`, `git push origin feat/...`, `gh pr create ...`, `gh pr view ...`, `gh pr status`.
   - **Inspections**: `ls`, `cat`, `head`, `tail`, `grep`, `find`, `stat`, `unzip -l`, `unzip -p`.
   - **Targeted Cleanup**: `rm -rf bin/`, `rm -rf files/*.mcpack`.
 
