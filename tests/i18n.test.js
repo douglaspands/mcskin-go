@@ -31,12 +31,18 @@ describe('i18n Module: Zero-dependency Translations & Detection', () => {
     it('returns accurate translations for all supported languages', () => {
       setLanguage('pt-BR');
       assert.equal(t('app_title'), 'CRIE SKINS LEGAIS');
+      assert.equal(t('menu_title'), 'MENU');
+      assert.equal(t('btn_close'), 'Fechar');
 
       setLanguage('en');
       assert.equal(t('app_title'), 'CREATE COOL SKINS');
+      assert.equal(t('menu_title'), 'MENU');
+      assert.equal(t('btn_close'), 'Close');
 
       setLanguage('es');
       assert.equal(t('app_title'), 'CREA SKINS GENIALES');
+      assert.equal(t('menu_title'), 'MENÚ');
+      assert.equal(t('btn_close'), 'Cerrar');
     });
 
     it('falls back to key if translation is missing in active and fallback languages', () => {
