@@ -38,6 +38,10 @@ venv/
 # Node
 node_modules/
 
+# Playwright regression suite artifacts
+/test-results/
+/playwright-report/
+
 # Local prototypes and scratch
 /var/
 

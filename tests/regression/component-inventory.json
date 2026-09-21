@@ -1,0 +1,50 @@
+[
+  {
+    "id": "editor3DCanvas",
+    "selector": "#editor3DCanvas",
+    "expectedRegion": {
+      "desktop": { "x": 12, "y": 83, "width": 966, "height": 645 },
+      "tablet": { "x": 0, "y": 79, "width": 820, "height": 873 },
+      "mobile": { "x": 0, "y": 92, "width": 448, "height": 667 }
+    },
+    "addedBy": "cumulative-regression-suite"
+  },
+  {
+    "id": "btnToggleGrid",
+    "selector": "#btnToggleGrid",
+    "expectedRegion": {
+      "desktop": { "x": 860, "y": 43, "width": 112, "height": 70 },
+      "tablet": { "x": 692, "y": 39, "width": 112, "height": 70 },
+      "mobile": { "x": 316, "y": 45, "width": 112, "height": 70 }
+    },
+    "addedBy": "cumulative-regression-suite"
+  },
+  {
+    "id": "btnPanUp",
+    "selector": "#btnPanUp",
+    "expectedRegion": {
+      "desktop": { "x": 890, "y": 176, "width": 72, "height": 70 },
+      "tablet": { "x": 722, "y": 172, "width": 72, "height": 70 },
+      "mobile": { "x": 346, "y": 185, "width": 72, "height": 70 }
+    },
+    "addedBy": "cumulative-regression-suite"
+  },
+  {
+    "id": "btnPanDown",
+    "selector": "#btnPanDown",
+    "expectedRegion": {
+      "desktop": { "x": 890, "y": 210, "width": 72, "height": 70 },
+      "tablet": { "x": 722, "y": 206, "width": 72, "height": 70 },
+      "mobile": { "x": 346, "y": 219, "width": 72, "height": 70 }
+    },
+    "addedBy": "cumulative-regression-suite"
+  },
+  {
+    "id": "desktopSidebarMenu",
+    "selector": "#desktopSidebarMenu",
+    "expectedRegion": {
+      "desktop": { "x": 950, "y": 38, "width": 320, "height": 782 }
+    },
+    "addedBy": "cumulative-regression-suite"
+  }
+]
