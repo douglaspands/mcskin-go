@@ -25,7 +25,7 @@ The editor SHALL provide an interactive 3D character viewport rendered with an e
 - **THEN** the 3D camera shifts its vertical and horizontal target center to that specific body part and smoothly zooms in for precision painting without the focused part clipping outside the viewport
 
 ### Requirement: Zoom Controls for Precision Painting
-The editor SHALL provide compact, floating vertical zoom controls for the 3D viewport and zoom controls for the 2D unwrapped sheet, maximizing usable viewport space while allowing the user to magnify and recenter the view precisely.
+The editor SHALL provide compact, floating vertical zoom controls for the 3D viewport and zoom controls for the 2D unwrapped sheet (`#wrapper2D`), maximizing usable viewport space while allowing the user to magnify, pan, and recenter the view precisely.
 
 #### Scenario: Zooming the 3D viewport
 - **WHEN** the user taps the floating vertical `🔍+` (Zoom In), `🔍−` (Zoom Out), scrolls the mouse wheel, or pinches on a touchscreen over the 3D viewport
@@ -38,6 +38,18 @@ The editor SHALL provide compact, floating vertical zoom controls for the 3D vie
 #### Scenario: Resetting camera to full-body view
 - **WHEN** the user taps the floating vertical `⟲` (Reset) button
 - **THEN** the camera resets its target to the whole-body center (Y=4), restores default camera distance (zoom=50), clears any single-part isolation focus, and returns to the default orientation
+
+#### Scenario: Pan navigation on a magnified 2D sheet
+- **WHEN** the 2D sheet is zoomed above 1x scale and the user drags with two fingers on touch, or drags with the mouse on desktop
+- **THEN** the texture sheet pans smoothly to reveal occluded pixel regions without triggering accidental pixel painting
+
+#### Scenario: Recentering the 2D sheet
+- **WHEN** the user clicks or taps the recenter button (`btnZoom2DReset` / `⟲`) on the 2D stage
+- **THEN** the 2D sheet scale resets immediately to 1x and pan offsets are centered
+
+#### Scenario: Single-finger pixel painting on 2D sheet
+- **WHEN** the user interacts with 1 finger or primary mouse button on the 2D sheet at any zoom level
+- **THEN** pixels are accurately painted or recolored at the exact touched coordinates
 
 ### Requirement: Pixel Grid Line Toggle
 The editor SHALL provide a single toggle button that shows or hides subtle photography-style pixel alignment guide lines on both the 3D viewport and the 2D unwrapped sheet using a delicate translucent dark shadow stroke (`rgba(0, 0, 0, 0.10)`) rendered at 16x upscale scale, preventing harsh white "cage" visual artifacts on dark skin colors and keeping line thickness at ~6% of pixel width, while presenting a clean 2D canvas free of obtrusive neon overlays.
@@ -55,7 +67,7 @@ The editor SHALL provide a single toggle button that shows or hides subtle photo
 - **THEN** a visual reticle or subtle highlight outlines the exact targeted grid cell, and painting applies strictly within that cell's pixel bounds without spilling into adjacent pixels
 
 ### Requirement: Fullscreen Editing Mode
-The editor SHALL allow the user to expand the editor into fullscreen to maximize available drawing space on any device, with the toggle prominently accessible in the main header on mobile viewports to conserve toolbar space, and with an exit control always reachable while fullscreen is active regardless of viewport width.
+The editor SHALL allow the user to expand the editor into fullscreen to maximize available drawing space on any device, with the toggle accessible in the navigation drawer footer immediately above the server shutdown button, and with an exit control always reachable while fullscreen is active regardless of viewport width.
 
 #### Scenario: Entering fullscreen
 - **WHEN** the user clicks the fullscreen toggle button
@@ -72,6 +84,10 @@ The editor SHALL allow the user to expand the editor into fullscreen to maximize
 #### Scenario: Exit control remains reachable inside fullscreen on mobile
 - **WHEN** the editor is actually in fullscreen on a mobile/tablet viewport
 - **THEN** fullscreen is requested on the whole document (not a sub-element), so the single header toggle button that opened fullscreen stays part of the fullscreened view and remains reachable to exit it, on every viewport width
+
+#### Scenario: Drawer footer fullscreen toggle placement
+- **WHEN** viewing the application drawer or desktop sidebar menu
+- **THEN** the fullscreen toggle button is positioned prominently inside the drawer footer immediately above the shutdown button
 
 ### Requirement: Unwrapped 2D Sheet Painting Mode
 The editor SHALL provide an unwrapped 2D texture sheet view (`#editor2DCanvas`) and a dedicated `[ 🧊 3D | 📜 2D ]` view mode segmented control placed in the top options bar immediately adjacent to the Steve and Alex model toggle pill, allowing instantaneous switching between the 3D character viewport and the 2D unfolded texture sheet canvas, enabling precise painting on occluded body parts (including inner arm surfaces touching the torso, inner leg surfaces, chin underside, and shoe soles) with bidirectional real-time texture synchronization.
@@ -93,7 +109,7 @@ The editor SHALL provide an unwrapped 2D texture sheet view (`#editor2DCanvas`) 
 - **THEN** the pixel is painted on `textureCanvas`, added to the undo stack, and instantly synchronized with the 3D texture
 
 ### Requirement: Child-Friendly Touch Ergonomics and Drawing Tools
-The editor SHALL provide touch-optimized controls designed for children aged 6 and older, including a dedicated "Pintar" vs "Girar" mode switch (presented as a floating pill centered atop the 3D stage, per `docs/prototypes/web-skin-editor-prototype.html`), essential drawing tools grouped in a uniform bottom tool dock, Minecraft-themed quick palettes reachable from a color bottom sheet, and streamlined gesture rotation on mobile while retaining discrete height and zoom adjustments.
+The editor SHALL provide touch-optimized controls designed for children aged 6 and older, including a dedicated "Pintar" vs "Girar" mode switch (presented as a floating pill centered atop the 3D stage, per `docs/prototypes/web-skin-editor-prototype.html`), essential drawing tools grouped in a uniform bottom tool dock, Minecraft-themed quick palettes reachable from a color bottom sheet, and streamlined gesture rotation on mobile while retaining discrete height and zoom adjustments, and supporting hybrid two-finger rotation and pinch within paint mode.
 
 #### Scenario: Touch gesture differentiation
 - **WHEN** the user is in "Pintar" mode on a touchscreen
@@ -115,6 +131,10 @@ The editor SHALL provide touch-optimized controls designed for children aged 6 a
 #### Scenario: Desktop stage vertical height and zoom adjustments
 - **WHEN** operating on desktop screens
 - **THEN** discrete floating controls for model height adjustment (Subir/Descer) and camera zoom (+/-) remain available on the stage perimeter without obscuring the painting canvas
+
+#### Scenario: Hybrid two-finger rotation and pinch in "Pintar" mode
+- **WHEN** the "Pintar" mode is active and the user touches the 3D stage with two fingers
+- **THEN** two-finger dragging rotates the 3D character and two-finger pinching zooms the character, while single-finger touches continue to paint individual pixels with precision
 
 ### Requirement: Body Part Isolation and Layer Management
 The editor SHALL permit users to switch between the base body layer and the 3D overlay layer via a single cycling control in the bottom tool dock, showing the active layer's icon and name, and to focus specific parts via the interactive 2D paper doll mannequin widget.
