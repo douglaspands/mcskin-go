@@ -37,7 +37,16 @@
 | 2026-09-20 | adaptive-skin-resolution/task-3.3-converter-resolution-selector | gemini-3.8-flash | single-file DOM & UI wiring | ok |
 | 2026-09-20 | adaptive-skin-resolution/task-4.1-app-resolution-orchestration | gemini-3.8-flash | multi-component orchestration | ok |
 | 2026-09-20 | adaptive-skin-resolution/task-5.1-token-guardian-audit | gemini-3.8-flash | token audit and test run | ok |
-| 2026-09-20 | adaptive-skin-resolution/task-5.2-feature-qa-reviewer | pro | PO/QA adversarial eval | pending |
+| 2026-09-20 | adaptive-skin-resolution/task-5.2-feature-qa-reviewer | pro | PO/QA adversarial eval | ok |
+| 2026-09-21 | melhorar-readme-foco-web-infantil/task-1.1-hero-badges | gemini-3.8-flash | 1-file documentation rewrite | ok |
+| 2026-09-21 | melhorar-readme-foco-web-infantil/task-1.2-tabela-comparativa | gemini-3.8-flash | 1-file documentation rewrite | ok |
+| 2026-09-21 | melhorar-readme-foco-web-infantil/task-1.3-guia-3-passos | gemini-3.8-flash | 1-file documentation rewrite | ok |
+| 2026-09-21 | melhorar-readme-foco-web-infantil/task-1.4-vitrine-interface-web | gemini-3.8-flash | 1-file documentation rewrite | ok |
+| 2026-09-21 | melhorar-readme-foco-web-infantil/task-1.5-instalacao-bedrock | gemini-3.8-flash | 1-file documentation rewrite | ok |
+| 2026-09-21 | melhorar-readme-foco-web-infantil/task-1.6-modo-cli-dev-guide | gemini-3.8-flash | 1-file documentation rewrite | ok |
+| 2026-09-21 | melhorar-readme-foco-web-infantil/task-2.1-validacao-links-imagens | gemini-3.8-flash | read-only verification | ok |
+| 2026-09-21 | melhorar-readme-foco-web-infantil/task-2.2-suite-testes | gemini-3.8-flash | script run verification | ok |
+| 2026-09-21 | melhorar-readme-foco-web-infantil/task-2.3-feature-qa-reviewer | gemini-3.8-flash | QA evaluation | ok |
 
 
 
