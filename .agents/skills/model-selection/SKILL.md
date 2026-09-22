@@ -47,7 +47,6 @@ All task types across the development lifecycle are handled by the standardized 
 | **Integration** | multi-file contracts | `flash` (High) | `sonnet` (High) | Cross-package cohesion |
 | **Debugging** | unknown root cause | `flash` (High) | `sonnet` (High) | Systematic hypothesis testing |
 | **Architecture / design** | `opsx-propose`, specs, tasks | `flash` (High) | `sonnet` (High) | Deep judgment & dependency analysis |
-| **PO/QA Review** | `feature-qa-reviewer` | `flash` (High) | `sonnet` (High) | Adversarial rigor, Bedrock & 6+ UX |
 | **Fix-loop remediation** | loop attempts 1–3 | `flash` (High) | `sonnet` (High) | Targeted repair within 3-attempt cap |
 
 ---
@@ -78,7 +77,6 @@ Standardized assignments across project capabilities:
 | Implement Go logic (TDD GREEN) | `flash` (High) | `sonnet` (High) |
 | Web UI: HTML/CSS zero-scroll layout | `flash` (High) | `sonnet` (High) |
 | Web UI: 2D/3D editor canvas & math | `flash` (High) | `sonnet` (High) |
-| `feature-qa-reviewer` (PO/QA evaluation) | `flash` (High) | `sonnet` (High) |
 | `bedrock-skin-pack-verifier` execution | `flash` (High) | `sonnet` (High) |
 | Fix-loop remediation (rounds 1–3) | `flash` (High) | `sonnet` (High) |
 | Final branch review (`opsx-archive`) | `flash` (High) | `sonnet` (High) |

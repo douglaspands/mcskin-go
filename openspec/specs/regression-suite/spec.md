@@ -51,15 +51,15 @@ At the end of every regression run, the suite SHALL verify that every screen com
 - **THEN** it checks component presence and placement at desktop, tablet, and mobile viewport widths, matching the responsive breakpoints already defined for the application
 
 ### Requirement: Regression Gate in the Change Lifecycle
-The full accumulated regression suite SHALL run and pass before a change proceeds from implementation to PO/QA sign-off, so that no change is archived while a prior feature's behavior or appearance has silently regressed.
+The full accumulated regression suite SHALL run and pass before a change is archived, so that no change is archived while a prior feature's behavior or appearance has silently regressed.
 
-#### Scenario: Regression run precedes QA sign-off
+#### Scenario: Regression run precedes archive
 - **WHEN** a change's implementation tasks are complete
-- **THEN** the full accumulated regression suite executes and passes before the PO/QA review step evaluates the change
+- **THEN** the full accumulated regression suite executes and passes before the change is archived
 
-#### Scenario: Regression failure blocks sign-off
+#### Scenario: Regression failure blocks archive
 - **WHEN** the accumulated regression suite reports any failure
-- **THEN** the change is not presented for PO/QA sign-off until the failure is resolved or a deliberate baseline update is made and justified
+- **THEN** the change is not archived until the failure is resolved or a deliberate baseline update is made and justified
 
 ### Requirement: Token-Economical Regression Reporting
 The regression suite's execution SHALL be silent-on-success and surface only actionable failure detail, consistent with the project's compact test-reporting convention, regardless of the underlying test runner.
