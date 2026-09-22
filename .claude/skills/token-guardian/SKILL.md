@@ -48,7 +48,7 @@ When verifying code or running test suites during iterative development:
 
 - **Research & Exploration**: Delegate codebase exploration, multi-file inspection, and symbol discovery to subagents.
   - **Antigravity**: `subagent: research` or `role: "Codebase Researcher"`.
-  - **Claude Code**: the `Agent` tool with `subagent_type: "Explore"` for read-only lookups, or `"fork"` when the exploration needs this conversation's existing context. Always set `model` explicitly per `.agents/skills/model-selection/SKILL.md`.
+  - **Claude Code**: the `Agent` tool with `subagent_type: "Explore"` for read-only lookups, or `"fork"` when the exploration needs this conversation's existing context. Use the model the user has selected/configured in the harness (see AGENTS.md's Parallel Dispatch & Model Selection section) — no per-task model override.
 - **Verbose Diagnostic Loops**: When troubleshooting unexpected behavior, run investigation loops inside an isolated subagent so that only the final root-cause conclusion is returned to the parent conversation context.
 - **Progressive Disclosure**: Keep parent conversations lean and actionable.
 

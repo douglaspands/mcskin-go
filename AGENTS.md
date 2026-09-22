@@ -103,11 +103,16 @@ To guarantee safe, efficient, and bounded execution cycles:
 - **Born Modularized ("Nascem Otimizadas")**: All new and refactored application files in `cmd/`, `internal/`, and `internal/web/static/js/` SHALL NOT exceed 300 lines or 15 KB in size. Keep frontend code in discrete, cohesive ES6 modules with single architectural concerns and JSDoc documentation.
 - **Vendor Isolation**: Third-party libraries (such as Three.js or QRCode) MUST reside in `internal/web/static/vendor/` and are excluded from AI context reads.
 - **Targeted Test Execution & Compact Runner**: Run targeted tests (e.g., `go test -v -run TestSpecific ./internal/...`) while iterating. Prefer the compact test runner `./scripts/test-compact.sh` for multi-package runs to preserve tokens (silent on PASS, concise diffs on FAIL).
-- **Subagent Offloading & High-Effort Model Standardization**: Repetitive research, verbose test repair loops, code investigations, and parallel waves SHALL be offloaded to subagents so parent conversations receive only concise summaries. All subagent dispatches and skills across both Antigravity and Claude Code MUST strictly use **`flash` (Antigravity)** and **`sonnet` (Claude Code) in High Effort Mode** (`.agents/skills/model-selection/SKILL.md`). Low-tier models (`flash_lite`, `haiku`) and heavy tiers (`pro`, `opus`) are strictly prohibited.
+- **Subagent Offloading**: Repetitive research, verbose test repair loops, code investigations, and parallel waves SHALL be offloaded to subagents so parent conversations receive only concise summaries. See "Parallel Dispatch (Planned Waves) & Model Selection" below for dispatch/model rules.
+
+### Parallel Dispatch (Planned Waves) & Model Selection
+- **Wave Structure Decided at Planning Time**: When `tasks.md` is authored (propose/update), independent task groups SHALL be identified and annotated as parallel-safe waves based on file/state disjointness. Tasks that share files or have a read-after-write dependency are planned into different (sequential) waves instead.
+- **Planned Parallel Waves Are Dispatched as Planned**: Once a set of tasks is planned to run in parallel, the harness SHALL dispatch them in parallel rather than silently collapsing the wave back to sequential execution.
+- **User-Selected Model Persistence**: Subagent dispatches and skill executions SHALL always use the model the user has selected or configured in the harness (e.g. via `/config`, an explicit `model` parameter, or the harness's own configured default — Antigravity's `invoke_subagent` defaults to `Model: inherit`). No task-type, complexity, or cost heuristic overrides that selection, and no per-dispatch logging file is required.
 - **Token Guardian Skill**: Use the `token-guardian` skill (`.agents/skills/token-guardian/SKILL.md`) to inspect and enforce file size budgets before committing.
 - **Context Hygiene**: Do not dump binary files, large images, or massive directory trees into the context.
 - **Concise Communication**: Keep outputs structured, actionable, and focused on code changes and verification results.
-- **Proactive Skill Suggestion & Autonomy Provisioning**: Whenever a recurring, multi-step, or verbose workflow is identified that could save context tokens via progressive disclosure, proactively suggest creating a new SKILL. The proposal MUST explicitly list the authorizations and permissions needed for the skill to operate autonomously. Once approved by the user, immediately provision those permissions into the command safety gate (`.agents/scripts/command-gate.py`) and project documentation to avoid repetitive permission prompts.
+- **Proactive Skill Suggestion & Autonomy Provisioning**: Whenever a recurring, multi-step, or verbose workflow is identified that could save context tokens via progressive disclosure, proactively suggest creating a new SKILL. The proposal MUST explicitly list the authorizations and permissions needed for the skill to operate autonomously. Once approved by the user, immediately provision those permissions into the command safety gate (`scripts/command-gate.py`) and project documentation to avoid repetitive permission prompts.
 
 ### Fast, Safe & Token-Economical Reading & Writing (I/O Optimization)
 To eliminate latency, avoid slow roundtrips, and minimize token burn during file operations:
@@ -165,6 +170,14 @@ Always prefer concise, flag-optimized commands over verbose defaults:
 
 - **Requires Explicit Confirmation (Tier 2)**:
   - Any unfamiliar shell commands or network calls.
+
+### Command Safety Gate: Single Canonical Script & Cross-Harness Parity
+- **Canonical Script**: Exactly one command safety gate script, `scripts/command-gate.py` (repo root), is the source of truth for command evaluation logic across every harness. No independent copy exists.
+- **Registered Identically on Every Harness**: The gate's `PreToolUse` hook is registered in `.agents/hooks.json` (Antigravity) and `.claude/settings.json` (Claude Code, project-level, committed) — both invoking the same canonical script directly, never a path-fallback guess or a divergent per-harness copy.
+- **Polyglot Payload Parsing**: The script extracts the command from either harness's stdin schema — Antigravity's `toolCall.args.CommandLine` or Claude Code's `tool_input.command` / `input.command` — and evaluates it identically regardless of source.
+- **Decision Semantics**: `allow` (Tier 1, no prompt), `ask` (Tier 2, interactive confirmation), `deny` (Tier 3, blocked with an actionable reason) — equivalent reasoning regardless of which harness issued the command. On `deny`, the script emits JSON to stdout for Antigravity and a non-zero exit code with the reason on stderr for Claude Code.
+- **Per-Harness Prompt Mechanism (outcome-equivalent, mechanism differs)**: Antigravity's hook contract consumes the gate's `allow`/`ask`/`deny` decision directly with no separate allowlist file. Claude Code layers a `permissions.allow` list in `.claude/settings.json` on top of the same hook so common Tier-1 commands never prompt even before the hook runs — both achieve "Tier 1 commands never interactively prompt."
+- **Canonical Command Form**: Use the same command form for a given operation every time (see the Token-Economical Command Catalog above) so a single allowlist entry or gate pattern covers it consistently instead of fragmenting across near-duplicate variants.
 
 ### Host & Environment Security Protocol
 To guarantee the absolute protection and stability of the host environment:

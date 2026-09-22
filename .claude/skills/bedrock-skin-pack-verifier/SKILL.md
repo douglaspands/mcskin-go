@@ -34,7 +34,7 @@ The skill automatically validates:
 Run the verification script passing the target `.mcpack` path:
 
 ```bash
-python3 .agents/skills/bedrock-skin-pack-verifier/scripts/verify-mcpack.py path/to/skin.mcpack
+python3 .claude/skills/bedrock-skin-pack-verifier/scripts/verify-mcpack.py path/to/skin.mcpack
 ```
 
 ### Expected Output Format

@@ -7,7 +7,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import os, sys, subprocess; paths = ['.agents/scripts/command-gate.py', 'scripts/command-gate.py', os.path.expanduser('~/Workspace/minecraft/png-to-mcpack/.agents/scripts/command-gate.py')]; target = next((p for p in paths if os.path.exists(p)), None); sys.exit(subprocess.call([sys.executable, target]) if target else 0)\"",
+            "command": "python3 scripts/command-gate.py",
             "timeout": 10
           }
         ]
