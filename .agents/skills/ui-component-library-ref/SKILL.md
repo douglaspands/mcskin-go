@@ -210,7 +210,10 @@ Strict modularization boundary: **No JS file may exceed 300 lines or 15 KB**.
 | `editor-file-loader.js` | File I/O for Editor | Loading user skins, preset templates (Steve, Alex, Blank), saving PNGs |
 | `editor-layout.js` | Viewport & Layout Management | Viewport sizing, responsive adaptations, fullscreen toggling |
 | `editor-menu.js` | Menu & Submenu Actions | Drawer & desktop sidebar navigation, new skin modal, skin naming flow |
+| `editor-exporter.js` | Texture Export | `getExportCanvas()` resolution scaling, `bindEditorExports()` PNG download wiring |
 | `palette.js` | Color & Tool State | Active tool selection (Pencil, Bucket, Recolor, Eraser), color picker, swatch palette |
 | `fx.js` | Audio & Visual FX | Web Audio API sound effects (`playSound`), celebratory confetti particles |
 | `network.js` | Network & IP Sharing | Server IP polling, QR Code canvas generation, clipboard copy with feedback |
 | `shutdown.js` | Server Lifecycle | Server shutdown dialog confirmation and graceful exit signaling |
+| `i18n.js` | Internationalization Core | `SUPPORTED_LANGS` (`pt-BR`/`en`/`es`), `detectLanguage()`, `t()` lookup, `applyTranslations()` |
+| `i18n-locales.js` | Translation Strings | `TRANSLATIONS` dictionary consumed by `i18n.js` |
