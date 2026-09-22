@@ -52,7 +52,7 @@ The project SHALL maintain exactly one command safety gate script as the source 
 - **THEN** the gate script SHALL extract and evaluate the command correctly from either schema, and SHALL return the decision in each harness's own required stdout JSON schema — a top-level `{"decision": ...}` body for Antigravity, and a `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": ...}}` body for Claude Code (whose PreToolUse hook schema rejects the legacy top-level `decision` field) — with a denial additionally exiting non-zero with the reason on stderr
 
 ### Requirement: Single-Source Governance Documentation
-The project SHALL maintain exactly one canonical document containing AI agent governance policy (state graph, loop/iteration caps, permission tiers, host security protocol). Every other harness entry-point file SHALL contain only a pointer to that canonical document plus facts unique to that harness.
+The project SHALL maintain exactly one canonical document containing AI agent governance policy (state graph, loop/iteration caps, permission tiers, host security protocol). Every other harness entry-point file SHALL contain only a pointer to that canonical document plus facts unique to that harness. Skill files (`.claude/skills/*/SKILL.md`, `.agents/skills/*/SKILL.md`) that restate canonical governance policy rather than providing operational guidance unique to the skill are subject to the same rule.
 
 #### Scenario: Harness entry-point file contains only a pointer
 - **WHEN** an agent harness reads its own entry-point file (`CLAUDE.md`, `GEMINI.md`, `.agents/governance.md`, or `openspec/config.yaml`'s `context`/`rules` fields)
@@ -61,6 +61,10 @@ The project SHALL maintain exactly one canonical document containing AI agent go
 #### Scenario: Governance rule updated in one place
 - **WHEN** a governance rule changes (e.g. the loop iteration cap or a permission tier)
 - **THEN** editing the canonical document SHALL be sufficient, and no other file SHALL require an edit to stay consistent with it
+
+#### Scenario: Skill file restates canonical policy
+- **WHEN** a skill file contains policy content that duplicates the canonical governance document (e.g. file-size budgets, command-economy rules, permission tiers) rather than skill-unique operational guidance
+- **THEN** that policy content SHALL be removed from the skill and consolidated into the canonical document, leaving the skill with only the content not already covered there — or the skill SHALL be deleted entirely if nothing unique remains
 
 ### Requirement: TDD-Verified Task Execution
 A task in a change's `tasks.md` that alters mechanically-checkable behavior (code, scripts, configuration, or reference counts) SHALL state its verification check in the task description and SHALL be executed RED (confirm the check currently fails or the baseline condition holds) before GREEN (apply the change and confirm the check now passes).
