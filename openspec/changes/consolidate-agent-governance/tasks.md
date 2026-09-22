@@ -64,11 +64,11 @@ Groups 1, 4, and the (2 -> 3) stream touch disjoint files and share no read-afte
 
 ## 5. Wave Boundary Checkpoint (Wave A/B gate)
 
-- [ ] 5.1 (VERIFY) Once Groups 1, 4, and the (2 -> 3) stream have all completed, run `openspec validate consolidate-agent-governance` and confirm it passes before continuing, catching any coherence break early instead of waiting for Group 6
-- [ ] 5.2 (GREEN) Commit the Wave A changes as a single checkpoint commit on `feat/consolidate-agent-governance` (e.g. `docs(governance): consolidate agent governance and remove model-selection`), giving a clean rollback point before Group 6's final verification
+- [x] 5.1 (VERIFY) Once Groups 1, 4, and the (2 -> 3) stream have all completed, run `openspec validate consolidate-agent-governance` and confirm it passes before continuing, catching any coherence break early instead of waiting for Group 6
+- [x] 5.2 (GREEN) Commit the Wave A changes as a single checkpoint commit on `feat/consolidate-agent-governance` (e.g. `docs(governance): consolidate agent governance and remove model-selection`), giving a clean rollback point before Group 6's final verification
 
 ## 6. Final Verification (Wave B - after the Group 5 checkpoint)
 
-- [ ] 6.1 (VERIFY) Run `openspec validate consolidate-agent-governance --strict` and verify it passes
-- [ ] 6.2 (VERIFY) Run a repo-wide grep for the deleted file paths (`.agents/scripts/command-gate.py`, `.claude/skills/model-selection`, `.agents/skills/model-selection`) and verify no non-archived file still references them
-- [ ] 6.3 (VERIFY) Run `go test ./...` (or `./scripts/test-compact.sh`) and verify it still passes, confirming the governance/doc changes did not affect application code
+- [x] 6.1 (VERIFY) Run `openspec validate consolidate-agent-governance --strict` and verify it passes
+- [x] 6.2 (VERIFY) Run a repo-wide grep for the deleted file paths (`.agents/scripts/command-gate.py`, `.claude/skills/model-selection`, `.agents/skills/model-selection`) and verify no non-archived file still references them
+- [x] 6.3 (VERIFY) Run `go test ./...` (or `./scripts/test-compact.sh`) and verify it still passes, confirming the governance/doc changes did not affect application code
