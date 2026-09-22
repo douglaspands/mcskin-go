@@ -109,7 +109,10 @@ To guarantee safe, efficient, and bounded execution cycles:
 - **Wave Structure Decided at Planning Time**: When `tasks.md` is authored (propose/update), independent task groups SHALL be identified and annotated as parallel-safe waves based on file/state disjointness. Tasks that share files or have a read-after-write dependency are planned into different (sequential) waves instead.
 - **Planned Parallel Waves Are Dispatched as Planned**: Once a set of tasks is planned to run in parallel, the harness SHALL dispatch them in parallel rather than silently collapsing the wave back to sequential execution.
 - **User-Selected Model Persistence**: Subagent dispatches and skill executions SHALL always use the model the user has selected or configured in the harness (e.g. via `/config`, an explicit `model` parameter, or the harness's own configured default — Antigravity's `invoke_subagent` defaults to `Model: inherit`). No task-type, complexity, or cost heuristic overrides that selection, and no per-dispatch logging file is required.
-- **Token Guardian Skill**: Use the `token-guardian` skill (`.agents/skills/token-guardian/SKILL.md`) to inspect and enforce file size budgets before committing.
+- **Subagent Delegation & Context Offloading**: Delegate codebase exploration, multi-file inspection, and symbol discovery to subagents so parent conversations receive only concise summaries.
+  - **Antigravity**: `subagent: research` or `role: "Codebase Researcher"`.
+  - **Claude Code**: the `Agent` tool with `subagent_type: "Explore"` for read-only lookups, or `"fork"` when the exploration needs this conversation's existing context. Use the model the user has selected/configured in the harness (see the "User-Selected Model Persistence" bullet above) — no per-task model override.
+  - **Verbose Diagnostic Loops**: When troubleshooting unexpected behavior, run investigation loops inside an isolated subagent so that only the final root-cause conclusion is returned to the parent conversation context.
 - **Context Hygiene**: Do not dump binary files, large images, or massive directory trees into the context.
 - **Concise Communication**: Keep outputs structured, actionable, and focused on code changes and verification results.
 - **Proactive Skill Suggestion & Autonomy Provisioning**: Whenever a recurring, multi-step, or verbose workflow is identified that could save context tokens via progressive disclosure, proactively suggest creating a new SKILL. The proposal MUST explicitly list the authorizations and permissions needed for the skill to operate autonomously. Once approved by the user, immediately provision those permissions into the command safety gate (`scripts/command-gate.py`) and project documentation to avoid repetitive permission prompts.
@@ -145,6 +148,17 @@ Always prefer concise, flag-optimized commands over verbose defaults:
 | **File Listing** | `ls -la` / `find .` | `ls -1 <dir>` / `find <dir> -maxdepth 2` | ~70% (no noise) |
 | **File Length** | Reading full file | `wc -l <file>` | ~95% (single number) |
 | **File Preview** | Reading whole file | `head -n 25 <file>` / `tail -n 25 <file>` | ~80% (bounded peek) |
+
+#### Pre-Completion Verification Checklist
+
+Before marking any task complete or archiving a change (`/opsx:archive` in Claude Code, `/openspec-archive-change` in Antigravity):
+1. [ ] Check file line counts: `wc -l internal/web/static/js/*.js` (all < 300 lines).
+2. [ ] Check vendor isolation: no minified vendor files outside `static/vendor/`.
+3. [ ] Run compact tests: `./scripts/test-compact.sh` (outputs `PASS: all packages OK`).
+4. [ ] Ensure no monolithic files exist in the changes.
+5. [ ] Ensure surgical reads were used (line slices instead of full dumps).
+6. [ ] Ensure surgical writes were used (contiguous replace instead of full overwrites).
+7. [ ] Ensure token-economical command alternatives were used (`git status -s`, `git log -n 3 --oneline`, etc.).
 
 ### Safe Autonomy Boundaries
 
