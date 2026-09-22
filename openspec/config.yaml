@@ -4,26 +4,16 @@ context: |
   Project: mcskin (Minecraft Bedrock Skin Pack Converter)
   Language & Toolchain: Go 1.25+, standard library only (image/png, archive/zip, crypto/rand, encoding/json, path/filepath). Zero third-party runtime dependencies in the production binary and served frontend; development/test tooling (e.g. a devDependency-only package.json for browser-driven regression testing) may declare external dependencies when they meaningfully improve quality, provided they are never bundled into the binary or served static assets.
   Platform Compatibility: Cross-platform (Linux and Windows amd64). Use filepath.ToSlash() for zip entries.
-  Methodology: Test-Driven Development (TDD). Pure unit tests MUST be 100% mocked with zero external integration (use io.Reader, bytes.Buffer, in-memory structs; no network, persistent disk, or OS process calls). Integration tests must be explicitly segregated. Tests MUST be verified RED before implementation code is written (GREEN phase).
   Domain & Standards:
     - Minecraft Bedrock .mcpack format: zip archive containing manifest.json (format_version: 2, RFC-4122 UUIDv4 header & module), skins.json, texts/en_US.lang, and texture.png.
     - Skin models: classic (geometry.humanoid.custom, 4px arms) and slim (geometry.humanoid.customSlim, 3px arms).
     - Image validation: 64x64 or 128x128 RGBA PNG only.
     - Output location: Exact same directory as input PNG with matching basename and .mcpack extension.
-  AI Agent Governance & Host Security:
-    - State Graph: [Plan/OpenSpec] -> [TDD: Write Tests (Red)] -> [Implement (Green)] -> [Verify & Lint] -> [Commit].
-    - Loop Engineering: Max 3 repair attempts per failing test. Halt on repeated identical errors.
-    - Host Security: Strict workspace containment. Zero sudo or privilege escalation. Air-gapped offline test execution. Synchronous commands bounded by 30s timeouts.
-    - Token Optimization & Born Modularized ("Nascem Otimizadas"): All new and refactored source files in `cmd/`, `internal/`, and `internal/web/static/js/` SHALL NOT exceed 300 lines or 15 KB. Third-party vendor libraries MUST be isolated in `internal/web/static/vendor/` and excluded from AI context reads. Compact test runner `./scripts/test-compact.sh` is silent on PASS. Offload research, verbose test repair loops, and code investigations to subagents.
-    - Autonomy: Autonomous execution for local read, test, build, and git commit. Permission required for destructive commands.
-  Git Conventions:
-    - Merging Strategy: After `/opsx-archive` completes all change archiving and spec synchronization, commit all archive changes on `feat/<nome_spec>`. Then request user confirmation to merge `feat/<nome_spec>` into `main` using squash merge or open a GitHub PR.
-    - Post-PR & Main Protection: Upon PR creation and checkout back to `main`, no further commits may be made to the feature branch, and direct commits to `main` are strictly prohibited. All git updates must occur in the archive command.
-    - Commits: Conventional Commits format (feat, fix, test, refactor, docs, chore).
+  AI Agent Governance, TDD Methodology, Host Security, and Git Conventions: see AGENTS.md (canonical governance document — applies identically to OpenSpec workflows and ordinary sessions).
 
 rules:
   proposal:
-    - "The very first action upon initiating a proposal MUST be synchronizing main ('git checkout main && git pull origin main'), then creating the branch 'feat/<change-name>' for rollback isolation"
+    - "Follow AGENTS.md's OpenSpec Feature Lifecycle branch/commit invariants (sync main, branch feat/<change-name>, before any other action)"
     - "Always include Why, What Changes, Capabilities, and Impact sections"
     - "Adhere to the zero external dependency principle for the production binary and served frontend; development/test tooling may declare dependencies scoped to tooling only"
   specs:
@@ -32,7 +22,7 @@ rules:
   design:
     - "Include package architecture and dependency decisions"
     - "Define TDD test execution sequence prior to implementation logic"
-    - "Define AI Agent governance and loop limits"
+    - "Follow AGENTS.md's AI Agent governance and loop limits"
   tasks:
     - "Structure tasks into TDD Red phase, Green implementation phase, and verification phase"
     - "Group tasks into atomic, verifiable steps"
