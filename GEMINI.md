@@ -53,7 +53,7 @@ The following commands are hard-blocked by project policy. You must NEVER propos
 - **Zero Dependencies**: Go standard library only. Binds the production Go binary and the frontend served by the embedded web server; development/test tooling (e.g. a devDependency-only `package.json` for browser-driven regression testing) MAY declare external dependencies when they meaningfully improve quality or efficiency, provided they are never bundled into the production binary or served static assets.
 - **Cross-Platform**: Windows (`.exe`) and Linux paths (`filepath.ToSlash` for ZIP entries).
 - **Standardized High-Effort Execution (`flash` / `sonnet`)**:
-  All subagents, task implementations, and skill executions (including `feature-qa-reviewer`) MUST strictly use **`flash` (Antigravity)** and **`sonnet` (Claude Code) in High Effort Mode** (high reasoning effort / thinking budget). The cheap tier (`flash_lite`, `haiku`) and heavy tier (`pro`, `opus`) are strictly prohibited per `.agents/skills/model-selection/SKILL.md`.
+  All subagents, task implementations, and skill executions MUST strictly use **`flash` (Antigravity)** and **`sonnet` (Claude Code) in High Effort Mode** (high reasoning effort / thinking budget). The cheap tier (`flash_lite`, `haiku`) and heavy tier (`pro`, `opus`) are strictly prohibited per `.agents/skills/model-selection/SKILL.md`.
 - **OpenSpec Branching & Squash Merge Protocol**:
   - **First Step on `/opsx-propose`**: Before creating any new feature branch, the harness MUST ensure that the local `main` branch is checked out and updated with the latest remote changes (`git checkout main && git pull origin main`):
     ```bash
@@ -61,15 +61,7 @@ The following commands are hard-blocked by project policy. You must NEVER propos
     git checkout -b feat/<nome_spec>
     ```
     This guarantees that the feature branch branches from the freshest codebase, prevents branch divergence, and allows immediate rollback if anything deviates from expectations.
-  - **Automatic PO/QA Review upon Implementation Completion**:
-    Immediately upon finishing all tasks in `/openspec-apply-change` (or `/opsx-apply`), the harness MUST automatically execute the `feature-qa-reviewer` skill in High Effort Mode (`role: "PO/QA Reviewer"` with `flash (High)`) to rigorously evaluate requirements, child usability (6+), Minecraft UX, and Bedrock `.mcpack` compliance.
-    - **Bounded Loop Remediation (Anti-Infinite Loop Protection)**:
-      In case defects or rejections are detected, enter a bounded remediation loop using Loop Engineering:
-      1. Maximum 3 iterations (`max_attempts = 3`).
-      2. 2-Strike Halting: Halt execution immediately if the identical error or rejection recurs across 2 attempts without progress.
-      3. Scope Boundary: Halt if fix requires expanding requirements beyond the spec (trigger `/openspec-update-change`).
-      4. Targeted Verification: Re-run tests before re-evaluating with QA.
-    - **Apply Phase Boundary**: Upon receiving formal approval (`APROVADO`), commit the implementation and inform the user to run `/opsx-archive`. **NEVER automatically archive or solicit PR/merge during the apply phase.**
+  - **Apply Phase Boundary**: Upon completing all tasks in `/openspec-apply-change` (or `/opsx-apply`), commit the implementation and inform the user to run `/opsx-archive`. **NEVER automatically archive or solicit PR/merge during the apply phase.**
   - **Final Step ONLY on `/opsx-archive`**: After the user executes `/opsx-archive` and all spec synchronization and archiving steps are completed:
     1. **Mandatory Archive Commit on Feature Branch**: All git updates (moving change to `archive/` and syncing `openspec/specs/`) MUST be committed directly on `feat/<nome_spec>` BEFORE pushing or opening the PR:
        ```bash

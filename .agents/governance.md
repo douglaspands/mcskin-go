@@ -15,9 +15,7 @@ stateDiagram-v2
     RedTesting --> GreenImplementation: Tests Fail As Expected (RED)
     GreenImplementation --> Verification: Tests Pass (GREEN)
     Verification --> SpecPlanning: New Scope Discovered
-    Verification --> POQAReview: Build & Tests Pass
-    POQAReview --> GreenImplementation: Issues Found / Refactor Required
-    POQAReview --> Completed: PO/QA Approved
+    Verification --> Completed: Build & Tests Pass
     Completed --> [*]
 ```
 
@@ -28,9 +26,8 @@ stateDiagram-v2
 | **SpecPlanning** | Trigger `/opsx-propose`, branch `feat/<nome_spec>` created | Planning artifacts validated by `openspec validate` | **First Command Invariant**: Before creating any feature branch, the harness MUST checkout `main` and execute `git pull origin main`, then `git checkout -b feat/<nome_spec>` for rollback isolation. No direct edits on `main`. |
 | **RedTesting** | Plan complete, task selected | Test suite authored and verified failing | Tests must fail due to missing implementation, not syntax errors. All unit tests must be 100% mocked with zero integration |
 | **GreenImplementation** | Verified failing test | Test suite passes | Implement only the minimal code necessary to satisfy tests |
-| **Verification** | All tasks in `/openspec-apply-change` complete | Full suite `go test ./...` and `go build ./...` succeed | **Automatic Trigger**: Automatically transitions to `POQAReview` immediately upon completing implementation tasks |
-| **POQAReview** | Build and unit tests succeed | Skill `feature-qa-reviewer` produces formal `APROVADO` report | Simulates PO (user requirements, usability 6+, theme, UX) and QA (binary checks, edge cases, Bedrock compliance). If issues found, transitions to bounded remediation loop |
-| **Completed** | PO/QA Approved, clean git status, spec archived and committed on `feat/<nome_spec>` | User confirmation requested for squash merge or GitHub PR | **Post-Archive & Main Protection Invariant**: All git updates (archive move, spec sync) MUST be committed on `feat/<nome_spec>` before PR. Upon returning to `main`: zero further commits on feature branch, and ABSOLUTELY ZERO direct commits on `main`. Prompt user to choose between `git checkout main && git merge --squash feat/<nome_spec>` or GitHub PR (`git push origin feat/<nome_spec> && gh pr create ...`). All tasks marked `[x]` |
+| **Verification** | All tasks in `/openspec-apply-change` complete | Full suite `go test ./...` and `go build ./...` succeed | Transitions to `Completed` immediately upon a successful build and test run |
+| **Completed** | Clean git status, spec archived and committed on `feat/<nome_spec>` | User confirmation requested for squash merge or GitHub PR | **Post-Archive & Main Protection Invariant**: All git updates (archive move, spec sync) MUST be committed on `feat/<nome_spec>` before PR. Upon returning to `main`: zero further commits on feature branch, and ABSOLUTELY ZERO direct commits on `main`. Prompt user to choose between `git checkout main && git merge --squash feat/<nome_spec>` or GitHub PR (`git push origin feat/<nome_spec> && gh pr create ...`). All tasks marked `[x]` |
 
 ---
 
