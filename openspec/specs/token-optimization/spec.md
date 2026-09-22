@@ -34,18 +34,42 @@ Repetitive research, verbose test repair loops, and code investigations SHALL be
 - **WHEN** an AI assistant delegates test-running, symbol searching, or verification to a subagent
 - **THEN** the subagent completes the diagnostic loop in its own isolated context and returns a brief actionable status summary to the parent orchestrator.
 
-### Requirement: Standardized High-Effort Model Execution
-All subagent dispatches and skill executions across both Google Antigravity and Anthropic Claude Code harnesses SHALL strictly use `flash` (Antigravity) and `sonnet` (Claude Code) configured in High Effort Mode (high reasoning effort / thinking budget). Use of cheap/fast models (`flash_lite`, `haiku`) or heavy models (`pro`, `opus`) is prohibited.
+### Requirement: User-Selected Model Persistence
+Subagent dispatches and skill executions SHALL always use the model the user has selected or configured in the harness. No task-type, complexity, or cost heuristic SHALL override that selection, and no per-dispatch logging is required.
 
-#### Scenario: General Subagent Task Dispatch
+#### Scenario: Dispatching any subagent task
 - **WHEN** any implementation, analysis, or testing subagent is dispatched via `invoke_subagent` (Antigravity) or `Agent` (Claude Code)
-- **THEN** it MUST use `model: flash` (Antigravity) or `model: "sonnet"` (Claude Code) with High Effort / reasoning mode explicitly enforced.
-- **AND** it MUST NOT use `flash_lite`, `haiku`, `pro`, or `opus`.
+- **THEN** it SHALL use the model the user has selected or configured in the harness (e.g. via `/config`, an explicit `model` parameter, or the harness's own configured default — Antigravity's `invoke_subagent` defaults to `Model: inherit`)
 
-#### Scenario: Planning and Task Annotation
-- **WHEN** tasks are generated or annotated during the OpenSpec propose workflow (`openspec-propose`)
-- **THEN** all tasks MUST be annotated with `flash (AGY, High) / sonnet (Claude, High)` as the execution model tier.
-- **AND** the Model Selection Summary MUST reflect `flash` / `sonnet` in High Effort mode as the uniform project standard.
+#### Scenario: No per-task model override
+- **WHEN** a task varies in complexity, type, or estimated cost
+- **THEN** the harness SHALL NOT select a different model tier for that task based on those factors, and SHALL NOT require writing a per-dispatch model-selection log entry
+
+### Requirement: Parallel Dispatch via Planned Waves
+When a change's `tasks.md` is authored, independent task groups SHALL be identified and annotated as parallel-safe waves based on file/state disjointness; a wave planned as parallel SHALL be dispatched as planned rather than silently collapsed to sequential execution.
+
+#### Scenario: Planned parallel wave is dispatched as planned
+- **WHEN** a set of tasks has been planned to run in parallel
+- **THEN** the harness SHALL dispatch them in parallel rather than executing them sequentially
+
+#### Scenario: Overlap or dependency detected during planning
+- **WHEN** two tasks share a file or have a read-after-write dependency
+- **THEN** they SHALL be planned into different (sequential) waves instead of the same parallel wave
+
+#### Scenario: Wave structure decided during task planning
+- **WHEN** `tasks.md` is authored or updated (propose/update workflow)
+- **THEN** the parallel-safe wave structure SHALL be decided and annotated at that time, not improvised during apply
+
+### Requirement: Token-Economical Command Preference
+The harness SHALL prefer compact, flag-optimized command forms over verbose defaults, and SHALL keep command output concise rather than verbose.
+
+#### Scenario: Compact form preferred over verbose
+- **WHEN** the harness runs a command that has both a verbose default and a more compact, equivalent flag-optimized form (e.g. `git status -s` vs `git status`, `./scripts/test-compact.sh` vs `go test -v ./...`)
+- **THEN** the harness SHALL use the compact form
+
+#### Scenario: Output kept concise
+- **WHEN** a command's output would otherwise be long or verbose
+- **THEN** the harness SHALL bound or summarize that output (e.g. via flags, `head`/`tail`, or a compact runner) rather than dumping the full verbose output into context
 
 ### Requirement: Skill & Process Optimization Suggestion at Proposal Closure
 At the close of every proposal, the workflow SHALL evaluate whether the feature's construction process could be made more token-efficient — through a reusable skill, a subagent delegation point, or a compact-reporting improvement — and SHALL surface that evaluation's outcome to the user, whether or not it recommends creating anything new.
