@@ -47,9 +47,9 @@ The project SHALL maintain exactly one command safety gate script as the source 
 - **WHEN** a new destructive command pattern needs to be blocked
 - **THEN** updating the single canonical gate script SHALL change the enforced behavior for every harness without editing more than one script file
 
-#### Scenario: Polyglot harness input and exit code compatibility
+#### Scenario: Polyglot harness input and output compatibility
 - **WHEN** the gate script is invoked by different harnesses with distinct stdin schemas (e.g. Antigravity's `toolCall.args.CommandLine` vs Claude Code's `tool_input.command`)
-- **THEN** the gate script SHALL extract and evaluate the command correctly from either schema, returning JSON stdout for Antigravity and non-zero exit code / stderr on deny for Claude Code
+- **THEN** the gate script SHALL extract and evaluate the command correctly from either schema, and SHALL return the decision in each harness's own required stdout JSON schema — a top-level `{"decision": ...}` body for Antigravity, and a `{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision": ...}}` body for Claude Code (whose PreToolUse hook schema rejects the legacy top-level `decision` field) — with a denial additionally exiting non-zero with the reason on stderr
 
 ### Requirement: Single-Source Governance Documentation
 The project SHALL maintain exactly one canonical document containing AI agent governance policy (state graph, loop/iteration caps, permission tiers, host security protocol). Every other harness entry-point file SHALL contain only a pointer to that canonical document plus facts unique to that harness.

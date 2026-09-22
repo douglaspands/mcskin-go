@@ -2,11 +2,16 @@
 """Canonical command safety gate, shared by every supported harness.
 
 Antigravity invokes this via .agents/hooks.json (PreToolUse, run_command),
-reading the printed JSON decision from stdout. Claude Code invokes it via
-.claude/settings.json's PreToolUse hook; it has no use for the JSON body and
-instead relies on a non-zero exit code + stderr message to block a denied
-command (see the "Polyglot harness input and exit code compatibility"
-scenario in specs/agent-governance/spec.md).
+reading a top-level {"decision": "allow"|"deny"|"ask"} JSON body from stdout.
+Claude Code invokes it via .claude/settings.json's PreToolUse hook and
+validates stdout JSON against its own schema, which has no top-level
+"decision" field for allow/ask (that field is a legacy approve|block-only
+shape from other hook events) — it requires
+{"hookSpecificOutput": {"hookEventName": "PreToolUse", "permissionDecision":
+"allow"|"deny"|"ask", ...}} instead. The script emits whichever shape matches
+the harness that invoked it (see "Polyglot harness input and exit code
+compatibility" in specs/agent-governance/spec.md), and a denial still exits
+non-zero with the reason on stderr for good measure.
 """
 import json
 import re
@@ -130,17 +135,43 @@ def extract_command(payload: dict) -> str:
     return ""
 
 
+def detect_harness(payload: dict) -> str:
+    """Identify which harness's stdin schema this payload matches."""
+    if "toolCall" in payload:
+        return "antigravity"
+    if "tool_input" in payload or "input" in payload:
+        return "claude-code"
+    return "unknown"
+
+
+def format_output(harness: str, result: dict) -> dict:
+    """Render the decision in whichever JSON shape the calling harness expects."""
+    if harness == "claude-code":
+        output = {
+            "hookSpecificOutput": {
+                "hookEventName": "PreToolUse",
+                "permissionDecision": result["decision"],
+            }
+        }
+        if "reason" in result:
+            output["hookSpecificOutput"]["permissionDecisionReason"] = result["reason"]
+        return output
+    # Antigravity (and unknown/no-payload cases) use the top-level shape.
+    return result
+
+
 def main():
+    harness = "unknown"
     try:
         raw_input = sys.stdin.read()
         if not raw_input:
-            print(json.dumps({"decision": "allow"}))
             sys.exit(0)
 
         payload = json.loads(raw_input)
+        harness = detect_harness(payload)
         command_line = extract_command(payload)
         result = evaluate_command(command_line)
-        print(json.dumps(result))
+        print(json.dumps(format_output(harness, result)))
 
         if result["decision"] == "deny":
             sys.stderr.write(result["reason"] + "\n")
@@ -148,7 +179,7 @@ def main():
         sys.exit(0)
     except Exception as e:
         err = {"decision": "ask", "reason": f"Safety gate error evaluating command: {str(e)}"}
-        print(json.dumps(err))
+        print(json.dumps(format_output(harness, err)))
         sys.exit(0)
 
 
